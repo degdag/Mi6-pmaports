@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-n1awifi
+pkgdesc="Samsung Galaxy Note 10.1 (2014 edition)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-n1awifi
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	msm-fb-refresher
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Non-free firmware for the Samsung Galaxy Note 10.1 (2014 edition)"
+	depends="firmware-samsung-n1awifi"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="d59e7aad584a07fa01b12e3b7e8ccc86e1d807f0f7e4c73ea5ef26bfcf531c471354839735b0b2b1665cef7dad5305dc36bf2a62f05ee440fdbb4342ce778d7c  deviceinfo"

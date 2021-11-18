@@ -1,0 +1,38 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-j7eltetmo
+pkgdesc="Samsung Galaxy J7 (T-Mobile)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-samsung-j7eltetmo
+	mesa-dri-gallium
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	# Disable v4l udev rules, because if enabled the device will fail to boot
+	# when VIDEO_EXYNOS_FIMC_IS is enabled.
+	mkdir -p "$pkgdir"/etc/udev/rules.d
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+
+
+sha512sums="
+6b8e11fbb398f52908c4bc350aad57e384115231f2cabe18badad692101a5317a502160aafe56a752551e30c78f6543f41ce30f09dcf7df1aa183be29f937341  deviceinfo
+"

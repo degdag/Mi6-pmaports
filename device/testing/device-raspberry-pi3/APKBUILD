@@ -1,0 +1,45 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-raspberry-pi3
+pkgdesc="Raspberry Pi 3B/3B+"
+pkgver=0.1
+pkgrel=15
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base raspberrypi-bootloader linux-rpi mesa-dri-vc4 bluetooth-raspberry-pi"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install $pkgname.post-upgrade"
+subpackages="$pkgname-weston"
+source="deviceinfo config.txt usercfg.txt cmdline.txt 95-vchiq-permissions.rules weston.ini networkmanager.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/config.txt "$pkgdir"/boot/config.txt
+	install -Dm644 "$srcdir"/usercfg.txt "$pkgdir"/boot/usercfg.txt
+	install -Dm644 "$srcdir"/cmdline.txt "$pkgdir"/boot/cmdline.txt
+	install -Dm644 "$srcdir"/95-vchiq-permissions.rules \
+		"$pkgdir"/etc/udev/rules.d/95-vchiq-permissions.rules
+	install -Dm644 "$srcdir"/networkmanager.conf \
+		"$pkgdir"/etc/NetworkManager/conf.d/10-rpi3.conf
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+sha512sums="
+1a735f34b5c8a6c1c860b84aef095ce675a287c2601405134f9f374fb6e88083265f9032655d3513ca83d0ddb6a169dadf8bceddfdec12a9c1bed3c9b67f8926  deviceinfo
+b95a66c8fa165aca2170ebb3f8688e78e1dd78d3ddb4d26c289ea77e406eec3bbfecb5a32997df86a692b674128d5b4f673c47f8e12013f33b765a69fec1cb51  config.txt
+a8e57535523d0f78e9d2ac1ac31b097a1a25468e3c910290647a60c862e631a4b4de94a5f6e4de999e1b9f70e67653a886967200856287dbc819b9f3ac16c548  usercfg.txt
+ae3de0b8fec07d3a283dc3c06bf8678eec1e65c9faf0b7f4fdc9fb92751e324d1f8e2fb224dbbf561b7e5a6fb34769bfa1657858375f74b101a130d78e0737e2  cmdline.txt
+7e5505cb07d5b4a81bd28443d508336b5c547356538f1c06f91ed93ad0d7d456d4f74f1d24df5a2e08c17e74f0a66607352ac4874e967e9a91dfec9522d2d58d  95-vchiq-permissions.rules
+320a466009c5abb416f70a60b45b3403ef1d1b4ac68a762c8028cd4615d537c48d906afe101e7335907a0274cc25b0b9b547e02ee69950e6792a7b54759c7cd9  weston.ini
+0f79016bf717dea43830962f524deae8d1cedc274376e40bd912ebe63208c5b1c3b7a5aa14379da19020c587dbd5588df2f0066ca1540070a226983a43e4159b  networkmanager.conf
+"

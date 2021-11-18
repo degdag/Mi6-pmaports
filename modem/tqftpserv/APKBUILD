@@ -1,0 +1,31 @@
+# Maintainer: Dolphin von Chips <DoIphinChips@protonmail.com>
+pkgname=tqftpserv
+pkgver=0_git20200207
+pkgrel=1
+_commit="783425b550de2a359db6aa3b41577c3fbaae5903"
+pkgdesc="Trivial File Transfer Protocol server over AF_QIPCRTR"
+url="https://github.com/andersson/tqftpserv"
+arch="all"
+license="BSD-3-Clause"
+makedepends="qrtr-dev"
+source="https://github.com/andersson/tqftpserv/archive/$_commit/tqftpserv-$_commit.tar.gz
+	tqftpserv.initd
+	"
+subpackages="$pkgname-doc $pkgname-openrc"
+builddir="$srcdir/tqftpserv-$_commit"
+options="!check" # No test suite
+
+build() {
+	make prefix="/usr"
+}
+
+package() {
+	make prefix="/usr" DESTDIR="$pkgdir" install
+	rm -r "$pkgdir"/usr/lib/systemd
+
+	install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+	install -Dm755 "$srcdir"/tqftpserv.initd "$pkgdir"/etc/init.d/tqftpserv
+}
+
+sha512sums="67673664bfea444da50e7ff5e882e68d60cf8a4cec60ecaea68766ed20f0bd66cbdbbee883e362003d252070f67172512aa06bcc2c94f23df9248bb1bf58b552  tqftpserv-783425b550de2a359db6aa3b41577c3fbaae5903.tar.gz
+f0ee04582df943e941d56310303f335ba809ed56311bc7c9d4f9f9bcb9476f80caa732ff37c466e0abaab099013cbe94994b7e23f6a709b5e7965cbd9dd9b96c  tqftpserv.initd"

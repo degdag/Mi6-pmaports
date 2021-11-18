@@ -1,0 +1,53 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/perry_defconfig
+
+pkgname=linux-motorola-perry
+pkgver=3.18.140
+pkgrel=1
+pkgdesc="Motorola Moto E4 kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="motorola-perry"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl dtbtool"
+
+_repository="android_kernel_motorola_msm8937"
+_commit="729b33fc2d3125da153badce07a88e22a16a37a9"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/moto-msm8937/$_repository/archive/$_commit/$pkgname-$_commit.tar.gz
+	$_config
+	arm-smmu.patch
+	epl8802_alsps.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS" \
+		O="$_outdir"
+
+	dtbTool -s 2048 -p "scripts/dtc/" -o "out/arch/arm64/boot/dt.img" "out/arch/arm64/boot/dts"
+}
+
+package() {
+	KERNEL_IMAGE_NAME="Image.gz"  downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+
+	install -Dm644 "$builddir/out/arch/arm64/boot/dt.img" "$pkgdir/boot/dt.img"
+}
+
+sha512sums="f31bfdb0941ee1976763eafd1bdc4048ba646e6bb7bc9ef7e40ada11369bcd514ac9cd57d1b2eb793b5af0697b028bfcd2ed1686de233d3ea52ac27dd9998d5c  linux-motorola-perry-729b33fc2d3125da153badce07a88e22a16a37a9.tar.gz
+9ed82ed6016526f4da8c0ecb1d2a8f1197fd6e054552002aa84799d28aad4dbe3543d3ebe57606ab62291de506015483061c566baab08a570b725ef789a5ff2e  config-motorola-perry.aarch64
+a1d0e865c91f7eb542832e3ff60fc7083bc4f5b5a7abecbf13ad6a867a5fab7c84e4187df8c4960dd01d610e1a968c801572f3e7fee97bc851bf3ab32c2e3f8c  arm-smmu.patch
+2f58744834780143b8f3df1d61bc2c9d4f712d18db9fec4b70768f302e27f1ac04402bf4ee28be635d6b942c941e68760c7ff86ebf053c744b29fd43bd9d5e47  epl8802_alsps.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch"

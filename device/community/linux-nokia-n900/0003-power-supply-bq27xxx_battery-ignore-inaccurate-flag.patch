@@ -1,0 +1,30 @@
+Ignore the uncalibrated flag in the battery controller and always show a capacity, even if it's
+not completely accurate.
+
+diff --git a/drivers/power/supply/bq27xxx_battery.c b/drivers/power/supply/bq27xxx_battery.c
+index 195c18c2f..be33a32cb 100644
+--- a/drivers/power/supply/bq27xxx_battery.c
++++ b/drivers/power/supply/bq27xxx_battery.c
+@@ -1377,11 +1377,11 @@ static inline int bq27xxx_battery_read_nac(struct bq27xxx_device_info *di)
+ {
+ 	int flags;
+ 
+-	if (di->opts & BQ27XXX_O_ZERO) {
++	/*if (di->opts & BQ27XXX_O_ZERO) {
+ 		flags = bq27xxx_read(di, BQ27XXX_REG_FLAGS, true);
+ 		if (flags >= 0 && (flags & BQ27000_FLAG_CI))
+ 			return -ENODATA;
+-	}
++	}*/
+ 
+ 	return bq27xxx_battery_read_charge(di, BQ27XXX_REG_NAC);
+ }
+@@ -1579,7 +1579,7 @@ void bq27xxx_battery_update(struct bq27xxx_device_info *di)
+ 		cache.flags = -1; /* read error */
+ 	if (cache.flags >= 0) {
+ 		cache.temperature = bq27xxx_battery_read_temperature(di);
+-		if (has_ci_flag && (cache.flags & BQ27000_FLAG_CI)) {
++		if (false && has_ci_flag && (cache.flags & BQ27000_FLAG_CI)) {
+ 			dev_info_once(di->dev, "battery is not calibrated! ignoring capacity values\n");
+ 			cache.capacity = -ENODATA;
+ 			cache.energy = -ENODATA;

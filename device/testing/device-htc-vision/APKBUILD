@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-vision
+pkgver=0.1
+pkgrel=9
+pkgdesc="HTC Desire Z"
+url="https://github.com/postmarketOS"
+arch="armv7"
+license="MIT"
+depends="linux-htc-vision mkbootimg postmarketos-base msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	90-android.rules
+	initfs-hook.sh"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-aosp-broadcom-wlan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+f31baaddcb39a4bad985bd807fbd2eb3d7e46630cdafa97c8ed74618ab62a561a52d34a31d2c3d78ebb171d451d020a865ed61ef0637652b436d9af1de1ccd05  deviceinfo
+d1e1da53c641aba2c0a8c5daf1438aabfe88024c940d3062a6a5e123e3c99af67e9917c60159297840aae06e6b9eaec8e050e412fc5570a525a32027665df064  90-android.rules
+3ce2d134aa59677e25a160b5985c552fbf048b237169bbeb85e2b8824f734627064b51c097036db10eee0254064d45d804d17372dffcd1ba246938968fe1e225  initfs-hook.sh
+"

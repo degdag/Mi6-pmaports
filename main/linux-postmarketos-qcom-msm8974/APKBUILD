@@ -1,0 +1,65 @@
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+_flavor=postmarketos-qcom-msm8974
+_config="config-$_flavor.$CARCH"
+
+pkgname=linux-$_flavor
+pkgver=5.14.14
+pkgrel=0
+_commit="4dbc40adfd7ce876f1385ca4ed1589cbf74c2031"
+pkgdesc="Kernel close to mainline with extra patches for Qualcomm MSM8974 devices"
+arch="armv7"
+_carch="arm"
+url="https://kernel.org/"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-zram
+	"
+makedepends="
+	bison
+	findutils
+	flex
+	gmp-dev
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+	"
+source="https://gitlab.com/postmarketOS/linux-postmarketos/-/archive/$_commit/linux-postmarketos-$_commit.tar.gz
+	config-$_flavor.armv7
+	"
+builddir="$srcdir/linux-postmarketos-$_commit"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/usr/share/dtb
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir/include/config/kernel.release" \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+}
+
+sha512sums="
+22938ed72a6e1ba647306f5d39680119bd6a39157b827825ef23c0d6e0e2c2c747e2503146c9c0c228dd32d2dc0746b87706f6db0db015185474fdfbd897e900  linux-postmarketos-4dbc40adfd7ce876f1385ca4ed1589cbf74c2031.tar.gz
+42f4401bf2256c11de2e4fede83f08301adf857953ee5f436f5fb4570e9103d33f9c90c9fc18cddeb5ad03e959c641f4075bd6e96de21ba89cc1d3856c88a2ca  config-postmarketos-qcom-msm8974.armv7
+"

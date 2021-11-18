@@ -1,0 +1,47 @@
+pkgname=firmware-sony-leo
+pkgver=0.1
+pkgrel=0
+pkgdesc="Firmware files for Sony Shinano-Leo platform"
+url="https://github.com/TheMuppets/proprietary_vendor_sony"
+arch="noarch"
+license="proprietary"
+options="!strip !check !archcheck !tracedeps pmb:cross-native"
+
+# Source
+_files_z3="BCM43xx.hcd touch_module_id_0x96.img"
+_files_shinano="fw_bcmdhd.bin fw_bcmdhd_apsta.bin"
+_files_msm8974="a330_pfp.fw a330_pm4.fw"
+_commit="0bf6c0b23b4cfce921135b2a5fec27d821c50964"
+_url="https://github.com/TheMuppets/proprietary_vendor_sony/raw/$_commit"
+for _i in $_files_z3; do
+	source="$source $pkgname-$_commit-$_i::$_url/z3/proprietary/vendor/firmware/$_i"
+done
+for _i in $_files_msm8974; do
+	source="$source $pkgname-$_commit-$_i::$_url/msm8974-common/proprietary/vendor/firmware/$_i"
+done
+for _i in $_files_shinano; do
+	source="$source $pkgname-$_commit-$_i::$_url/shinano-common/proprietary/vendor/firmware/$_i"
+done
+
+package() {
+	cd "$srcdir"
+	for _i in $_files_z3; do
+		install -D -m644 "$pkgname-$_commit-$_i" \
+			"$pkgdir/lib/firmware/postmarketos/$_i"
+	done
+	for _i in $_files_msm8974; do
+		install -D -m644 "$pkgname-$_commit-$_i" \
+			"$pkgdir/lib/firmware/postmarketos/$_i"
+	done
+	for _i in $_files_shinano; do
+		install -D -m644 "$pkgname-$_commit-$_i" \
+			"$pkgdir/lib/firmware/postmarketos/$_i"
+	done
+}
+
+sha512sums="648a6d7fdde54524a678c3b7147093e76ac564e0adf5e14e27c432e359792c70ba54da44148f5f3f52cfe4be09231c964090eeedda6211bc71f398de16212b40  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-BCM43xx.hcd
+678b167d1bd15360d3b3cf01f2a6408a7a5f283c383538b1824b852ece9a61f70e729105320acef65908498c2db81d3a4f95b2f77d703432985541b27dd20779  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-touch_module_id_0x96.img
+a642584990333d62ba6a985eeaddc6898c37a8e80aabb61121f93a90d5076861eb698422101e7b00706b7d3dfc00f9f358ea5e44a70fda7369931eb58b455931  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-a330_pfp.fw
+999e3e0777b8dffc0e0d20b214c8217dab577a31753b6a29af2fae57293693196e992a905265e35a586a7978c04547aa8c88496dbe6f836b74ed39026eaa5f05  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-a330_pm4.fw
+066e7a72d556356a10bb367afe4dc984337291b2d7e00ed0d6594092fa2b97e2b0246fa12d37b47bdbd1bbe0f9619a4b9575fc5891f79d4768d91e13a9e51ad5  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-fw_bcmdhd.bin
+29031ec0802d90d86005029ca7e645e2898c7e0d34e6d6251215cdfee80c0253ead140ae973a765106c5b2148a11a3dabbf38479a24539bb16320b5cc0062f2c  firmware-sony-leo-0bf6c0b23b4cfce921135b2a5fec27d821c50964-fw_bcmdhd_apsta.bin"

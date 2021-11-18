@@ -1,0 +1,49 @@
+# Contributor: Matthew5pl <matteofo06@gmail.com>
+# Maintainer: NotLugozzi <thomasbassi34@gmail.com>
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/msm8953-perf_defconfig
+
+pkgname=linux-xiaomi-daisy
+pkgver=4.9.220
+pkgrel=2
+pkgdesc="Xiaomi Mi A2 Lite kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="xiaomi-daisy"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl"
+
+# Source
+_repository="daisy_msm8953"
+_commit="80aa9da8ef47805db4c0f987dbbda57a61832874"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/RebornDaisyProject/$_repository/archive/$_commit.tar.gz
+	$_config
+	config-xiaomi-daisy.aarch64
+	0003-Add-config-option-to-fix-bootloader-cmdline-args.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="8c71f6d3ec8076fe025c3b6506eda0678daf0e8eba0e6e2c5af8803487f760e4504b195cca3b281b8a6f7283136a05553589c73a50a616e41cdc8d4f60ea2ea5  linux-xiaomi-daisy-80aa9da8ef47805db4c0f987dbbda57a61832874.tar.gz
+b94445c70ce4f4a63f376ab6fc0c187379885ee4dd3b9ac20c7cd7f018061235fc88d6befde26108e3c276f014d6126011397de1fea525d71fe05f3b33f261ba  config-xiaomi-daisy.aarch64
+b94445c70ce4f4a63f376ab6fc0c187379885ee4dd3b9ac20c7cd7f018061235fc88d6befde26108e3c276f014d6126011397de1fea525d71fe05f3b33f261ba  config-xiaomi-daisy.aarch64
+9ce867c4254b537ef5d2485780c26b72da8a3a8767ba71557f3b48d6c550e0e14c8c3e575b31bf65d2878f08a8a4926e48a1c2f1be534bf80a7a57f58313b0fd  0003-Add-config-option-to-fix-bootloader-cmdline-args.patch"

@@ -1,0 +1,38 @@
+pkgname=firmware-xiaomi-daisy
+pkgver=1
+pkgrel=1
+pkgdesc="Firmware files for Xiaomi Mi A2 Lite"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+depends="wcnss-wlan"
+_repository="firmware-xiaomi-daisy"
+_commit="9ae200b57743088f83a6f2b02a6b7ce4596a77d6"
+source="$pkgname-$_commit.tar.gz::https://github.com/alikates/firmware-xiaomi-daisy/archive/$_commit.tar.gz"
+options="!strip !check !archcheck !spdx !tracedeps pmb:cross-native"
+builddir="$srcdir/firmware-xiaomi-daisy-$_commit"
+
+_fwdir="/lib/firmware/postmarketos"
+
+package() {
+	echo $source
+
+	# Modem firmware
+	install -Dm0644 modem/mba.mbn -t "$pkgdir/$_fwdir"
+	install -Dm0644 modem/modem.* -t "$pkgdir/$_fwdir"
+
+	# ADSP firmware
+	install -Dm0644 adsp/adsp.* -t "$pkgdir/$_fwdir"
+
+	# GPU and video acceleration firmwares
+	install -Dm0644 gpu/a5* -t "$pkgdir/$_fwdir"
+	install -Dm0644 gpu/venus.* -t "$pkgdir/$_fwdir"
+
+	# Wifi/BT firmware
+	install -Dm0644 wcnss/WCNSS_qcom_wlan_nv.bin -t "$pkgdir/$_fwdir"/wlan/prima
+	install -Dm0644 wcnss/wcnss.* -t "$pkgdir/$_fwdir"
+}
+
+sha512sums="
+0778b0c4a7e836c9e0cef842dda2fd9d5eba4693cd875a605413267690d48d9b7ea86b1ece0471e55e5c49d1b3645bee1aa735ba164d0120bdfc94ffffa7e16b  firmware-xiaomi-daisy-9ae200b57743088f83a6f2b02a6b7ce4596a77d6.tar.gz
+"

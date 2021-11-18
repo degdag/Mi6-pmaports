@@ -1,0 +1,27 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-klipad-rel
+pkgdesc="KLIPAD Klipad Tablet"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-klipad-rel
+	mesa-dri-gallium
+	postmarketos-base
+	mkbootimg
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="6622168d2bc68367c8f0e43c7d8eb993c54c7f02d2283eb7d6039b8e2e9ccd38bb6055b390dc84a2976bc4951bedf790bd336e3d02e785da72421d7451214f94  deviceinfo"

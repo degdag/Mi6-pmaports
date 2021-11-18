@@ -1,0 +1,56 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/ace_defconfig
+
+pkgname=linux-htc-ace
+pkgver=3.0.101
+pkgrel=18
+pkgdesc="HTC Desire HD kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="htc-ace"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl xz gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_htc_msm7x30"
+_commit="887cd64b8361ac89ac56810460947a537112bdc9"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/OpenDesireProject/$_repository/archive/$_commit.tar.gz
+	$_config
+	02_gpu-msm-fix-gcc5-compile.patch
+	03_msm-fb-pixclock.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="72fc35e1c7fe848ae5c1139176d4c45ef042d494403ab38e5fa98e3620fce3253ffc4bf7151738c7dd47967f2ad96b034a9365dc68f1c025aef87e985d5b1776  linux-htc-ace-887cd64b8361ac89ac56810460947a537112bdc9.tar.gz
+0c959e3da98feaa594b2177650a0b71e934376ceffa454b2f82b7517f357ca03e88a9f6db5e962a57f0b1f45579a830b41bf414e8c7cd38edaa4d3fec6c433de  config-htc-ace.armv7
+2962e853aea3bec3cfea762584a6722023c5c9041994065a7ee75b6c4584121890d6dd1ac74317a2bb8069bff49583a9cccd73cca539665a76713465e05a2cf6  02_gpu-msm-fix-gcc5-compile.patch
+6a4079863ca09f8bca1dd9c80487860a8f6fc6c20d18961bc54988bb1831517e36092605cc593e5e1531ebb80eb76d0b1a006c339a7e334dc0d85bd91b20c72a  03_msm-fb-pixclock.patch"

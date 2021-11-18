@@ -1,0 +1,13 @@
+diff --git a/mm/rmap.c b/mm/rmap.c
+index 8005080fb9e..13b34598b00 100644
+--- a/mm/rmap.c
++++ b/mm/rmap.c
+@@ -521,7 +521,7 @@ void page_unlock_anon_vma(struct anon_vma *anon_vma)
+  * Returns virtual address or -EFAULT if page's index/offset is not
+  * within the range mapped the @vma.
+  */
+-inline unsigned long
++static inline unsigned long
+ vma_address(struct page *page, struct vm_area_struct *vma)
+ {
+ 	pgoff_t pgoff = page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);

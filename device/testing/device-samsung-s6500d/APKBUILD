@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-s6500d
+pkgdesc="Samsung Galaxy Mini 2"
+pkgver=0.1
+pkgrel=12
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-s6500d mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+72e29cd8085c136630036fbd3f5ebd3d33fd6461a757ffc3383f1c796142a7569062a4e76596b61ead757d1e4dc2a3a7573d1571d94f5358beaa6294959fcb0a  deviceinfo
+"

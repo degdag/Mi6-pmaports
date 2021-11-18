@@ -1,0 +1,35 @@
+# Maintainer: Sireesh Kodali <scarface@disroot.org>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-potter
+pkgdesc="Motorola Moto G5 Plus"
+pkgver=0.2
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-postmarketos-qcom-msm8953 mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/Wi-Fi/Bluetooth/Audio/Video/Modem firmware"
+	depends="firmware-motorola-potter"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+0356ad2d897c6587d9723e4b585c0ede3311b8f4571fa4d72752460d533477a956c14172995820d1d3e2ea2eb1ad677518b4ab0342e85d03fbe1f1aee4716eeb  deviceinfo
+"

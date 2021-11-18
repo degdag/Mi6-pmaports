@@ -1,0 +1,30 @@
+# Maintainer: David Heidelberg <david@ixit.cz>
+pkgname=firmware-asus-grouper
+pkgver=1
+pkgrel=1
+pkgdesc="Firmware for Nexus 7 (asus-grouper/tilapia)"
+url="https://github.com/OpenELEC/wlan-firmware"
+arch="armv7"
+license="custom:proprietary"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+
+# Sources
+_commit="3be9d8274352e36073c635991e7f29063bdf2c53"
+_url="https://github.com/OpenELEC/wlan-firmware"
+source="$pkgname-bt-$_commit.tar.gz::$_url/archive/$_commit.tar.gz
+	brcmfmac4330-sdio.asus,tilapia.txt"
+
+package() {
+	# Bluetooth
+	cd "$srcdir/wlan-firmware-$_commit/firmware/brcm/"
+	install -Dm644 bcm4330.hcd \
+		"$pkgdir"/lib/firmware/postmarketos/brcm/BCM4330B1.hcd
+	# Wi-Fi
+	install -D -m644 "$srcdir"/brcmfmac4330-sdio.asus,tilapia.txt \
+		"$pkgdir"/lib/firmware/postmarketos/brcm/brcmfmac4330-sdio.asus,tilapia.txt
+	ln "$pkgdir"/lib/firmware/postmarketos/brcm/brcmfmac4330-sdio.asus,tilapia.txt \
+		"$pkgdir"/lib/firmware/postmarketos/brcm/brcmfmac4330-sdio.asus,grouper.txt
+}
+
+sha512sums="daf910bd0ae542a1a598ab0abcc5bd58a5c30a0033ce3e1a9db60f85120b46a460810f5608c3e197d5aabb38d6666dc838a0bd63a39c9c9318724c6088c6581b  firmware-asus-grouper-bt-3be9d8274352e36073c635991e7f29063bdf2c53.tar.gz
+093a615250689f83c43af18a195d66d89e4b56584069a3903652e68e9da42568d2e176aa77cf23e1f23b3cb869f5c639fb1c8cdfc8af9fc6d17abe17cad7e821  brcmfmac4330-sdio.asus,tilapia.txt"

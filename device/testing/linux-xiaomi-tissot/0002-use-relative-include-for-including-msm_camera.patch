@@ -1,0 +1,25 @@
+From 38e5f48ffaee072167cb4a9b058d4ae9b4fdbf87 Mon Sep 17 00:00:00 2001
+From: Wiktor Tkaczynski <wiktor.tkaczynski@gmail.com>
+Date: Fri, 7 Aug 2020 18:05:13 +0200
+Subject: [PATCH 2/8] use relative include for including msm_camera
+
+---
+ drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c b/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
+index 1d743091..fc5d2300 100644
+--- a/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
++++ b/drivers/media/platform/msm/camera_v2/common/cam_smmu_api.c
+@@ -25,7 +25,7 @@
+ #include <linux/sizes.h>
+ #include <soc/qcom/scm.h>
+ #include <soc/qcom/secure_buffer.h>
+-#include <msm_camera_tz_util.h>
++#include "msm_camera_tz_util.h"
+ #include "cam_smmu_api.h"
+ 
+ #define SCRATCH_ALLOC_START SZ_128K
+-- 
+2.25.1
+

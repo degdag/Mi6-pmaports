@@ -1,0 +1,45 @@
+# Maintainer: m0rf30 <morf3089@gmail.com>
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/vince_defconfig
+
+pkgname=linux-xiaomi-vince
+pkgver=4.9.288
+pkgrel=0
+pkgdesc="Xiaomi Redmi Note 5 Plus kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="xiaomi-vince"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl"
+
+# Source
+_repository="android_kernel_xiaomi_vince"
+_commit="aca24259284c032c376068047a7bfb881d587061"
+_config="config-$_flavor.$arch"
+source="$pkgname-$_commit.tar.gz::https://github.com/GhostMaster69-dev/$_repository/archive/$_commit.tar.gz
+	$_config
+	"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="
+daad194c49fab1122948a4f7d8276c9ab1193965d073c9b2abf899f98c5d2fa9a3fb773cd474769f384f89c09d539da76e3561786fb396a033bb649f1a4e1269  linux-xiaomi-vince-aca24259284c032c376068047a7bfb881d587061.tar.gz
+79851f352de3ebc5d1c3ec856f28ab4734fd38533127abf7c40b698a60126dd381f9bfbcf7b93742f11a5401b421fd687fb9b5eb41fa96d8e6d7c72bea715bd5  config-xiaomi-vince.aarch64
+"

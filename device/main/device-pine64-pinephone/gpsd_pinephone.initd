@@ -1,0 +1,13 @@
+#!/sbin/openrc-run
+
+depend() {
+	after gpsd
+}
+
+start() {
+	gpsdctl add /dev/EG25.NMEA
+}
+
+stop() {
+	gpsdctl remove /dev/EG25.NMEA
+}

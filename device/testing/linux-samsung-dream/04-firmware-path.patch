@@ -1,0 +1,22 @@
+diff --git a/drivers/net/wireless/bcmdhd4361/dhd.h b/drivers/net/wireless/bcmdhd4361/dhd.h
+index df9f668aa1c8..6aa707fb5945 100644
+--- a/drivers/net/wireless/bcmdhd4361/dhd.h
++++ b/drivers/net/wireless/bcmdhd4361/dhd.h
+@@ -376,7 +376,7 @@ enum dhd_op_flags {
+ #if defined(CUSTOMER_HW4) && defined(PLATFORM_SLP)
+ #define CONFIG_BCMDHD_CLM_PATH "/lib/firmware/bcmdhd_clm.blob"
+ #else
+-#define CONFIG_BCMDHD_CLM_PATH "/etc/wifi/bcmdhd_clm.blob"
++#define CONFIG_BCMDHD_CLM_PATH "/lib/firmware/postmarketos/bcmdhd_clm.blob"
+ #endif /* CUSTOMER_HW4 && PLATFORM_SLP */
+ #endif /* CONFIG_BCMDHD_CLM_PATH */
+ #define WL_CCODE_NULL_COUNTRY  "#n"
+@@ -2369,7 +2369,7 @@ extern char fw_path2[MOD_PARAM_PATHLEN];
+ #elif (ANDROID_PLATFORM_VERSION == 7)
+ #define VENDOR_PATH "/system"
+ #elif (ANDROID_PLATFORM_VERSION >= 8)
+-#define VENDOR_PATH "/vendor"
++#define VENDOR_PATH ""
+ #endif /* ANDROID_PLATFORM_VERSION < 7 */
+ #else
+ #define VENDOR_PATH ""

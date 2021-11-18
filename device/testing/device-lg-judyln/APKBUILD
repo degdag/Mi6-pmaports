@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-judyln
+pkgdesc="LG G7 ThinQ"
+pkgver=1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="linux-postmarketos-qcom-sdm845 mkbootimg postmarketos-base soc-qcom-sdm845"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+6fdf3d646490a0e6dd85c37cfd55e4fcb9ffa2d28a62f41999701ddfe32d465fc6c57e3181f0b0b8b7eec1f4b1839d51173861167f20dd8442587e2b7b848992  deviceinfo
+"

@@ -1,0 +1,57 @@
+From 609006cba4e96e376915df1e66cf397c73ffe8b7 Mon Sep 17 00:00:00 2001
+From: Daniele Debernardi <drebrez@gmail.com>
+Date: Fri, 19 Jul 2019 22:18:33 +0000
+Subject: [PATCH] RX-51: Symbols: Extend Swiss layout
+
+---
+ symbols/nokia_vndr/rx-51 | 26 ++++++++++++++++++--------
+ 1 file changed, 18 insertions(+), 8 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 567a054..ddb87da 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -216,22 +216,32 @@ xkb_symbols "ch" {
+     name[Group1] = "Swiss";
+ 
+     // 1. row
+-    key <AD06>	{ [	z,		Z,		6,		6		] };
+-    key <AB08>	{ [	udiaeresis,	Udiaeresis,	egrave,		Egrave		] };
++    key <AD06>	{ [	z,		Z,		6,		F6		] };
++    key <AB08>	{ [	udiaeresis,	Udiaeresis,	egrave,		F11		] };
+ 
+     // 2. row
+-    key <AC06>	{ [	h,		H,		equal,		equal		] };
++    key <AC02>	{ [	s,		S,		plus,		ampersand	] };
++    key <AC03>	{ [	d,		D,		numbersign,	dollar		] };
++    key <AC04>	{ [	f,		F,		minus,		percent		] };
++    key <AC05>	{ [	g,		G,		underscore,	bracketleft	] };
++    key <AC06>	{ [	h,		H,		equal,		bracketright	] };
+     key <AC07>	{ [	j,		J,		parenleft,	parenleft	] };
+     key <AC08>	{ [	k,		K,		parenright,	parenright	] };
+-    key <AC09>	{ [	l,		L,		colon,		colon		] };
+-    key <AB09>	{ [	odiaeresis,	Odiaeresis,	eacute,		Aacute		] };
+-    key <UP>	{ [	adiaeresis,	Adiaeresis,	agrave,		Agrave		] };
++    key <AC09>	{ [	l,		L,		colon,		semicolon	] };
++    key <AB09>	{ [	odiaeresis,	Odiaeresis,	eacute,		bar		] };
++    key <UP>	{ [	adiaeresis,	Adiaeresis,	agrave,		asciitilde	] };
+ 
+     // 3. row
+     key <AB01>	{ [	y,		Y,		question,	question	] };
+     key <AB02>	{ [	x,		X,		exclam,		exclam		] };
+-    key <AB03>	{ [	c,		C,		ccedilla,	Ccedilla	] };
+-    key <LEFT>	{ [	period,		comma,		comma,		comma		] };
++    key <AB03>	{ [	c,		C,		ccedilla,	less		] };
++    key <AB04>	{ [	v,		V,		slash,		greater		] };
++    key <AB05>	{ [	b,		B,		backslash,	braceleft	] };
++    key <AB06>	{ [	n,		N,		quotedbl,	braceright	] };
++    key <AB07>	{ [	m,		M,		apostrophe,	asciicircum	] };
++    key <LEFT>	{ [	period,		comma,		comma,		degree		] };
++    key <DOWN>	{ [	Left,		Up,		Up,		Prior		] };
++    key <RGHT>	{ [	Right,		Down,		Down,		Next		] };
+ };
+ 
+ 
+-- 
+2.22.0
+

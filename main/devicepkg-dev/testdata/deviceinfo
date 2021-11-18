@@ -1,0 +1,6 @@
+deviceinfo_name="Test"
+deviceinfo_kernel_cmdline_downstream="androidboot.boot_recovery=1"
+deviceinfo_kernel_cmdline_mainline="console=ttyMSM0,115200,n8 PMOS_NO_OUTPUT_REDIRECT"
+deviceinfo_kernel_cmdline_other="root=/dev/sda1 quiet splash"
+deviceinfo_bootimg_qcdt_downstream="true"
+deviceinfo_bootimg_qcdt_mainline="false"

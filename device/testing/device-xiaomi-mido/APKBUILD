@@ -1,0 +1,31 @@
+pkgname=device-xiaomi-mido
+pkgdesc="Xiaomi Redmi Note 4X"
+pkgver=1.0
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg soc-qcom-msm8916 linux-postmarketos-qcom-msm8953"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Proprietary firmware"
+	depends="linux-firmware-qcom firmware-xiaomi-mido"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+bb472be955dcfcdec22c4021c05ecdeea1302ff9764e498585efc09219e90dcf5861b9c0ef3aaaa6c5830332474e5fd7dfa0f6acf5d3980928f3655f01993f27  deviceinfo
+"

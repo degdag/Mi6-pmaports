@@ -1,0 +1,149 @@
+pkgname=firmware-oneplus-oneplus3
+pkgver=2
+pkgrel=1
+pkgdesc="Firmware for OnePlus 3/3T (metapackage)"
+url="https://gitlab.com/DrGitX/firmware-oneplus3"
+arch="aarch64"
+license="proprietary"
+makedepends="mtools pil-squasher"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+subpackages="$pkgname-op3 $pkgname-op3t"
+_gpufw="https://github.com/TheMuppets/proprietary_vendor_oneplus/raw/lineage-17.1/oneplus3/proprietary/vendor/firmware"
+_files="adsp.b00
+	adsp.b01
+	adsp.b02
+	adsp.b03
+	adsp.b04
+	adsp.b05
+	adsp.b06
+	adsp.b08
+	adsp.b09
+	adsp.mdt
+	modem.b00
+	modem.b01
+	modem.b02
+	modem.b03
+	modem.b04
+	modem.b05
+	modem.b06
+	modem.b07
+	modem.b08
+	modem.b09
+	modem.b10
+	modem.b11
+	modem.b12
+	modem.b13
+	modem.b15
+	modem.b16
+	modem.b17
+	modem.b18
+	modem.b19
+	modem.b20
+	modem.mdt
+	mba.mbn
+	slpi.b00
+	slpi.b01
+	slpi.b02
+	slpi.b03
+	slpi.b04
+	slpi.b05
+	slpi.b06
+	slpi.b07
+	slpi.b08
+	slpi.b09
+	slpi.b10
+	slpi.b11
+	slpi.b12
+	slpi.b13
+	slpi.b14
+	slpi.mdt
+	venus.b00
+	venus.b01
+	venus.b02
+	venus.b03
+	venus.b04
+	venus.mdt
+"
+source="modem_op3.bin::$url/-/raw/master/oneplus3/NON-HLOS.bin
+	modem_op3t.bin::$url/-/raw/master/oneplus3t/NON-HLOS.bin
+	$_gpufw/a530_zap.elf
+	$_gpufw/a530_zap-pro.elf
+	20-adreno-gpu-firmware.files
+"
+
+_mdtnames="adsp modem slpi venus"
+_mbns="a530_zap.mbn adsp.mbn mba.mbn modem.mbn slpi.mbn venus.mbn"
+
+unpack() {
+	mkdir -p $srcdir/oneplus3 $srcdir/oneplus3t
+
+	# Extract oneplus3 blobs
+	for _i in $_files; do
+		mcopy -v -b -p -n -i $srcdir/modem_op3.bin ::image/$_i $srcdir/oneplus3/$_i
+	done
+
+	# Extract oneplus3t blobs
+	for _i in $_files; do
+		mcopy -v -b -p -n -i $srcdir/modem_op3t.bin ::image/$_i $srcdir/oneplus3t/$_i
+	done
+}
+
+package() {
+	cd "$srcdir/oneplus3"
+
+	# Squash oneplus3 firmware segments into mbns
+	for _i in $_mdtnames; do
+		pil-squasher "$_i.mbn" "$_i.mdt"
+	done
+
+	cd "$srcdir/oneplus3t"
+
+	# Squash oneplus3t firmware segments into mbns
+	for _i in $_mdtnames; do
+		pil-squasher "$_i.mbn" "$_i.mdt"
+	done
+}
+
+_install_fw() {
+	cd "$srcdir"
+
+	# Move zap shader to the same directory as the other mbns
+	mv "a530_zap$2.elf" "$srcdir/$1/a530_zap.mbn"
+
+	cd "$srcdir/$1"
+
+	# Install mbns
+	for _i in $_mbns; do
+		install -Dm644 $_i "$subpkgdir/lib/firmware/qcom/msm8996/$1/$_i"
+	done
+
+	# Append zap shader path to 20-adreno-gpu-firmware.files
+	cp "$srcdir/20-adreno-gpu-firmware.files" "$srcdir/20-adreno-gpu-firmware.files-$1"
+	echo "/lib/firmware/qcom/msm8996/$1/a530_zap.mbn" >> "$srcdir/20-adreno-gpu-firmware.files-$1"
+
+	# Install 20-adreno-gpu-firmware.files
+	install -Dm644 "$srcdir/20-adreno-gpu-firmware.files-$1" \
+		"$pkgdir/etc/postmarketos-mkinitfs/files/20-adreno-gpu-firmware.files"
+}
+
+op3() {
+	pkgdesc="OnePlus 3 firmware"
+	depends="$pkgname"
+
+	_install_fw oneplus3
+}
+
+op3t() {
+	pkgdesc="OnePlus 3T firmware"
+	depends="$pkgname"
+
+	_install_fw oneplus3t -pro
+}
+
+sha512sums="
+c0f3f908e237202003d9b2fe4071e2800bdcdae180e8311fbc0671478fcd63aba5a3fe5ab5d297010c12c232501f05f31141fc39a44c5b86ac2b56016f553a7f  modem_op3.bin
+3da90f51fc39c3db4f0f39c07eda318b0b1fc85f7fbb8f21bd31a3ae5c73a4b39ba630a9521a7c5ee844e14c24d084f5d42e4c2ffd2bdee541e50ec7b1629b14  modem_op3t.bin
+374ed1606a8c12bd8fb8adb3e0d91603aa53ff9aed175921c9e6b579104407b01274e5f3cf158007b83ecb5aa2c7343c526e360aebc8bca557cd4b9c4c711f98  a530_zap.elf
+237c82252f1ff44a454bed5f84a8dcf74e0f6ea6e5674e7d5aa32436fcf20d8c9df5c6edc4b4bc151e5fdce4694c1d14edc8ba0804ceb738f3fb67eff950aeff  a530_zap-pro.elf
+e41812751afa4c05829e40033e8355232f9f775633594f42b82a40156d3c518e53ab4b5086e421576b6f9de17f4cb540a6f85f2da69a66d445b43e0d8f2d4ce7  20-adreno-gpu-firmware.files
+"

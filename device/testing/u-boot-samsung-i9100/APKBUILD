@@ -1,0 +1,42 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Contributor: Paul Cercueil <paul@crapouillou.net>
+pkgname=u-boot-samsung-i9100
+pkgver=2012.04_rc1
+pkgrel=0
+pkgdesc="U-Boot for Samsung Galaxy SII"
+arch="armv7"
+_carch="arm"
+license="GPL-2.0-only"
+url="https://github.com/Talustus"
+options="!check"
+makedepends="gcc4"
+
+_repository="i9100-uboot"
+_commit="8a10be9b0698f800cd80e6ef4be976ade0abc4da"
+source="$pkgname-$_commit.tar.gz::$url/$_repository/archive/$_commit.tar.gz
+	0001-ARM-Use-armv7-a-instruction-set-for-ARMv7-CPUs.patch
+	0002-Fix-ulong-type-not-defined.patch
+	0003-Galaxy-S2-Load-kernel-from-KERNEL-partition.patch
+	"
+
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" HOSTCC=gcc4-gcc CC=gcc4-gcc galaxys2_config
+	make ARCH="$_carch" HOSTCC=gcc4-gcc CC=gcc4-gcc u-boot.bin
+}
+
+package() {
+	unset LDFLAGS
+	install -D -m644 "$builddir"/u-boot.bin "$pkgdir"/boot/u-boot.bin
+}
+
+sha512sums="52c1fbadf80650c508ca5d23abf37e0de7357878681200925a5971df304f4e6e093fdd6dd8e6ebf907e902390a01708dfbb7553a19c52288fbdce17a15789d8e  u-boot-samsung-i9100-8a10be9b0698f800cd80e6ef4be976ade0abc4da.tar.gz
+ffe9ee32de615edcab9d4f00ad3c4786fb1ba5f3d53e04554d9d202c49fece6cce8f54d2d90313e428ac023e96f14888f0b26275e029059974a5e19ecb8c6264  0001-ARM-Use-armv7-a-instruction-set-for-ARMv7-CPUs.patch
+0ee5646a99f1124b37ba2e256f6f3768aaaebc6b247778f1d8e9e391840273662e48c4cac910dd4bccb7569d2be2527e8e19dfbada01a1ffff2d1fe3035c0fe8  0002-Fix-ulong-type-not-defined.patch
+dcf8be0c0bbbe8ef4f34b5dd6b9ac1dee9554041dfb65da36178fb9540652a9e98663e369098764ef5bc15d799a658b3986da9bcd43f88a9dc0d855ee59db989  0003-Galaxy-S2-Load-kernel-from-KERNEL-partition.patch"

@@ -1,0 +1,23 @@
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=qmi-ping
+pkgver=0_git20200306
+_commit="16624da254b4721fdff9f89d2b29cb9cfacdd5f3"
+pkgrel=0
+pkgdesc="Ping-like utility for QMI/QRTR"
+url="https://github.com/andersson/qmi-ping"
+arch="all"
+license="BSD-3-Clause"
+makedepends="qrtr-dev"
+source="$pkgname-$_commit.tar.gz::https://github.com/andersson/qmi-ping/archive/$_commit.tar.gz"
+builddir="$srcdir/qmi-ping-$_commit"
+options="!check" # No tests
+
+build() {
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" prefix=/usr install
+}
+
+sha512sums="6a6c012d2b3cb937e9a2708eb77bec933fcbb6a15399ef3c8de8d80fd0cbc81952ce01527c9afc4863464f074c542665e23678710917e1aa7573012e57e014b1  qmi-ping-16624da254b4721fdff9f89d2b29cb9cfacdd5f3.tar.gz"

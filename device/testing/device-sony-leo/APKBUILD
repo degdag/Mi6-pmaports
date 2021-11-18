@@ -1,0 +1,44 @@
+# Maintainer: Audun MG <audun@gangsto.org>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-leo
+pkgdesc="Sony Xperia Z3"
+pkgver=0.1
+pkgrel=3
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-nonfree-firmware:nonfree_firmware
+	"
+source="deviceinfo
+	90-android-touch-dev.rules
+	"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+kernel_downstream() {
+	pkgdesc="Weston and X.Org with touch and wifi works (see device table for details)"
+	depends="linux-sony-leo"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi and touchscreen firmware"
+	depends="firmware-sony-leo"
+	mkdir "$subpkgdir"
+}
+sha512sums="
+b2c228e32c9b1c9fbfaa6c95c2fc5566fe042fd8143ea25fce702f940c0549c7e9b5fd6ab392809ec55ec94773ac5d396b635d9af9ab84dff0584053096c9da8  deviceinfo
+0fbbc5ef5b303431a0f1a9b9ef939f03aef6f1774765089102ce95e57dc5edb692c685a6c11adcada40db608998b714029d12a05c9364bd0445ce8fda7bf5fde  90-android-touch-dev.rules
+"

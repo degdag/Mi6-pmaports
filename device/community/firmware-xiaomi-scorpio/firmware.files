@@ -1,0 +1,6 @@
+./lib/firmware/qcom/msm8996/scorpio/a530_zap.mbn
+./lib/firmware/qcom/msm8996/scorpio/adsp.mbn
+./lib/firmware/qcom/msm8996/scorpio/mba.mbn
+./lib/firmware/qcom/msm8996/scorpio/modem.mbn
+./lib/firmware/qcom/msm8996/scorpio/slpi.mbn
+./lib/firmware/qcom/msm8996/scorpio/venus.mbn

@@ -1,0 +1,39 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i9100g
+pkgdesc="Samsung Galaxy SII (GT-I9100G)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-i9100g
+	mesa-dri-gallium
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	modules-load.conf
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi firmware"
+	depends="firmware-samsung-i9100"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+bcdf4ed0226a952d0c83e942d2fd2520b27fdde8d4a946b223c5bee74028e4e1d1889ae6daf6298a558fa269fcff9a02193db0b79eceb42f2262d1700eb87d9c  deviceinfo
+2a9b4212269ca367effb8c336cf8432498297988b3cb2b1ea4bef0ce4bcc1ed2975f8a798ef9b4c3131f7e2366e25c2c1abafe9302bee6679ed6440ba10c3d36  modules-load.conf
+"

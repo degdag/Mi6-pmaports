@@ -1,0 +1,36 @@
+# Maintainer: Daniele Debernardi <drebrez@gmail.com>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-raspberry-pi4
+pkgver=0.2
+pkgrel=1
+pkgdesc="Raspberry Pi 4"
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base raspberrypi-bootloader linux-rpi4 mesa-dri-gallium"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="deviceinfo config.txt usercfg.txt cmdline.txt 95-vchiq-permissions.rules"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/config.txt "$pkgdir"/boot/config.txt
+	install -Dm644 "$srcdir"/usercfg.txt "$pkgdir"/boot/usercfg.txt
+	install -Dm644 "$srcdir"/cmdline.txt "$pkgdir"/boot/cmdline.txt
+	install -Dm644 "$srcdir"/95-vchiq-permissions.rules \
+		"$pkgdir"/etc/udev/rules.d/95-vchiq-permissions.rules
+}
+
+
+sha512sums="
+439c2700066589c72a8b83d4eeefca07f42acf0f2297724079e7d03c25f29d48e866106872142bc5fc373447a12ae389ee15e5a1ff811cb2146c296aa6f7b802  deviceinfo
+a94a52dc6dcc3ef815a2ea1a9a626a59651d89ea8f8851cdc3dd953e2f28f2e51f2fd7eabe2cae771d4dcae999e531cc3d65466f01d4ec5cb88a76c5c4d942d9  config.txt
+a2db3354ce5ab7dde8a2a276f24cb7230294db25a18cb2702636bfee54f3a0fd659ae4c789d117c353d5e2fd028e39ea57405aa454d06b5325b839ec7c83070b  usercfg.txt
+ae3de0b8fec07d3a283dc3c06bf8678eec1e65c9faf0b7f4fdc9fb92751e324d1f8e2fb224dbbf561b7e5a6fb34769bfa1657858375f74b101a130d78e0737e2  cmdline.txt
+7e5505cb07d5b4a81bd28443d508336b5c547356538f1c06f91ed93ad0d7d456d4f74f1d24df5a2e08c17e74f0a66607352ac4874e967e9a91dfec9522d2d58d  95-vchiq-permissions.rules
+"

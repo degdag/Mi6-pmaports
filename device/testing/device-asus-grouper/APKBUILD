@@ -1,0 +1,58 @@
+# Maintainer: David Heidelberg <david@ixit.cz>
+pkgname=device-asus-grouper
+pkgdesc="Google Nexus 7 2012 (grouper)"
+pkgver=5
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="alsa-ucm-conf postmarketos-base mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-phosh
+	$pkgname-kernel-e1565:kernel_e1565
+	$pkgname-kernel-pm269:kernel_pm269
+	$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	pointercal
+	rootston.ini"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/pointercal \
+	                "$pkgdir"/etc/pointercal
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+kernel_e1565() {
+	pkgdesc="Mainline kernel for HW rev. E1565 (newer devices)"
+	depends="linux-postmarketos-grate"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_pm269() {
+	pkgdesc="Mainline kernel for HW rev. PM269 (older devices)"
+	depends="linux-postmarketos-grate"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Google Nexus 7 (2012) WiFi & BT firmware"
+	depends="firmware-asus-grouper firmware-aosp-broadcom-wlan-mainline"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+ff94b9f679d66d8d3965515a476c588c522c6025c459db8802fe0451441de278da170638f17147b94283d7c35d1a351f9a856eb24437bbb6952d37569b1c7ba1  deviceinfo
+1f9d77df433c7199a9f07d6fd1d90cdf1ab40021bf1970be9400e5f32155d92f7fa338162a0ca95d441d1701eff0f5e0cbb64a0555de48740a62e8ff59fe11e5  pointercal
+6ec993e278d2a73c72fb96f001716ded63543d99183847d22d172cd81ac410791c79370ecf391d0c24822c975d91b84dc1db296e1b28dbf66d5c227bff8d4011  rootston.ini
+"

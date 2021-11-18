@@ -1,0 +1,40 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-castor
+pkgver=2
+pkgrel=5
+pkgdesc="Sony Xperia Z2 Tablet"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="
+	linux-postmarketos-qcom-msm8974
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo modules-load.conf"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi, GPU firmware"
+	depends="
+		linux-firmware-brcm
+		linux-firmware-cypress
+		firmware-qcom-adreno-a330
+		firmware-sony-castor
+	"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="599ddc55007a2277643c3a8ef52135b6e962f2402906e26cb3c37461e6d54ca17dab40ead24e089d1264ba7692b201e13707eabfe5d787c82f8a85db7fe1d69e  deviceinfo
+d8ce60ea7acaabf627ddca2f0887a4cda46f313b7aaf7934bef2fef8a6e0798ccefab849e4571e4e3fcd06ae34c1a6efe3b58b401e2e443416f6200e6d4ea769  modules-load.conf"

@@ -1,0 +1,56 @@
+# Kernel config based on: arch/arm/configs/lineageos_n5110_defconfig
+
+pkgname=linux-samsung-n5110
+pkgver=3.0.101
+pkgrel=7
+pkgdesc="Samsung Galaxy Note 8.0 (Wi-Fi) kernel fork"
+arch="armhf"
+_carch="arm"
+_flavor="samsung-n5110"
+url="https://kernel.org"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev xz gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_samsung_smdk4412"
+_commit="b7ffe7f2aea2391737cdeac2a33217ee0ea4f2ba"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/LineageOS/$_repository/archive/$_commit.tar.gz
+	$_config
+	0001-BACKPORT-random-introduce-getrandom-2-system-call.patch
+	0002-BACKPORT-random-Wake-up-all-getrandom-2-callers-when.patch
+	0003-BACKPORT-ARM-wire-up-getrandom-syscall.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="7e47ecfa6c3b2f4ac199ceed4103a00a577f9fa0002f5759df570f3c11a3436e53114e87a13e9efd27f2a2e17fcaab1be0666dffaa7d23699e700bee0d2afe33  linux-samsung-n5110-b7ffe7f2aea2391737cdeac2a33217ee0ea4f2ba.tar.gz
+5d81144263c5aa9bfbbe85b0987cc26a0ca0ff7fcc952acb1edc6e8155f20d5dd582220dee29e379dc09476c49d8283b63b4b1f1e8e3eee3255dcea6cd97991f  config-samsung-n5110.armhf
+9f931974afda5f82dab400758aa35decb97678ef698748c56dae4b2ede62fab34c3a7d6c16293602cfbb7a6a41d64ac3d25b8cb63251bef23475d50bfaae16a6  0001-BACKPORT-random-introduce-getrandom-2-system-call.patch
+5d64e22eaeddc4a7fd4b99076bd2e29c02c214852663d6ddb30d304e9aba1f177f8c25e15f7892045cc132ef80e148952128536817fa8af6f03f3c7ee33d33a3  0002-BACKPORT-random-Wake-up-all-getrandom-2-callers-when.patch
+8ce10fba0b10131de07a9c47544702b68c52f2e0a09eb2942044abf2e292cbfacbac0b6f6445306af46915064573037cfd66f99500bfa75551daa9376b1a6f77  0003-BACKPORT-ARM-wire-up-getrandom-syscall.patch"

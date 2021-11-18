@@ -1,0 +1,8 @@
+#!/bin/sh
+
+rc-update add dbus default
+rc-update add elogind default
+rc-update add haveged default
+rc-update add postmarketos-ondev default
+
+exit 0

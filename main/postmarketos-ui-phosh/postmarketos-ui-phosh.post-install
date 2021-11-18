@@ -1,0 +1,21 @@
+#!/bin/sh
+
+rc-update add tinydm default
+rc-update add modemmanager default
+rc-update add bluetooth default
+rc-update add iio-sensor-proxy default
+rc-update add networkmanager default
+dconf update
+tinydm-set-session -s /usr/share/wayland-sessions/phosh.desktop
+
+# Add the user to relevant groups in post-upgrade (symlink to post-install).
+# Note that we don't want to rely on users existing in post-install
+# (pmaports#820), therefore the group is also set via _pmb_groups during
+# 'pmbootstrap install'. When adding a new group here, keep _pmb_groups in
+# sync.
+default_user=$(getent passwd "10000" | cut -d: -f1)
+if [ -n "$default_user" ]; then
+	usermod -aG feedbackd "$default_user"
+fi
+
+exit 0

@@ -1,0 +1,5 @@
+#!/bin/sh
+
+postmarketos-mvcfg-pre-upgrade \
+	postmarketos-base-elogind \
+	/etc/elogind/logind.conf

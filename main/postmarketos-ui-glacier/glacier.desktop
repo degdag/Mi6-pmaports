@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Glacier (Wayland)
+Comment=This session will start Glacier
+Exec=dbus-run-session /usr/bin/glacier
+TryExec=/usr/bin/glacier
+Type=Application

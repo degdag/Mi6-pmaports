@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-huawei-kiwi
+pkgdesc="Huawei Honor 5X"
+pkgver=1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg linux-postmarketos-qcom-msm8939 soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+nonfree_firmware() {
+	pkgdesc="Modem/GPU/WiFi/BT/Video firmware"
+	depends="linux-firmware-qcom firmware-huawei-kiwi firmware-qcom-adreno-a420"
+	mkdir "$subpkgdir"
+}
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+5f8f25743dd46d2140191fc469d1f4cc159f6047bd34c233236bdb4e4ab4115ccb60ffa39dd898f6f7ee0b4217cfac627694cf6bbb28a406d01860873caaecbe  deviceinfo
+"

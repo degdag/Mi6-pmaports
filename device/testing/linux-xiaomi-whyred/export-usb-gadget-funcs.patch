@@ -1,0 +1,187 @@
+diff --git a/drivers/platform/msm/usb_bam.c b/drivers/platform/msm/usb_bam.c
+index a9bcabfd..02a96f1e 100644
+--- a/drivers/platform/msm/usb_bam.c
++++ b/drivers/platform/msm/usb_bam.c
+@@ -470,6 +470,8 @@ int usb_bam_alloc_fifos(enum usb_ctrl cur_bam, u8 idx)
+ 	return 0;
+ }
+ 
++EXPORT_SYMBOL(usb_bam_alloc_fifos);
++
+ int usb_bam_free_fifos(enum usb_ctrl cur_bam, u8 idx)
+ {
+ 	struct usb_bam_ctx_type *ctx = &msm_usb_bam[cur_bam];
+@@ -531,6 +533,8 @@ int usb_bam_free_fifos(enum usb_ctrl cur_bam, u8 idx)
+ 	return 0;
+ }
+ 
++EXPORT_SYMBOL(usb_bam_free_fifos);
++
+ static int connect_pipe(enum usb_ctrl cur_bam, u8 idx, u32 *usb_pipe_idx)
+ {
+ 	int ret;
+@@ -1130,6 +1134,8 @@ int usb_bam_connect(enum usb_ctrl cur_bam, int idx, u32 *bam_pipe_idx)
+ 	return 0;
+ }
+ 
++EXPORT_SYMBOL(usb_bam_connect);
++
+ static int __sps_reset_pipe(enum usb_ctrl bam_type,
+ 			    struct sps_pipe *pipe, u32 idx)
+ {
+@@ -1820,6 +1826,8 @@ void usb_bam_suspend(enum usb_ctrl cur_bam,
+ 	usb_bam_start_suspend(&info[cur_bam]);
+ }
+ 
++EXPORT_SYMBOL(usb_bam_suspend);
++
+ static void usb_bam_start_suspend(struct usb_bam_ipa_handshake_info *info_ptr)
+ {
+ 	struct usb_bam_pipe_connect *pipe_connect;
+@@ -2017,6 +2025,8 @@ void usb_bam_resume(enum usb_ctrl cur_bam,
+ 	queue_work(ctx->usb_bam_wq, &info[cur_bam].resume_work);
+ }
+ 
++EXPORT_SYMBOL(usb_bam_resume);
++
+ static void _msm_bam_wait_for_host_prod_granted(enum usb_ctrl bam_type)
+ {
+ 	struct usb_bam_ctx_type *ctx = &msm_usb_bam[bam_type];
+@@ -2598,6 +2608,8 @@ int usb_bam_register_wake_cb(enum usb_ctrl bam_type, u8 idx,
+ 	return __usb_bam_register_wake_cb(bam_type, idx, callback, param, true);
+ }
+ 
++EXPORT_SYMBOL(usb_bam_register_wake_cb);
++
+ int usb_bam_register_start_stop_cbs(enum usb_ctrl bam_type, u8 dst_idx,
+ 	void (*start)(void *, enum usb_bam_pipe_dir),
+ 	void (*stop)(void *, enum usb_bam_pipe_dir), void *param)
+@@ -2614,6 +2626,8 @@ int usb_bam_register_start_stop_cbs(enum usb_ctrl bam_type, u8 dst_idx,
+ 	return 0;
+ }
+ 
++EXPORT_SYMBOL(usb_bam_register_start_stop_cbs);
++
+ int usb_bam_disconnect_pipe(enum usb_ctrl bam_type, u8 idx)
+ {
+ 	struct usb_bam_ctx_type *ctx = &msm_usb_bam[bam_type];
+@@ -2675,6 +2689,8 @@ int usb_bam_disconnect_pipe(enum usb_ctrl bam_type, u8 idx)
+ 	return 0;
+ }
+ 
++EXPORT_SYMBOL(usb_bam_disconnect_pipe);
++
+ /**
+  * is_ipa_hanlde_valid: Check if ipa_handle is valid or not
+  * @ipa_handle: IPA Handle for producer or consumer
+diff --git a/drivers/usb/dwc3/dwc3-msm.c b/drivers/usb/dwc3/dwc3-msm.c
+index b933a702..358a721b 100644
+--- a/drivers/usb/dwc3/dwc3-msm.c
++++ b/drivers/usb/dwc3/dwc3-msm.c
+@@ -437,6 +437,7 @@ int msm_data_fifo_config(struct usb_ep *ep, phys_addr_t addr,
+ 						dst_pipe_idx);
+ }
+ 
++EXPORT_SYMBOL(msm_data_fifo_config);
+ 
+ /**
+ * Cleanups for msm endpoint on request complete.
+diff --git a/drivers/usb/gadget/debug.c b/drivers/usb/gadget/debug.c
+index 32a53299..fa5ff4ff 100644
+--- a/drivers/usb/gadget/debug.c
++++ b/drivers/usb/gadget/debug.c
+@@ -126,8 +126,12 @@ err0:
+ 	return ret;
+ }
+ 
++EXPORT_SYMBOL(debug_debugfs_init);
++
+ void debug_debugfs_exit(void)
+ {
+ 	debugfs_remove_recursive(dbg_buffer.root);
+ 	dbg_buffer.root = NULL;
+ }
++
++EXPORT_SYMBOL(debug_debugfs_exit);
+diff --git a/drivers/usb/gadget/function/u_ctrl_qti.c b/drivers/usb/gadget/function/u_ctrl_qti.c
+index 013c54da..c7e18705 100644
+--- a/drivers/usb/gadget/function/u_ctrl_qti.c
++++ b/drivers/usb/gadget/function/u_ctrl_qti.c
+@@ -320,6 +320,7 @@ void gqti_ctrl_update_ipa_pipes(void *gr, enum qti_port_type qport,
+ 
+ }
+ 
++EXPORT_SYMBOL(gqti_ctrl_update_ipa_pipes);
+ 
+ static int qti_ctrl_open(struct inode *ip, struct file *fp)
+ {
+diff --git a/drivers/usb/gadget/function/u_data_ipa.c b/drivers/usb/gadget/function/u_data_ipa.c
+index d9a0b0e0..6f14c2fd 100644
+--- a/drivers/usb/gadget/function/u_data_ipa.c
++++ b/drivers/usb/gadget/function/u_data_ipa.c
+@@ -367,6 +367,8 @@ void ipa_data_disconnect(struct gadget_ipa_port *gp, enum ipa_func_type func)
+ 	queue_work(ipa_data_wq, &port->disconnect_w);
+ }
+ 
++EXPORT_SYMBOL(ipa_data_disconnect);
++
+ /**
+  * configure_fifo() - Configure USB BAM Pipe's data FIFO
+  * @idx: USB BAM Pipe index
+@@ -863,6 +865,8 @@ err:
+ 	return ret;
+ }
+ 
++EXPORT_SYMBOL(ipa_data_connect);
++
+ /**
+  * ipa_data_start() - Restart USB endless transfer
+  * @param: IPA data channel information
+@@ -989,6 +993,9 @@ void ipa_data_suspend(struct gadget_ipa_port *gp, enum ipa_func_type func,
+ 	queue_work(ipa_data_wq, &port->suspend_w);
+ 	spin_unlock_irqrestore(&port->port_lock, flags);
+ }
++
++EXPORT_SYMBOL(ipa_data_suspend);
++
+ static void bam2bam_data_suspend_work(struct work_struct *w)
+ {
+ 	struct ipa_data_ch_info *port = container_of(w, struct ipa_data_ch_info,
+@@ -1119,6 +1126,8 @@ void ipa_data_resume(struct gadget_ipa_port *gp, enum ipa_func_type func,
+ 	spin_unlock_irqrestore(&port->port_lock, flags);
+ }
+ 
++EXPORT_SYMBOL(ipa_data_resume);
++
+ static void bam2bam_data_resume_work(struct work_struct *w)
+ {
+ 	struct ipa_data_ch_info *port = container_of(w, struct ipa_data_ch_info,
+@@ -1231,7 +1240,9 @@ void ipa_data_port_select(enum ipa_func_type func)
+ 	port->ipa_params.src_client = IPA_CLIENT_USB_PROD;
+ 	port->ipa_params.dst_client = IPA_CLIENT_USB_CONS;
+ 	port->func_type = func;
+-};
++}
++
++EXPORT_SYMBOL(ipa_data_port_select);
+ 
+ void ipa_data_free(enum ipa_func_type func)
+ {
+@@ -1247,6 +1258,8 @@ void ipa_data_free(enum ipa_func_type func)
+ 	}
+ }
+ 
++EXPORT_SYMBOL(ipa_data_free);
++
+ /**
+  * ipa_data_setup() - setup BAM2BAM IPA port
+  *
+@@ -1306,6 +1319,8 @@ free_ipa_ports:
+ 	return ret;
+ }
+ 
++EXPORT_SYMBOL(ipa_data_setup);
++
+ void ipa_data_set_ul_max_xfer_size(u32 max_transfer_size)
+ {
+ 	if (!max_transfer_size) {

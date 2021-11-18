@@ -1,0 +1,22 @@
+pkgname=firmware-chuwi-hi10plus
+pkgver=0.1
+pkgrel=2
+_commit="2ab861d875105d0b88402d596e3d197dd47135df"
+pkgdesc="Firmware for Chuwi Hi10 Plus"
+url="https://github.com/onitake/gsl-firmware"
+arch="x86_64"
+license="proprietary"
+source="$pkgname-$_commit.tar.gz::https://github.com/Danct12/gsl-firmware/archive/$_commit.tar.gz
+	20-touchscreen-firmware.files"
+options="!strip !check !archcheck !spdx !tracedeps pmb:cross-native"
+builddir="$srcdir/gsl-firmware-$_commit"
+
+package() {
+	install -Dm644 firmware/chuwi/hi10_plus/firmware.fw \
+		"$pkgdir"/lib/firmware/silead/gsl1680-chuwi-hi10plus.fw
+	install -Dm644 "$srcdir"/20-touchscreen-firmware.files \
+		"$pkgdir"/etc/postmarketos-mkinitfs/files/20-touchscreen-firmware.files
+}
+
+sha512sums="5d2f447403941475542aac6110086117ddf031ad96cf1081cc7c63db465c609e2983c34f269fce86598198ab68826f8c8768232aedb8eaaa4b9a61037c61e610  firmware-chuwi-hi10plus-2ab861d875105d0b88402d596e3d197dd47135df.tar.gz
+85eda4c0a90f4d9aaf34dff36b08534e27962acd0214873a6b73039a663dd5bfd7de084833b07f2a56314466e2466ad68ce7b6ecbfe496c0578020847bc9b6e6  20-touchscreen-firmware.files"

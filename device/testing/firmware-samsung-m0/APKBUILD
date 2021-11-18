@@ -1,0 +1,42 @@
+pkgname=firmware-samsung-m0
+pkgver=1
+pkgrel=0
+_commit="d5a8735a6ad1fff3091f100383ac004f411d7528"
+_repo="android_vendor_samsung"
+pkgdesc="Samsung Galaxy S III Firmware"
+url="https://github.com/Androguide/android_vendor_samsung"
+arch="armv7"
+license="proprietary"
+subpackages="
+	$pkgname-mainline
+	$pkgname-downstream
+	"
+source="$pkgname-$_commit.tar.gz::https://github.com/Androguide/$_repo/archive/$_commit.tar.gz"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+builddir="$srcdir/android_vendor_samsung-$_commit"
+
+package() {
+	install -Dm644 "$srcdir/$_repo-$_commit"/smdk4412-common/proprietary/system/etc/wifi/nvram_net.txt \
+		"$pkgdir"/lib/firmware/postmarketos/nvram_net.txt
+}
+
+mainline() {
+	depends="$pkgname linux-firmware-brcm"
+	mkdir -p "$subpkgdir"/lib/firmware/brcm
+
+	ln -s /lib/firmware/postmarketos/nvram_net.txt \
+		"$subpkgdir"/lib/firmware/brcm/brcmfmac4334-sdio.samsung,i9300.txt
+	ln -s /lib/firmware/postmarketos/nvram_net.txt \
+		"$subpkgdir"/lib/firmware/brcm/brcmfmac4334-sdio.samsung,i9305.txt
+}
+
+downstream() {
+	depends="$pkgname"
+
+	install -Dm644 "$srcdir/$_repo-$_commit"/smdk4412-common/proprietary/system/etc/wifi/bcmdhd_sta.bin_b2 \
+		"$subpkgdir"/lib/firmware/postmarketos/bcmdhd_sta.bin_b2
+}
+
+sha512sums="
+6559320d23e6a73accacf8c760426cb5a0679ab34e353d24dde653b336eadf98c2aa28c783e7010bf9f32cc64baadc02a9fff09baac6ff8b535ed5bc94c8abc5  firmware-samsung-m0-d5a8735a6ad1fff3091f100383ac004f411d7528.tar.gz
+"

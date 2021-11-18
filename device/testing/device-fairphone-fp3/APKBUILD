@@ -1,0 +1,45 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-fairphone-fp3
+pkgdesc="Fairphone 3"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	mesa-dri-gallium
+	msm-fb-refresher
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel (recommended)"
+	depends="linux-fairphone-fp3"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Firmware for WiFi, Audio, etc."
+	depends="firmware-fairphone-fp3-wcnss"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+90453ae44a2ee6b04d1bd4b461a477f5660d257b8736cacaca95d6d95788c1625abf68c00aca1d6893e1797310480f83fc98ec55301a79f1b2fcacace6321ddb  deviceinfo
+"

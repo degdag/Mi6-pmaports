@@ -1,0 +1,22 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Raspberry Pi Zero"
+deviceinfo_manufacturer="Raspberry Pi"
+deviceinfo_codename="raspberry-pi0"
+deviceinfo_year="2015"
+deviceinfo_modules_initfs="dwc2 af_packet usb_f_ecm g_ether"
+deviceinfo_arch="armhf"
+deviceinfo_disable_dhcpd="false"
+
+# Device related
+deviceinfo_chassis="embedded"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="1920"
+deviceinfo_screen_height="1080"
+
+# Bootloader related
+deviceinfo_flash_method="none"
+deviceinfo_boot_filesystem="fat16"

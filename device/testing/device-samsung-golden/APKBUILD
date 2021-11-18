@@ -1,0 +1,73 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-golden
+pkgdesc="Samsung Galaxy S III mini"
+pkgver=1
+pkgrel=11
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-kwin
+"
+source="
+	deviceinfo
+	kwin.sh
+	downstream/init-usb-hook.sh
+	downstream/modules-load-wifi.conf
+	downstream/module-config.conf
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-samsung-golden mesa-dri-swrast"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+
+	# USB
+	install -Dm644 "$srcdir"/init-usb-hook.sh \
+		"$subpkgdir"/etc/postmarketos-mkinitfs/hooks/00-init_usb.sh
+
+	# WiFi kernel module configuration
+	install -Dm644 "$srcdir"/modules-load-wifi.conf \
+		"$subpkgdir"/etc/modules-load.d/00-load-wifi.conf
+	install -Dm644 "$srcdir"/module-config.conf \
+		"$subpkgdir"/etc/modprobe.d/00-module-config.conf
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel"
+	depends="linux-postmarketos-stericsson mesa-dri-gallium"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi/BT firmware"
+	depends="firmware-samsung-u8500"
+	mkdir "$subpkgdir"
+}
+
+kwin() {
+	install_if="$pkgname-kernel-mainline kwin"
+	install -Dm644 "$srcdir"/kwin.sh "$subpkgdir"/etc/profile.d/kwin.sh
+}
+
+sha512sums="
+9c5329c37d0dfd7ff34e22c5346429692d1b8b700b84ed8ac1934f62ca54495db7200506bde5a66f1543bfb3fa10a6c5cb53a1590067d6eda01b94d666fb3bc0  deviceinfo
+685ec71484a932c59f83f1039d4d18a010a5849342e96d9e15ae8ce64374aac15073f9c51d7d9f270c60e70d2ea15c685b8f528cdc40f991b093b9227cba6a48  kwin.sh
+769f76b2b0dc5279c514181f6cc915c045562df0c1fe08c54b6588d11ff2c75441a3a4f78d6dde669c82e1c572a66bdde475da3e289d334e3255fcf15430c044  init-usb-hook.sh
+61e8becbf6fa7c1c6c42e481083f5981ae7af33a48cbc53e817d8ac2c6a8e4f67a54b32ae3b8f5f25f7b412165a849dc93a629110dc47b0d16927bf2a12eb7e1  modules-load-wifi.conf
+436900f627e4ec7e8359bfa6b5d0ac98c69cdd3f3b5e68d23354fa87d79beef866afd6c4cf27b97e9b608cce44fe8d116594f3b08520c9c05624bcf58b61c7f1  module-config.conf
+"

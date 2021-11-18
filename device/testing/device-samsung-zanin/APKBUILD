@@ -1,0 +1,28 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-zanin
+pkgdesc="Samsung Galaxy Chat"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-zanin mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo
+	initfs-hook.sh
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+a29dfdbf377a87a6ab24ac1b48bf06341ba3b6c0626980e889c00907ed06506bbfbfc274677396251b305109960c01dcaf1f7933919c863434783c2f9e7a3654  deviceinfo
+27a2263ce1dc96de8ac3a2ff6fc8d19c1ae591c883ff201637c5b8dfbbb07d807200853fa51de7d9ee1d0126ceb3a35a6787da53fd25389bbbb78c126eb049a3  initfs-hook.sh
+"

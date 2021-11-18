@@ -1,0 +1,38 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i9070
+pkgver=1
+pkgrel=33
+pkgdesc="Samsung Galaxy S Advance"
+url="https://postmarketos.org"
+arch="armhf"
+license="MIT"
+depends="postmarketos-base linux-samsung-i9070 mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+install="$pkgname.post-install"
+source="
+	deviceinfo
+	initfs-hook.sh
+	modules-load.conf
+"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-i9070"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+35ced13758b09fcdbd256da6b5c2b82cc08069d9e889e242560fec2c42932a6550305006469fd458975ef34566bbbfc185677f089a2b006b42e1762ecfb9a8d5  deviceinfo
+449e5047f9c15d536233fe2836cf10ae3dd2bf46f1c12ad0423f098bd54bff357438747a3c23aec9b1d8826146f87ff39d657c2b48247fb5ac4ebdeed65634fa  initfs-hook.sh
+61e8becbf6fa7c1c6c42e481083f5981ae7af33a48cbc53e817d8ac2c6a8e4f67a54b32ae3b8f5f25f7b412165a849dc93a629110dc47b0d16927bf2a12eb7e1  modules-load.conf
+"

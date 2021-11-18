@@ -1,0 +1,71 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Minecrell <minecrell@minecrell.net>
+# Co-Maintainer: Daniele Debernardi <drebrez@gmail.com>
+pkgname=device-qemu-aarch64
+pkgver=2.3
+pkgrel=2
+pkgdesc="Simulated device in QEMU (aarch64)"
+url="https://postmarketos.org"
+arch="aarch64"
+license="MIT"
+depends="postmarketos-base mesa-dri-gallium"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-lts:kernel_lts
+	$pkgname-kernel-virt:kernel_virt
+	$pkgname-mce
+	$pkgname-sway
+	$pkgname-weston
+	"
+
+source="
+	deviceinfo
+	mce-display-blanking.conf
+	weston.ini
+	"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+mce() {
+	pkgdesc="Prevents screen blanking for UI's using mce (Glacier, Asteroid)"
+	install_if="$pkgname=$pkgver-r$pkgrel mce"
+	install -Dm644 "$srcdir"/mce-display-blanking.conf \
+		"$subpkgdir"/etc/mce/50display-blanking.conf
+}
+
+sway() {
+	install_if="$pkgname=$pkgver-r$pkgrel sway"
+	depends="postmarketos-ui-sway-logo-key-alt"
+	mkdir "$subpkgdir"
+}
+
+weston() {
+	install_if="$pkgname=$pkgver-r$pkgrel weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+kernel_virt() {
+	pkgdesc="Alpine Virt kernel (minimal, no audio)"
+	depends="linux-virt"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_lts() {
+	pkgdesc="Alpine LTS kernel"
+	depends="linux-lts linux-firmware-none"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+sha512sums="
+7dbe34f2aa8f30ab5284007d43c49e2a3c74135dcabcf1f5915afbceb645277152099c808dac5c004db51be9abb34b2976c7336d0f52ed143b23c4d6cdeb061e  deviceinfo
+99d32eed6c5cda59e91516e982c5bd5165ff718133e2411a0dbba04e2057d1dfad49a75e5cc67140d0e0adcbe1383671bd2892335929b782a5b19f5472e635ad  mce-display-blanking.conf
+de794566118f1744d068a94e6a75b61d43f6749a4b0871a5270fa7a2048164d609c71fcffa61845c2a7dd4cb5fbeb72c0e4f8b73b382f36d6ff0bcc9b8a5ae25  weston.ini
+"

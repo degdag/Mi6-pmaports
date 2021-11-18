@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-crespo
+pkgdesc="Samsung Nexus S"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-crespo mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Nexus S firmware"
+	depends="firmware-samsung-crespo"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+bbe8347a2c1e251bae9065b5d7ecad0ce86561d8d6966068dac2a87e682be5db888f51a42b7f22556e881d8d9cd2ff69c5b2b4615173432cba9f6882bca096ef  deviceinfo
+"

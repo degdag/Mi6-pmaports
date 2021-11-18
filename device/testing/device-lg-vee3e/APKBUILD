@@ -1,0 +1,22 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-vee3e
+pkgdesc="LG Optimus L3 II"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-lg-vee3e mkbootimg mesa-dri-gallium mdss-fb-init-hack"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="a530628db623e2f0d8428379c0e340d03ba78bd38e760a4df01e6f4623245ce2ea7c0daf92db5203ac46e08799ea8a96aa793b0355514e30691517f83ec017a6  deviceinfo"

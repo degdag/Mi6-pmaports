@@ -1,0 +1,27 @@
+pkgname=triggerhappy
+pkgver=0.5.0
+pkgrel=0
+pkgdesc="A lightweight hotkey daemon"
+url="https://github.com/wertarbyte/triggerhappy"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="linux-headers perl"
+subpackages="$pkgname-doc"
+options="!check"
+source="triggerhappy-$pkgver.tar.gz::https://github.com/wertarbyte/triggerhappy/archive/release/$pkgver.tar.gz
+	triggerhappy.openrc"
+builddir="$srcdir/$pkgname-release-$pkgver"
+
+build() {
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+	install -Dm 644 triggerhappy.conf.examples "$pkgdir"/etc/triggerhappy/triggers.d/triggerhappy.conf.examples
+	install -Dm 644 udev/triggerhappy-udev.rules "$pkgdir"/usr/lib/udev/rules.d/99-triggerhappy.rules
+	install -Dm 755 "$srcdir"/triggerhappy.openrc "$pkgdir"/etc/init.d/triggerhappy
+}
+
+sha512sums="7a4c7a67a90a92e907fcc966902e9a1d5ebc702304ac4165d1a2733a0891dd08f4caf4e4677b41854fcd8021c03b2ffa118a34658dd5d4d97d538517457622dc  triggerhappy-0.5.0.tar.gz
+f6762c7fd8c493bbc6ae996fa687979ff2675773f8fa3e15dc49f5fbf074c45f2d93fce532936691b55bea8f11937696c7544c982b89ac378512e7614fbcf439  triggerhappy.openrc"

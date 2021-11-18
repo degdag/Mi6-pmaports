@@ -1,0 +1,12 @@
+#!/bin/sh
+
+# This attempts to clean up files in /boot left over from when mkinitfs
+# appended kernel 'flavors'. Without doing this cleanup, /boot might be more
+# full than it needs to be, and things like copying files atomically in the new
+# mkinitfs may not have enough space to do the atomic copy
+echo "Cleaning up old boot files..."
+for f in /boot/boot.img-* /boot/initramfs-*-extra* /boot/initramfs-*[!-extra]; do
+        [ -f "$f" ] && rm -v "$f"
+done
+
+exit 0

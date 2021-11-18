@@ -1,0 +1,52 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-skomer
+pkgdesc="Samsung Galaxy Xcover 2"
+pkgver=4
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg linux-postmarketos-stericsson mesa-dri-gallium"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-kwin
+	$pkgname-phosh
+"
+source="
+	deviceinfo
+	kwin.sh
+	rootston.ini
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi/BT firmware"
+	depends="firmware-samsung-u8500"
+	mkdir "$subpkgdir"
+}
+
+kwin() {
+	install_if="$pkgname kwin"
+	install -Dm644 "$srcdir"/kwin.sh "$subpkgdir"/etc/profile.d/kwin.sh
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+			"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+828a520f13bd3b60053b7f7f1651799add4545232a1a6b57c511a62da60859b621452a9aaa86a0f479e92fb6b411f4df7699acb64b2947565db38822e38cb379  deviceinfo
+685ec71484a932c59f83f1039d4d18a010a5849342e96d9e15ae8ce64374aac15073f9c51d7d9f270c60e70d2ea15c685b8f528cdc40f991b093b9227cba6a48  kwin.sh
+95576332f1ad579d30359df9a3efcc3f478c56688509b5c470a70e8ae41466dbb397fb6db7578b5c54e13795ab8cf869b5c63ba775951817a8bb3d4c682bdfd5  rootston.ini
+"

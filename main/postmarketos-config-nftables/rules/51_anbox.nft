@@ -1,0 +1,11 @@
+#!/usr/sbin/nft -f
+table inet filter {
+    chain input {
+        iifname "anbox*" accept comment "Allow incoming network traffic from Anbox"
+    }
+    chain forward {
+        iifname "anbox*" accept comment "Allow outgoing network traffic from Anbox"
+        ct state {established, related} counter accept comment "accept established connections"
+    }
+}
+

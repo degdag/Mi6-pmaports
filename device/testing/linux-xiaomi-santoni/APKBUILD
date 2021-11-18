@@ -1,0 +1,50 @@
+# Kernel config based on: arch/arm64/configs/santoni_defconfig
+pkgname=linux-xiaomi-santoni
+pkgver=3.18.140
+pkgrel=3
+pkgdesc="Xiaomi Redmi 4X kernel fork - msm-3.18 rebase"
+arch="aarch64"
+_carch="arm64"
+_flavor="xiaomi-santoni"
+url="https://kernel.org"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev"
+
+# Source
+_repository="msm-3.18"
+_commit="2dd8017f40290eb326e352cca254cd8bdd1614c9"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/bitrvmpd/$_repository/archive/$_commit.tar.gz
+	fix-xorg-mdss-update-fb-info.patch
+	disable-substream-runtime-errors.patch
+	bt-hci-smd.patch
+	99_framebuffer.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="d7a290e676aa40d35289cedbad5dd077accff4e1a2467223765a79f101ff4c1313315cbffd574ad74c648c4b8f5751d16a1fa1607c9939b373d3f2974a7b2326  linux-xiaomi-santoni-2dd8017f40290eb326e352cca254cd8bdd1614c9.tar.gz
+a277af28a718f5caf94257005393aa92d62c96110a8ec6368ff62f2e0d871b69c56c4ce00174db637204d53fa63ad3a79b8d6141713dca0878e1f06fe0379caa  fix-xorg-mdss-update-fb-info.patch
+14ee08e4f93befeaabfb35e6bf0b8bb5b2eecba1c21ce4498499c377c2cf4d5fccbfe85e14ca92c704d067386ec08a06805ab886f0ec7691471cf379838545aa  disable-substream-runtime-errors.patch
+f5850f712ce7aa42ada1971fc5f428ac8b9f5eef77d8bfb09bb24e0636e0b70ae78009466ed4962bd257721126577a756114e2ee2a70d4a925dd57e0ec7bcfa6  bt-hci-smd.patch
+a6f9899ab97af727e4450201a2edc2bf6fc805d981fa967581b98c5e1ee0b9c005feeeb647b40b220a79ed9a318cf9bbf8f953aab941daf6fea4790a372aae21  99_framebuffer.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch
+753b1517980a6aa4bc1ccea6d013cb5cf74cd85a92a279a5fff2f13f0930a9266305d9efdd06ce4fe7baf76eb47118fe95b855a458e0457d91041da9b8ef0897  config-xiaomi-santoni.aarch64"

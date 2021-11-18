@@ -1,0 +1,78 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/odroidxu4_defconfig
+# Maintainer: Dylan Van Assche <me@dylanvanassche.be>
+
+pkgname=linux-odroid-hc2
+pkgver=5.14.0
+pkgrel=0
+pkgdesc="ODROID XU3/XU4/HC1/HC2/MC1 kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="odroid-hc2"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-nftables"
+makedepends="
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	gmp-dev
+	installkernel
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	rsync
+	xz
+	linux-headers
+	"
+# Source
+_config="config-$_flavor.$arch"
+_pkgname="linux"
+_commit="813dade16c755c4aeff738df4e8e5ebe6da4c515"
+source="
+	$_pkgname-$pkgver.tar.gz::https://github.com/tobetter/linux/archive/$_commit.tar.gz
+	$_config
+"
+subpackages="$pkgname-dev"
+builddir="$srcdir/$_pkgname-$_commit"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+
+	make modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+dev() {
+	provides="linux-headers"
+	replaces="linux-headers"
+
+	cd $builddir
+
+	# https://github.com/torvalds/linux/blob/master/Documentation/kbuild/headers_install.rst
+	make -j1 headers_install \
+		ARCH="$_carch" \
+		INSTALL_HDR_PATH="$subpkgdir"/usr
+}
+
+sha512sums="
+131ecd04b15280f3ebbb6bdf50c31c0f88e4430ceecba454896119b8f3f5b6f4171daab30ff8fc3ca86403354c9e8c3a9bf53b6673b66a9125fe42a3f91d49d3  linux-5.14.0.tar.gz
+bf3e599de30d88ab9c0df3e7a9487bf9aa0b511615208c82a1c7f2fc254839a896637effa3bb49a7081eded25168aa3aa5855feb516b935d33f106995cffbfba  config-odroid-hc2.armv7
+"

@@ -1,0 +1,22 @@
+pkgname=0xffff
+pkgver=0.9
+pkgrel=0
+pkgdesc="Open Free Fiasco Firmware Flasher for Maemo devices"
+url="https://github.com/pali/0xFFFF"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="linux-headers libusb-compat-dev"
+subpackages="$pkgname-doc"
+source="https://github.com/pali/0xFFFF/releases/download/$pkgver/0xFFFF-$pkgver.tar.gz"
+builddir="$srcdir/0xFFFF-$pkgver"
+options="!check" # No test suite
+
+build() {
+	make
+}
+
+package() {
+	make PREFIX=/usr DESTDIR="$pkgdir/" install
+}
+
+sha512sums="6ec5ccc1ed7c8b4b2b10e641176f2c07bc8d490519571e1c935c501e8351e84de641848a2feb4f815a6a199c852f5eebd459b4009c1abed56772697445650daa  0xFFFF-0.9.tar.gz"

@@ -1,0 +1,32 @@
+From e89504dba59f7f59f57d3346a06e708c03a1b7ca Mon Sep 17 00:00:00 2001
+From: Paul Cercueil <paul@crapouillou.net>
+Date: Sun, 12 Apr 2020 15:32:23 +0200
+Subject: [PATCH 2/3] Fix ulong type not defined
+
+Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+---
+ include/compiler.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/compiler.h b/include/compiler.h
+index 0734ed4942..50214ffe56 100644
+--- a/include/compiler.h
++++ b/include/compiler.h
+@@ -46,13 +46,13 @@
+ # include <byteswap.h>
+ #elif defined(__MACH__) || defined(__FreeBSD__)
+ # include <machine/endian.h>
+-typedef unsigned long ulong;
+ #endif
+ 
+ typedef uint8_t __u8;
+ typedef uint16_t __u16;
+ typedef uint32_t __u32;
+ typedef unsigned int uint;
++typedef unsigned long ulong;
+ 
+ #define uswap_16(x) \
+ 	((((x) & 0xff00) >> 8) | \
+-- 
+2.25.1
+

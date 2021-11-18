@@ -1,0 +1,86 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-microsoft-surface-rt
+pkgdesc="Microsoft Surface RT"
+pkgver=5
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+# pmb:strict: avoid grub-related install error during build with pmbootstrap
+options="!check !archcheck pmb:strict"
+depends="postmarketos-base
+	linux-postmarketos-grate
+	mesa-dri-swrast
+	libvdpau-tegra
+	alsa-ucm-conf
+"
+makedepends="devicepkg-dev grub grub-efi"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-x11
+	$pkgname-phosh
+"
+source="
+	deviceinfo
+	grub.cfg
+	initfs-hook.sh
+	pointercal
+	rootston.ini
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+
+	grub-mkimage \
+		--prefix="/grub" \
+		--output="bootarm.efi" \
+		--format="arm-efi" \
+		--compression="xz" \
+		\
+		disk \
+		fat \
+		gzio \
+		iso9660 \
+		linux \
+		normal \
+		part_gpt \
+		part_msdos
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+
+	install -D "$srcdir"/grub.cfg \
+		"$pkgdir"/boot/grub/grub.cfg
+	install -D "$srcdir"/bootarm.efi \
+		"$pkgdir"/boot/EFI/Boot/bootarm.efi
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi firmware"
+	depends="linux-firmware-mrvl"
+	mkdir "$subpkgdir"
+}
+
+x11() {
+	install_if="$pkgname xorg-server"
+	depends="xf86-video-opentegra"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+30b2265fee16faca4f5256adb6453989d1fe4b1c6f4c902e6f5397249ea218e9b1e8e118e039a0a9b0c446edfd6c58857a7562c5b855648e8ba428da33b51436  deviceinfo
+40b507176edce2d141ff707aecad6f8d9636b828084e84d0015886d5e371127285bc80398fc13c1b88a7740c5b4694d2011286138249c95d27db0d9df3ca102f  grub.cfg
+0c7640df35d29a5c2e168d1e54b73a90d903e51b16d67ad08c3ccb41972209086844357f82cf6a2b6de977ebfb7e1099da01db71dc0733e90662ba315f0cd1d0  initfs-hook.sh
+34f6eb789d4688985a262c519017e0712a90ca5acf89e6b3f39e33792a7982155261c6b4f0dbf41595b512da9dc7c9002adb69a550e80be349a374d086799916  pointercal
+618284cdaccd09e60cb9a99afa337fcad7b3bd33f6422b9eae34175bc4516138d486cbb9f5735cafb325bc16cf362de16aeae7c77d334668c749afcfa557359b  rootston.ini
+"

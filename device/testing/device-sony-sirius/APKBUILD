@@ -1,0 +1,64 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-sirius
+pkgver=1
+pkgrel=20
+pkgdesc="Sony Xperia Z2 device package"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="
+	linux-postmarketos-qcom-msm8974
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-weston $pkgname-x11 $pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	weston.ini
+	99-touch.rules
+	modules-load.conf
+	brcmfmac4339-sdio.txt
+"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/99-touch.rules \
+		"$pkgdir"/etc/udev/rules.d/99-touch.rules
+	install -D -m644 "$srcdir"/brcmfmac4339-sdio.txt \
+		"$pkgdir"/lib/firmware/brcm/brcmfmac4339-sdio.txt
+}
+
+x11() {
+	install_if="$pkgname xorg-server"
+	depends="
+		libinput
+		xf86-input-libinput
+		xf86-video-modesetting"
+	mkdir "$subpkgdir"
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi/GPU firmware"
+	depends="linux-firmware-qcom linux-firmware-brcm linux-firmware-cypress firmware-qcom-adreno-a330"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="27ea6b5aac4bf701d334acccf3479349f234cd7536063441ed249a354f1dd1a2c4874a6f398550236bec20d610e702d62dceed6b249857759546f723d67a2f76  deviceinfo
+de794566118f1744d068a94e6a75b61d43f6749a4b0871a5270fa7a2048164d609c71fcffa61845c2a7dd4cb5fbeb72c0e4f8b73b382f36d6ff0bcc9b8a5ae25  weston.ini
+ec5e26e60a77e74befabf5cc3f85a2636ce07261e725c0a051999d321ddec056f307001ba659c91e403770ac99d38b3160fd46e235c467fefc03d0901452314d  99-touch.rules
+35a5dbd90eef6c567822f1a805c6adf620bb9c6c9c2e1755407409c2fab044baa40dda9e526c45108b4a2bbf43e0ad67e3dd90c35f6a6c6e29ec5930f2d1c4a7  modules-load.conf
+b99a1bc0d430a261b6ab0b5ea12f2e996ab24ece6fe40ff57357697f4db976394c655a7c7a63e7c985f6356126a6b1d920eb0077817cb65ae18250f404282a68  brcmfmac4339-sdio.txt
+"

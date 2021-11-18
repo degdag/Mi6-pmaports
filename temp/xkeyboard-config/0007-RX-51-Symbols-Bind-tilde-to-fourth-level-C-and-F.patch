@@ -1,0 +1,34 @@
+From ffe1a6ca63fc4c0e7b2ca2ae5e53d1add8bda206 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 20:35:00 +0200
+Subject: [PATCH 07/10] RX-51: Symbols: Bind tilde to fourth level C and F
+
+---
+ symbols/nokia_vndr/rx-51 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index b866ad2..3edba1f 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -398,7 +398,7 @@ xkb_symbols "english_base" {
+     key <AC01>	{ [	a,		A,		asterisk,	asterisk	] };
+     key <AC02>	{ [	s,		S,		plus,		plus		] };
+     key <AC03>	{ [	d,		D,		numbersign,	numbersign	] };
+-    key <AC04>	{ [	f,		F,		minus,		minus		] };
++    key <AC04>	{ [	f,		F,		minus,		asciitilde	] };
+     key <AC05>	{ [	g,		G,		underscore,	underscore	] };
+     key <AC06>	{ [	h,		H,		parenleft,	parenleft	] };
+     key <AC07>	{ [	j,		J,		parenright,	parenright	] };
+@@ -409,7 +409,7 @@ xkb_symbols "english_base" {
+     // 3. row
+     key <AB01>	{ [	z,		Z,		sterling,	sterling	] };
+     key <AB02>	{ [	x,		X,		dollar,		dollar		] };
+-    key <AB03>	{ [	c,		C,		EuroSign,	EuroSign	] };
++    key <AB03>	{ [	c,		C,		EuroSign,	asciitilde	] };
+     key <AB04>	{ [	v,		V,		slash,		less		] };
+     key <AB05>	{ [	b,		B,		backslash,	greater		] };
+     key <AB06>	{ [	n,		N,		quotedbl,	quotedbl	] };
+-- 
+1.8.1.4
+

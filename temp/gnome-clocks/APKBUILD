@@ -1,0 +1,37 @@
+# Forked from Alpine to apply waked patch
+pkgname=gnome-clocks
+pkgver=9999_git20210323
+pkgrel=1
+_commit=13a15e8506d90b0300f9549020c66280ee4d3026
+pkgdesc="Clock application designed for GNOME 3"
+url="https://wiki.gnome.org/Apps/Clocks"
+# s390x, mips64 and riscv64 blocked by rust -> libhandy
+arch="all !s390x !mips64 !riscv64"
+license="GPL-2.0-or-later"
+depends="gsettings-desktop-schemas waked"
+makedepends="meson glib-dev gtk+3.0-dev libgweather-dev gsound-dev gnome-desktop-dev
+	geoclue-dev geocode-glib-dev gettext-dev vala itstool libhandy1-dev"
+checkdepends="appstream-glib desktop-file-utils"
+subpackages="$pkgname-lang $pkgname-doc"
+source="
+	$pkgname-$_commit.tar.gz::https://gitlab.gnome.org/GNOME/gnome-clocks/-/archive/$_commit/gnome-clocks-$_commit.tar.gz
+	0001-waked-implementation.patch
+	"
+builddir="$srcdir/$pkgname-$_commit"
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	meson test --no-rebuild -v -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+sha512sums="
+ba248a5b45b4200cc08137e9510ef445f649a01481a6e934e189119edf0bab2645a8429d1396739dc8525bf65e059556c41a29a35f970a4b1a24fdacc0e5652d  gnome-clocks-13a15e8506d90b0300f9549020c66280ee4d3026.tar.gz
+50857339594ad2ab234eaaa090b1a7bfa809798cb7916149751466a7d3d583e9080e61ed1ffd4987b52f7ff4e280f2b9439eff9ad028e1bef31684d255d3ca9d  0001-waked-implementation.patch
+"

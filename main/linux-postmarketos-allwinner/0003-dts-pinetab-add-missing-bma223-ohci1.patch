@@ -1,0 +1,49 @@
+From a76ae09d570406690bde1436aa910e76ae179716 Mon Sep 17 00:00:00 2001
+From: Oliver Smith <ollieparanoid@postmarketos.org>
+Date: Tue, 20 Oct 2020 11:11:48 +0200
+Subject: [PATCH] dts: pinetab: add missing bma223, ohci1
+
+Fix the accelerometer (BMA223). ohci1 is the low-speed variant of the usb
+port. Original patch by Icenowy Zheng.
+
+Cherry picked from here, but this isn't the original patch either:
+https://gitlab.com/pine64-org/linux/-/commit/69ae7087ec51b09bb6a0afb53dddb5eb030b3236
+---
+ .../boot/dts/allwinner/sun50i-a64-pinetab.dts      | 14 +++++++++++++-
+ 1 file changed, 13 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/allwinner/sun50i-a64-pinetab.dts b/arch/arm64/boot/dts/allwinner/sun50i-a64-pinetab.dts
+index 91d27bc93a3e..c33c5690a87b 100644
+--- a/arch/arm64/boot/dts/allwinner/sun50i-a64-pinetab.dts
++++ b/arch/arm64/boot/dts/allwinner/sun50i-a64-pinetab.dts
+@@ -225,7 +225,15 @@ &i2c0_pins {
+ &i2c1 {
+ 	status = "okay";
+ 
+-	/* TODO: add Bochs BMA223 accelerometer here */
++	bma223@18 {
++		compatible = "bosch,bma223", "bosch,bma222e";
++		reg = <0x18>;
++		interrupt-parent = <&pio>;
++		interrupts = <7 5 IRQ_TYPE_LEVEL_HIGH>; /* PH5 */
++		mount-matrix = "0", "-1", "0",
++			       "-1", "0", "0",
++			       "0", "0", "-1";
++	};
+ };
+ 
+ &lradc {
+@@ -291,6 +299,10 @@ &ohci0 {
+ 	status = "okay";
+ };
+ 
++&ohci1 {
++	status = "okay";
++};
++
+ &pwm {
+ 	status = "okay";
+ };
+-- 
+2.31.1
+

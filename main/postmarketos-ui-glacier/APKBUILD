@@ -1,0 +1,57 @@
+# Contributor: Bart Ribbers <bribbers@disroot.org>
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-glacier
+pkgver=0.1
+pkgrel=4
+pkgdesc="(Wayland) Open-source alternative to the SailfishOS UI"
+url="https://wiki.postmarketos.org/wiki/Glacier"
+# armhf blocked by glacier-home
+arch="noarch !armhf"
+license="GPL-3.0-or-later"
+depends="
+	dsme
+	elogind
+	glacier-home
+	ofono
+	ofono-openrc
+	postmarketos-base-ui
+	pulseaudio
+	qt5-qtvirtualkeyboard
+	urfkill
+	urfkill-openrc
+	"
+# Required to launch
+depends="$depends
+	tinydm
+	"
+_pmb_recommends="
+	glacier-calc
+	glacier-filemuncher
+	glacier-gallery
+	glacier-music
+	glacier-pinquery
+	glacier-settings
+	megapixels
+	qmlkonsole
+	"
+_pmb_groups="users"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="
+	glacier.sh
+	glacier.desktop
+	glacier-qt-mobile-controls.sh
+	"
+options="!check pmb:gpu-accel" # No code to test
+
+package() {
+	install -Dm755 "$srcdir"/glacier.sh \
+		"$pkgdir"/usr/bin/glacier
+	install -Dm755 "$srcdir"/glacier.desktop \
+		"$pkgdir"/usr/share/wayland-sessions/glacier.desktop
+
+	install -Dm755 -t "$pkgdir"/etc/profile.d/ \
+		"$srcdir"/glacier-qt-mobile-controls.sh
+}
+sha512sums="e57e1dc48a602b98e16ed4960add51e2532d3cbdbb4c44f4df56eecb726d27b9732cf53b2548c4f3adce8e1a7e72710723da72df700afc131065bafb8b3cbbba  glacier.sh
+6a05f5ab14dd9bfa8366ff9e9acbe6443373fbdca22eb3ddbe6ccb57ff19835cfc312ab89fd6dfe91e1e8cc757d12b52c8a71172bac35775f132a5a6ec6be5a9  glacier.desktop
+bf8db527c49fa724e640a90269ba2648a2555f5867b2adbfbd88d1f685261f757339757c09ee08f590c76de4bd3d0c73a47dea9bd340644dd4707e76152cefd1  glacier-qt-mobile-controls.sh"

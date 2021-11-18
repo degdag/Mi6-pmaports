@@ -1,0 +1,28 @@
+#!/bin/sh
+
+# Generate symlinks for acpid events, based on definitions in /etc/acpi.map
+for i in $(awk '{if($NF && ($1 !~ /^#/)) print $NF}' /etc/acpi.map); do
+        ln -s /etc/acpi/handler.sh /etc/acpi/$i
+done
+
+# Enable acpid
+rc-update add acpid default
+# hwdrivers is required for acpid to 'see' all devices
+rc-update add hwdrivers boot
+# Enable ofono
+rc-update add ofono default
+# Enable swclock
+rc-update -q add swclock boot
+
+# Load nokia-modem module on boot
+NMC=/etc/modules-load.d/nokia-modem.conf
+if [ ! -f $NMC ] || [ -z "$(grep nokia-modem $NMC)" ]; then
+	echo "nokia-modem" >> /etc/modules-load.d/nokia-modem.conf
+fi
+
+# Set RTC device for hwclock
+if [ -z "$(grep /dev/rtc0 /etc/conf.d/hwclock)" ]; then
+        sed -i 's/clock_args=\"/clock_args=\" -f \/dev\/rtc/' /etc/conf.d/hwclock
+fi
+
+exit 0

@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Er2 <er2@dismail.de>
+
+pkgname=device-alcatel-5010d
+pkgdesc="Alcatel OneTouch Pixi 4 (5) 5010D"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-alcatel-5010d
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+7116820f1b172f6d478d6155f6ff39dfe94237e6641f769eea11314185bc6d5aafc6197b36be99477191eb208dd4edf6c91953f9c64c538152a61b7b61af6980  deviceinfo
+"

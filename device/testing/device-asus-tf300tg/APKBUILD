@@ -1,0 +1,66 @@
+# Maintainer: Svyatoslav Ryhel <clamor95@gmail.com>
+
+pkgname=device-asus-tf300tg
+pkgdesc="Asus Transformer Pad 3G TF300TG"
+pkgver=1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	alsa-ucm-conf
+	asus-transformer-blobtools
+	libvdpau-tegra
+	linux-postmarketos-grate
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	pointercal
+	rootston.ini
+"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+	$pkgname-x11
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# osk-sdl touchscreen calibration
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Asus Transformers WiFi & BT firmware"
+	depends="firmware-asus-transformer"
+	mkdir "$subpkgdir"
+}
+
+x11() {
+	install_if="$pkgname=$pkgver-r$pkgrel xorg-server"
+	depends="xf86-video-opentegra"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+fe051ecca0a74dbde0195daed9602152fe20149d286694c3b37e03806f0fcf7700ed343cc2431c9ff92a8a19a0c4d9a0f7ef6478736f78de839239cda1f37b1a  deviceinfo
+d4270d13750b4c63a2f02a31ef42d00496ae71fc2c9cb8a7505da41d343911df353ff9150136f5cef143bf844024fee096f751ec0fa18589fae51dc30b1063c6  pointercal
+6ec993e278d2a73c72fb96f001716ded63543d99183847d22d172cd81ac410791c79370ecf391d0c24822c975d91b84dc1db296e1b28dbf66d5c227bff8d4011  rootston.ini
+"

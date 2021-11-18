@@ -1,0 +1,52 @@
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-asteroid
+pkgver=0.1
+pkgrel=3
+pkgdesc="(Wayland) Smartwatch UI from AsteroidOS"
+url="https://wiki.postmarketos.org/wiki/AsteroidOS"
+# armhf blocked by asteroid-launcher
+arch="noarch !armhf"
+license="GPL-3.0-or-later"
+depends="
+	asteroid-launcher
+	dsme
+	"
+# Required to launch
+depends="$depends
+	elogind
+	postmarketos-base-ui
+	tinydm
+	tinydm-openrc
+	"
+_pmb_recommends="
+	asteroid-alarmclock
+	asteroid-btsyncd
+	asteroid-calculator
+	asteroid-calendar
+	asteroid-compass
+	asteroid-flashlight
+	asteroid-hrm
+	asteroid-music
+	asteroid-settings
+	asteroid-stopwatch
+	asteroid-timer
+	asteroid-weather
+	"
+_pmb_groups="users"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="
+	asteroid.desktop
+	asteroid-launcher-wrapper.sh
+	gtk-app-wayland.sh
+	"
+options="!check"
+
+package() {
+	install -Dm755 "$srcdir"/asteroid-launcher-wrapper.sh "$pkgdir"/usr/bin/asteroid-launcher-wrapper
+	install -Dm644 "$srcdir"/asteroid.desktop -t "$pkgdir"/usr/share/wayland-sessions/
+	install -Dm755 "$srcdir"/gtk-app-wayland.sh -t "$pkgdir"/etc/profile.d/
+}
+
+sha512sums="6dab13e0fb128cce487554871ce4786334b46e0f8f0ffbef0a222607e04f5b49660872ea59b322790e4e35f9b7a53040233823308ba280a8b21c86a412405ec0  asteroid.desktop
+3795b5e385bbe37a19879ba1fa6b31c3649f304f8e2a9fc2e83987483d2529c0f74aaba4b097e0c5a7aadd97eafe9f1e2c5c1e44dbf41a04768db27843b9bcbd  asteroid-launcher-wrapper.sh
+57793bb079c76ba3bdcfca7880aa887de11fe80e7a05557b78435e57feabab70fbaeedc42da3aec6f914c35bba8e8ee9918367516eb45ee247f63f694624f179  gtk-app-wayland.sh"

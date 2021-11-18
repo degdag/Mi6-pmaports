@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-apexq
+pkgdesc="Samsung Galaxy S Relay 4G"
+pkgver=0.1
+pkgrel=7
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-apexq mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-apexq"
+	mkdir "$subpkgdir"
+}
+
+
+sha512sums="
+2a56bf2324dd51e22b62077a14619712315f6c7cdb6edb6aacff2d64cfb5b9acf8114a133b5a33406ad1b26bbb686d6009aa5e30b03024c1d80282f4d067c861  deviceinfo
+"

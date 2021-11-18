@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Asus Zenfone 5"
+deviceinfo_manufacturer="Asus"
+deviceinfo_codename="asus-t00f"
+deviceinfo_year="2014"
+deviceinfo_arch="x86"
+
+# Device related
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="720"
+deviceinfo_screen_height="1280"
+deviceinfo_dev_touchscreen="/dev/input/event1"
+
+# Bootloader related
+deviceinfo_flash_method="fastboot"
+deviceinfo_kernel_cmdline="init=/init pci=noearly earlyprintk=nologger loglevel=0 kmemleak=off androidboot.bootmedia=sdcard androidboot.hardware=redhookbay watchdog.watchdog_thresh=60 androidboot.spid=xxxx:xxxx:xxxx:xxxx:xxxx:xxxx androidboot.serialno=01234567890123456789 ip=50.0.0.2:50.0.0.1::255.255.255.0::usb0:on vmalloc=172M slub_max_order=2"
+deviceinfo_generate_bootimg="false"
+deviceinfo_bootimg_qcdt="false"
+deviceinfo_flash_pagesize="2048"
+

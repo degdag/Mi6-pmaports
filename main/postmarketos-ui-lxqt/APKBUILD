@@ -1,0 +1,42 @@
+# Maintainer: Antoni Aloy <aaloytorrens@gmail.com>
+pkgname=postmarketos-ui-lxqt
+pkgver=0.1
+pkgrel=2
+pkgdesc="(X11) Lightweight Qt Desktop Environment (stylus recommended)"
+url="https://lxqt-project.org/"
+arch="noarch !armhf" # lxqt-desktop not available on armhf
+license="GPL-3.0-or-later"
+depends="
+	dbus-x11
+	dnsmasq
+	elogind
+	lxpolkit
+	lxqt-desktop
+	mesa-egl
+	networkmanager
+	postmarketos-base-ui
+	tinydm
+	tinydm-openrc
+	xorg-server
+	"
+_pmb_recommends="
+	gnome-keyring
+	network-manager-applet
+	paper-icon-theme
+	pavucontrol
+	pm-utils
+	postmarketos-artwork-icons
+	postmarketos-artwork-wallpapers
+	pulseaudio-utils
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="$pkgname-$pkgver.tar.gz::https://gitlab.com/antoni.aloytorrens/lxqt-tablet/-/archive/$pkgver/lxqt-tablet-$pkgver.tar.gz"
+options="!check" # No testsuite
+builddir="$srcdir/lxqt-tablet-$pkgver"
+
+package() {
+	install -d -m755 "$pkgdir"/etc/skel
+	cp -a "$builddir"/config "$pkgdir"/etc/skel/.config
+}
+
+sha512sums="63492fd0ad8ffb1d0a9f4f3f53eb4b8a21e670ba5a2a62c86b38f60b77578cfd9970b0767c875fd263e06367f998a2e895b33562b0235b831c4aa34177e14ea6  postmarketos-ui-lxqt-0.1.tar.gz"

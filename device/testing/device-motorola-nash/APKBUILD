@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-nash
+pkgdesc="Motorola Moto Z2 Force"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-nash mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+f4a1a89ab4c99481309efca6b5fdfd2210d2732a4db5f90f40a623a275b629bc7c5966aaf54c4c0f4ed4325472c7e9d3cf0a3fe8c8dce681010b7ff2c683ab56  deviceinfo
+"

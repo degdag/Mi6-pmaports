@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Enable triggerhappy
+rc-update -q add triggerhappy default

@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-fairphone-fp1
+pkgdesc="Fairphone 1"
+pkgver=0.2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-fairphone-fp1 mkbootimg mtk-mkimage mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+01d34ac04c3f461a98fd7562119dae59a5228d70e8ce1694a56faf1e91881c5de716dff15ffae6a4e6c34b85f8ebf1f2a8dee4aab2be7afab40fa2bbac0b7c85  deviceinfo
+"

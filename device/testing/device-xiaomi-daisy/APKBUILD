@@ -1,0 +1,77 @@
+# Contributor: Matthew5pl <matteofo06@gmail.com>
+# Maintainer: NotLugozzi <thomas.bassi@outlook.it>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-xiaomi-daisy
+pkgdesc="Xiaomi Mi A2 Lite"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mesa-dri-gallium"
+makedepends="devicepkg-dev"
+subpackages="
+		$pkgname-nonfree-firmware:nonfree_firmware
+		$pkgname-kernel-downstream:kernel_downstream
+		$pkgname-kernel-mainline:kernel_mainline
+		$pkgname-phosh
+		$pkgname-modem
+		"
+source="
+	deviceinfo
+	fb.modes
+	pointercal
+	30-gpu-firmware.files
+	rootston.ini
+	"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm0644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+	install -Dm0644 "$srcdir"/pointercal "$pkgdir"/etc/pointercal
+	install -Dm0644 "$srcdir"/30-gpu-firmware.files "$pkgdir"/etc/postmarketos-mkinitfs/files/30-gpu-firmware.files
+}
+
+nonfree_firmware() {
+	pkgdesc="Wi-Fi, ADSP Firmware"
+	depends="firmware-xiaomi-daisy"
+	mkdir "$subpkgdir"
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-xiaomi-daisy"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Mainline kernel"
+	depends="linux-postmarketos-qcom-msm8953 mkbootimg"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+modem() {
+	depends="qrtr rmtfs rmtfs-openrc msm-modem-uim-selection"
+	install_if="$pkgname=$pkgver-r$pkgrel $pkgname-nonfree-firmware"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel phosh"
+	mkdir "$subpkgdir"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+3ee2d46cb2559ada99c1536608b28dc98b9da65ac3990d512e6d65e4a64190127fd9d6949dbe5515cddfcf85d226d710b9c336b3f198b9f93c0f683f2f24d918  deviceinfo
+9b888f3a4ef3ed3c0b2e9c6a6e8a6c686909c530c3d95be797b47b4eb9deb55d64190b7a3736e44139630bfff5e295625a855052923369fdd37889060a3220ca  fb.modes
+4fa63c184f00033fbae2e4b140c9655061b3b662e337f7bdf5f8e26f7b57d6c66ad01fc93da05ce7d330f0f05bb0d36cc9b356ebfc7eb4200be4d4cc03afc975  pointercal
+302c0bec754bb79ef561c1a8d4ff34ba52b904c853bce6a15a79ba7b5b7a3d02c1c75bbe86d59be7b608a6dc744dd3e3c638eaa4539c53d20fa55fa5ea397d74  30-gpu-firmware.files
+035f97e328ff9f976b082e66b97f76036cdee9825f3022471c7c5d371291cc4b5bd5c18196cd49f4cd9ad6390abe691b506de3b221e3c122433d5620e3b3c4c9  rootston.ini
+"

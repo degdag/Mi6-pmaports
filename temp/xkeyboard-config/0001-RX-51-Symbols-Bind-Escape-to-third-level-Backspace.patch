@@ -1,0 +1,25 @@
+From 05d512bd6a4d8e4db0e676c9c55b0bb3e4a294e1 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 17:46:47 +0200
+Subject: [PATCH 01/10] RX-51: Symbols: Bind Escape to third level Backspace
+
+---
+ symbols/nokia_vndr/rx-51 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 318d372..ebd077e 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -3,7 +3,7 @@ xkb_symbols "common" {
+     include "nokia_vndr/rx-51(common_keys)"
+     include "nokia_vndr/rx-51(modifiers)"
+ 
+-	key <BKSP>	{ [	BackSpace,	Delete,		BackSpace,	Delete		] };
++	key <BKSP>	{ [	BackSpace,	Delete,		Escape, 	Delete		] };
+ 	
+     // This section should not be included by any other section.
+     // It's referenced only once by rule file to allow multiple layout configurations.
+-- 
+1.8.1.4
+

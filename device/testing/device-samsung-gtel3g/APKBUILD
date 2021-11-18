@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-gtel3g
+pkgdesc="Samsung Galaxy Tab E 9.6"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-gtel3g mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+c0d4d47c36048447751c4ac57b1e0ce9dfa32e0029eee32018268fe1250c830e3ec478411e1066abe2998d2bfe2e5e99bcee0a4578e4432fbab20ed29d8daeb4  deviceinfo
+"

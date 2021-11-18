@@ -1,0 +1,28 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+pkgname=postmarketos-ui-gnome
+pkgver=1
+pkgrel=8
+pkgdesc="(Wayland) Gnome Shell"
+url="https://gnome.org/"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	gdm
+	gnome
+	kgx
+	polkit-elogind
+	postmarketos-base-ui
+	postmarketos-artwork-wallpapers
+	pulseaudio
+	xwayland
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="000-gschema.override"
+options="!check"
+
+package() {
+	install -Dm644 "$srcdir"/000-gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/000-postmarketos.gschema.override
+}
+sha512sums="37d82966724b3ad42e69511ebfca55b628389ada47ff207c85267087fe6deae93fbdb77cd4350a89e6a02a3b0f6b3dcad74f2bc55a95daef37b7ffd9f57adff0  000-gschema.override"

@@ -1,0 +1,30 @@
+# Forked from Alpine to package the gtk3 version for Sxmo (pma#1129)
+pkgname=megapixels-gtk3
+pkgver=0.16.1
+pkgrel=0
+pkgdesc="GTK+3 camera app for mobile devices"
+url="https://git.sr.ht/~martijnbraam/megapixels"
+arch="all"
+license="GPL-3.0-only"
+# Required by postprocess.sh
+# depends="cmd:dcraw_emu cmd:convert cmd:exiftool"
+depends="libraw-tools graphicsmagick exiftool"
+makedepends="glib-dev gtk+3.0-dev tiff-dev meson zbar-dev"
+source="
+	megapixels-$pkgver.tar.gz::https://git.sr.ht/~martijnbraam/megapixels/archive/$pkgver.tar.gz
+"
+options="!check" # There's no testsuite
+builddir="$srcdir/megapixels-$pkgver"
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+9eae9d8c166f18a45aed2db12dda9e23937683ae727df339238da718e666cc7b2f5c9d9948395f41dc41d8d698418fc1a5b9015a04e913a6c5b043a2237a26ab  megapixels-0.16.1.tar.gz
+"

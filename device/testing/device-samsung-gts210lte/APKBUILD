@@ -1,0 +1,45 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-gts210lte
+pkgdesc="Samsung Galaxy Tab S2 9.7 LTE (2015)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-gts210lte
+	mesa-dri-swrast
+	msm-fb-refresher
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo 90-sec_touchscreen.rules"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	# Disable v4l udev rules, because if enabled the device will fail to boot
+	# when VIDEO_EXYNOS_FIMC_IS is enabled.
+	mkdir -p "$pkgdir"/etc/udev/rules.d
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+	install -D -m644 "$srcdir"/90-sec_touchscreen.rules \
+		"$pkgdir"/etc/udev/rules.d/90-sec_touchscreen.rules
+
+}
+
+nonfree_firmware() {
+	pkgdesc="Non-free firmware for Samsung Galaxy Tab S2"
+	depends="firmware-samsung-gts210 firmware-samsung-gts210-lte"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+3afdfb0ad9a0d302ce8aa7fac5ac24d32754f3d49f8fadfe2dd92b1fa0f6e490a1cb6e96acbda1e6dba108658c401b1678114edb713d51af5125d8c4c7984807  deviceinfo
+0d23fae6de9b04a36f395068278b8a9054c33e435b24de943da1e55a0ee2d88ee932a3fd2f660596377b14474483edecb8357684f9b7bc2c53979c7f863fae52  90-sec_touchscreen.rules
+"

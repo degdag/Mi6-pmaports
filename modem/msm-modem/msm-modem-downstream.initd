@@ -1,0 +1,21 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+
+name="Modem Subsystem"
+description="Qualcomm MSM modem subsystem service"
+
+_subsys="/dev/subsys_modem"
+command="/usr/bin/keepfileopen"
+command_args="$_subsys"
+
+respawn_delay=1
+respawn_max=3
+
+depend() {
+	need rmtfs
+}
+
+start() {
+	# Subsystem misc file is only available on some downstream kernels
+	[ ! -c "$_subsys" ] || default_start
+}

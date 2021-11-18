@@ -1,0 +1,54 @@
+pkgname=linux-samsung-espresso3g
+pkgver=5.15_rc1
+pkgrel=1
+pkgdesc="Samsung Galaxy Tab 2 (7.0 inch) mainline kernel"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-espresso3g"
+url="https://kernel.org"
+license="GPL2"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-zram"
+makedepends="openssl-dev yaml-dev mpc1-dev mpfr-dev xz findutils bison flex perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev"
+_commit="7f948007463451675a274ec0abaefdd9253ae56b"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/openpvrsgx-devgroup/linux_openpvrsgx/archive/$_commit.tar.gz
+	00-add-espresso-dts.patch
+	$_config
+"
+builddir="$srcdir/linux_openpvrsgx-$_commit"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$arch" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	install -Dm644 "$builddir/arch/$_carch/boot/"*zImage \
+		"$pkgdir/boot/vmlinuz"
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+
+	make -j1 modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+sha512sums="
+6af57b5b1c91b611eae2a495a014701a53db3f2f99e6f043d7640d788250555e2f5dcbf7ec3deb4ce3124dea809132dd81939be5faa73be2dda48483f341e44b  linux-samsung-espresso3g-7f948007463451675a274ec0abaefdd9253ae56b.tar.gz
+34fabb12df19f26ddac5dcd8e2d943314f9ed6658823c172b822cca1d1dc131ab46345dab908c70c2889f0518736d82bc43de51fc64c37c71c64082b0a5ae734  00-add-espresso-dts.patch
+e633f289ee4900a87f3a95fdeada83ae070911e46b5220377bbb0de56f118bfb3c923187f42b33d0069539a75d0e7ed621ed8e4ccf9552bf9785ed8f79cfc8d7  config-samsung-espresso3g.armv7
+"

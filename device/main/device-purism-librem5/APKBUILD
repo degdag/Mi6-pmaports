@@ -1,0 +1,148 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer:  Clayton Craft <clayton@craftyguy.net>
+# Co-Maintainer: Bhushan Shah <bshah@kde.org>
+pkgname=device-purism-librem5
+pkgdesc="Purism Librem 5 Phone"
+pkgver=1.24
+pkgrel=0
+_confver=38
+_purismrel=1
+# <librem5-base ver>.<purism release>
+_purismver=${_confver}pureos$_purismrel
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	alsa-ucm-conf
+	gpsd
+	iw
+	linux-purism-librem5
+	mesa-dri-gallium
+	mesa-egl
+	postmarketos-base
+	u-boot-librem5
+	u-boot-tools
+"
+makedepends="devicepkg-dev"
+builddir=$srcdir/librem5-base-pureos-$_confver
+source="
+	https://source.puri.sm/Librem5/librem5-base/-/archive/pureos/$_purismver/librem5-base-pureos-$_purismver.tar.gz
+	00-mesa.sh
+	70-wifi-pm.rules
+	77-mm-broadmobi-port-types.rules
+	deviceinfo
+	flash_script.lst
+	modprobe.d-ship_mode.conf
+	modprobe.d_rsi.conf
+	modules-load.d_librem5.conf
+	pcscd-librem5-reader.conf
+	pcscd-librem5.initd
+	uboot-script.cmd
+	xorg.conf
+	0001-librem5-pm.udev-disable-PM-for-broadmobi-modem.patch
+	0002-audio-pulse-librem5.pa-rename-sinks-for-alsa-ucm-con.patch
+"
+subpackages="
+	$pkgname-phosh
+	$pkgname-pulseaudio
+	$pkgname-smartcard
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+install="$pkgname.post-install"
+
+builddir="$srcdir/librem5-base-pureos-$_purismver"
+
+build() {
+	mkimage -A arm64 -C none -O linux -T script -d "$srcdir/uboot-script.cmd" "$srcdir/boot.scr"
+	devicepkg_build $startdir $pkgname
+}
+
+phosh() {
+	pkgdesc="Phosh support for the Librem 5"
+	install_if="$pkgname phosh"
+	depends="
+		wys
+	"
+	install -D -m644 "$builddir"/default/org.freedesktop.ModemManager1.pkla \
+		"$subpkgdir"/var/lib/polkit-1/localauthority/10-vendor.d/org.freedesktop.ModemManager1.pkla
+}
+
+pulseaudio() {
+	pkgdesc="Pulseaudio support for the Librem 5"
+	install_if="$pkgname pulseaudio"
+	# install config files from upstream Purism
+	mkdir -p "$subpkgdir"/etc/pulse/
+	cp -r "$builddir"/default/audio/pulse/daemon.conf.d "$subpkgdir"/etc/pulse/
+	install -D -m644 "$builddir"/default/audio/pulse/librem5.pa "$subpkgdir"/etc/pulse/librem5.pa
+	mkdir -p "$subpkgdir"/usr/share/pulseaudio/alsa-mixer
+	cp -r "$builddir"/default/audio/profile-sets "$subpkgdir"/usr/share/pulseaudio/alsa-mixer/
+}
+
+smartcard() {
+	pkgdesc="OpenPGP SmartCard support for the Librem 5"
+	depends="$pkgname ccid gnupg-scdaemon pcsc-lite pcsc-tools"
+	install_if="$pkgname pcsc-tools"
+	install="$install $subpkgname.post-install"
+
+	install -D -m644 "$srcdir"/pcscd-librem5-reader.conf \
+		"$subpkgdir"/etc/reader.conf.d/librem5-ttxs-reader
+
+	install -D -m755 "$srcdir"/pcscd-librem5.initd \
+		"$subpkgdir"/etc/init.d/pcscd-librem5
+}
+
+package() {
+	install -D -m644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/boot.scr
+	install -D -m644 "$srcdir"/modprobe.d_rsi.conf "$pkgdir"/etc/modprobe.d/rsi.conf
+	install -D -m644 "$srcdir"/modules-load.d_librem5.conf "$pkgdir"/etc/modules-load.d/librem5.conf
+	install -D -m644 "$srcdir"/00-mesa.sh "$pkgdir"/etc/profile.d/00-mesa.sh
+	install -D -m644 "$srcdir"/flash_script.lst "$pkgdir"/usr/share/uuu/flash_script.lst
+	install -Dm644 "$srcdir"/xorg.conf \
+		"$pkgdir"/etc/X11/xorg.conf.d/10-video.conf
+
+	# udev
+	install -D -m644 "$builddir"/debian/librem5-base-defaults.librem5-pm.udev  \
+		"$pkgdir"/usr/lib/udev/rules.d/librem5-pm.rules
+	install -D -m644 "$builddir"/debian/librem5-base-defaults.librem5-modem.udev  \
+		"$pkgdir"/usr/lib/udev/rules.d/librem5-modem.rules
+	install -D -m644 "$builddir"/default/gpsd/99-gnss.rules  \
+		"$pkgdir"/usr/lib/udev/rules.d/librem5-gnss.rules
+	# Wifi / PM
+	install -Dm644 "$srcdir"/70-wifi-pm.rules -t "$pkgdir"/usr/lib/udev/rules.d/
+
+	# install audio config files from upstream Purism
+	mkdir -p "$pkgdir"/usr/share/alsa/ucm2
+	cp -r "$builddir"/default/audio/ucm2 "$pkgdir"/usr/share/alsa/
+
+	# enable bq25890_charger ship_mode
+	install -Dm644 "$srcdir"/modprobe.d-ship_mode.conf \
+		"$pkgdir"/etc/modprobe.d/bq25890_charger.conf
+
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi and Bluetooth firmware"
+	depends="firmware-siliconlabs-rs9116"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+b9d3314d1bfc98db0ee06117babb2835568296f9a0de0feb07082bf18c97c9cd737cd29ed82f1c6d0577675d527918db2116cedd1de33631ece30f7e94c06c2a  librem5-base-pureos-38pureos1.tar.gz
+2e72d9a084ecd6c96cafbbd8fda461ae8b2ebd14ffda601d9f36d73f08f04088213de17da078293ddd958d4c76d33148c7af6e252eb0709f6934855a55578509  00-mesa.sh
+8b6fa7b12c15f439c561901f3ffe24a1ef2a0c343401c0a79281060854ab29e08a1fb5e7adae8684b12aa9f535ed99e2dad993dce9724822cb0fbf2497dd86e5  70-wifi-pm.rules
+00355d9ad085a77e157f3c62eb4f1bcac2823d3b341e34d1128edbfb1444fba83e8eacd263ea61da9f6d853f1328ab7fbe5ea63bd08c8a1bc9b8eaf44ae1f1c6  77-mm-broadmobi-port-types.rules
+b25884fd20e1db6f53e38c3db371d2a9f091ca1de3b6d8ffe7f263bd87258a970cee5458ae7fb566983565eacf47a1667e2fe031d540d206e1c22256baf9bf55  deviceinfo
+2703c7a4e7f32cf102dfed644a8213497828ae1fe9f3bd789663157f79c8c8ddb05672e5c9a0c6883e9dee42afcfe9578e611dd1d9fe6cd8129d8d7738d28ad2  flash_script.lst
+110630f959e3f3a2acc335d755defeb0f49fb40f46cb2423205511f43d1dfdbb91722271fac34a6cbf04a5f0406e6a34ed77e75555acc3f420041d32224027d6  modprobe.d-ship_mode.conf
+3f62c04eb92d850e32d5e1b17534dec753563342ea6c4f9dc2572700d4f6eeb8ae8cd8e8e4f1b0f5c61f21d87bc61c02212f27313986157220003d78e2d69505  modprobe.d_rsi.conf
+a0740e405781ec6ef765fdc9f5700c95adbb241c45c97b9384ba68cdece662cb216ca5918640042f6e65a5d1b1a9099936382c99b49a44303f7b6d77a075a471  modules-load.d_librem5.conf
+8ef4ec7a9e9a4fb801d207e7d94b627aacc9243a93b0ec28e0823a6f44b8102416c040e4ddf499f87bb9dfa960cf6f627b008b79f197f6814b3fd881e18ae8ef  pcscd-librem5-reader.conf
+2618b40eebd3602066ee75ab85cbdbb4cfee498def9879c95a304f05a6eeedf1ab28c5dd9fa5efc8f88c790f49c96458c61d5dfe8a3ca0f96bcc0e244313ab01  pcscd-librem5.initd
+d2005a327a44aac0b56c113eeac72cdb8859b7fa9e5e799d931ccfd685c81f5ec2d4d1e2cae6ed0257e1309167086c3fced6138e51f482f4ffba0e5ebf6d7d89  uboot-script.cmd
+1cbc65cf2cb8fad4b0332d012a0256a266205b9b64371f5c0dae09dbb7f1e45b254e8c43993b896097e9d7035a72d547d9bce1ab2133addc56a5abdb80b44616  xorg.conf
+f535b43b8defe75e72049e4eee181bfe821f6304a096413bccf6d08c8bb11b947fa1fee305af85616abd778745fadd52ebd610c2d135a4f907915b99ab2c526a  0001-librem5-pm.udev-disable-PM-for-broadmobi-modem.patch
+6420866a32ee6094cfc7da59ab0c4b1d4db940ce7ab9c1d7e92fb3646284d48c60908f001507a543fef47ae3be195c815ab77510e7fb169cd16464478a72d2a8  0002-audio-pulse-librem5.pa-rename-sinks-for-alsa-ucm-con.patch
+"

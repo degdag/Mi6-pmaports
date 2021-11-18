@@ -1,0 +1,4 @@
+#!/bin/sh
+
+# Enable waked init script
+rc-update add waked default

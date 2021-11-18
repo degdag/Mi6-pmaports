@@ -1,0 +1,54 @@
+# Maintainer: Caleb Connolly (kalube) <caleb@connolly.tech>
+pkgname=soc-qcom-sdm845
+pkgdesc="Common package for Qualcomm SDM845 devices"
+pkgver=5
+pkgrel=0
+url="https://postmarketos.org"
+license="BSD-3-Clause"
+arch="aarch64"
+options="!check !archcheck !tracedeps"
+depends="
+	mesa-dri-gallium
+	swclock-offset
+	msm-modem-uim-selection
+"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-ucm
+"
+
+_ucm_commit="f959b6c46165f23eebcf34ffefef14c6be015a55"
+source="
+	alsa-ucm-conf-$_ucm_commit.tar.gz::https://gitlab.com/sdm845-mainline/alsa-ucm-conf/-/archive/$_ucm_commit/alsa-ucm-conf-$_ucm_commit.tar.gz
+	90-feedbackd-pmi8998.rules
+	modemmanager.conf
+"
+
+package() {
+	mkdir -p "$pkgdir"
+	install -Dm644 "$srcdir"/90-feedbackd-pmi8998.rules \
+		"$pkgdir"/usr/lib/udev/rules.d/90-feedbackd-pmi8998.rules
+	install -Dm644 "$srcdir"/modemmanager.conf \
+		"$pkgdir"/etc/conf.d/modemmanager
+}
+
+nonfree_firmware() {
+	pkgdesc="Modem, WiFi and GPU Firmware"
+	depends="pd-mapper pd-mapper-openrc tqftpserv tqftpserv-openrc msm-modem"
+	install="$subpkgname.post-install"
+	mkdir "$subpkgdir"
+}
+
+ucm() {
+	provides="alsa-ucm-conf"
+
+	# install audio config files
+	mkdir -p "$subpkgdir"/usr/share/alsa/ucm2
+	cp -r "$srcdir/alsa-ucm-conf-$_ucm_commit"/ucm2 "$subpkgdir"/usr/share/alsa/
+}
+
+sha512sums="
+48fba9c041a2a2dfef9f038dfeeb7f636ed4e3b4d1babe2bd9b6ee350a4a34472b0f20d69b57864aa79fb28b24bb38a88ef1542a6d3211db713b361a4d136745  alsa-ucm-conf-f959b6c46165f23eebcf34ffefef14c6be015a55.tar.gz
+4f2c22a3a3fc7d380e200ad977578107d81f0e7ade7918e03bdb15b60a564e8db5f47e13cce22f636d38fd3722696bb46076b8872dae0ca2d8a3838522a1f025  90-feedbackd-pmi8998.rules
+e33f41360ccc4900bb76a26cc7b46bde1fb90facdf45c4fbcebc80499386939948401cacd6df9f779eafab10f4ee77ee1fef3e7bd06f483f8c2a4a644c84f327  modemmanager.conf
+"

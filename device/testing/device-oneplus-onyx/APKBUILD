@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-oneplus-onyx
+pkgdesc="OnePlus X"
+pkgver=2
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-oneplus-onyx mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+64563fea9dab2ade4d89dddd36f7776a31bcacde0739bec181f9acd866f118a5f164180d53089c1874fb9d66c1a166602329600f98984320a4519b10c313c871  deviceinfo
+"

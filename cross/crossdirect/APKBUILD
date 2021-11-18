@@ -1,0 +1,82 @@
+# Wrapper for the "crossdirect" compilation method.
+# pmbootstrap mounts the native chroot in the foreign arch (e.g. armhf) chroot
+# as /native. This package gets installed into the native chroot, and creates
+# wrappers like:
+#
+# /native/usr/lib/crossdirect/armhf/gcc
+# -> /native/usr/bin/armv6-alpine-linux-muslgnueabihf-gcc
+# /native/usr/lib/crossdirect/armhf/rustc
+# -> /native/usr/bin/rustc --target=armv6-alpine-linux-musleabihf ...
+#
+# When building packages in the armhf chroot, PATH will get prepended with
+# "/native/usr/lib/crossdirect/armhf". The end game is of course invoking the
+# cross compiler from the native chroot, running at native speed, whenever
+# calling the compiler from the foreign arch chroot. See crossdirect.c for
+# implementation details of the C version (llvm, fakeroot, rpath). The rust
+# version is implemented as simple shell wrappers.
+
+pkgname=crossdirect
+pkgver=4
+pkgrel=3
+pkgdesc="Wrappers to launch native cross compilers in foreign chroots"
+url="https://postmarketOS.org"
+arch="all"
+license="MIT"
+options="!check"
+source="crossdirect.c rustc.sh rust-qemu-linker.sh"
+
+build() {
+	cd "$srcdir"
+	# Architectures and binaries
+	_archs="x86_64 armhf armv7 aarch64"
+	for _arch in $_archs; do
+		[ "$_arch" == "$CARCH" ] && continue
+		_hostspec="$(arch_to_hostspec $_arch)"
+
+		# Build with -Werror, because we maintain this short program. (If
+		# upstream is elsewhere, having -Werror is usually not desired.)
+		$CC -o "crossdirect-$_arch" \
+			-static \
+			-Werror \
+			-DHOSTSPEC="\"$_hostspec\"" \
+			crossdirect.c
+
+		# rustc
+		sed "s/@ARCH@/$_arch/g" rustc.sh >rustc-"$_arch"
+	done
+}
+
+package() {
+	# Architectures and binaries
+	_archs="x86_64 armhf armv7 aarch64"
+	_bins="c++ cc cpp g++ gcc clang clang++"
+
+	# Rust: qemu-linker
+	install -Dm755 "$srcdir/rust-qemu-linker.sh" \
+		"$pkgdir/usr/lib/crossdirect/rust-qemu-linker"
+
+	# Iterate over architectures
+	for _arch in $_archs; do
+		[ "$_arch" == "$CARCH" ] && continue
+
+		# GCC: put arch-specific crossdirect wrapper in arch-specific
+		# bin folder
+		_bindir="$pkgdir/usr/lib/crossdirect/$_arch"
+		_hostspec="$(arch_to_hostspec $_arch)"
+		mkdir -p "$_bindir"
+		cd "$_bindir"
+		cp "$srcdir/crossdirect-$_arch" "./"
+
+		# GCC: create compiler symlinks
+		for _bin in $_bins; do
+			ln -s "crossdirect-$_arch" "$_bin"
+			ln -s "crossdirect-$_arch" "$_hostspec-$_bin"
+		done
+
+		# Rust: arch-specific rustc wrapper
+		install -Dm755 "$srcdir/rustc-$_arch" "$_bindir/rustc"
+	done
+}
+sha512sums="500107e5aff8b34e74b54982ebcd447fc41bc8283956d506561b031a055cb30ec12698047c2604918b4b6d8560fe03db427a63dff2b83c907e8494b7f5233f29  crossdirect.c
+6be16ba88720e628a3ecc8fa53f8e7a21d2af268b0509745d989139874d6b94b640bfcff09575eaa19073810be6ef91169c1f83e94f5cf8e6819f2670d9408de  rustc.sh
+ea9bf8db3810d03d0a7395057f3d6e57f7127d87c55deaedc171c255288f5f3cc6fbcc680a5a1b92786cf573875d5dc22521173799fe2639acc97d0715ff905b  rust-qemu-linker.sh"

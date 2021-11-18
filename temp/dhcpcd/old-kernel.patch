@@ -1,0 +1,11 @@
+--- a/src/if-linux.c
++++ b/src/if-linux.c
+@@ -97,6 +97,8 @@ int if_getssid_wext(const char *ifname, uint8_t *ssid);
+ #define BPF_ETHCOOK		-ETH_HLEN
+ #define BPF_WHOLEPACKET	0x0fffffff /* work around buggy LPF filters */
+ 
++#undef IFA_F_NOPREFIXROUTE
++
+ struct priv {
+ 	int route_fd;
+ 	uint32_t route_pid;

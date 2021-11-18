@@ -1,0 +1,30 @@
+pkgname=firmware-huawei-kiwi
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Huawei Honor 5X"
+url="https://git.sr.ht/~bo41/firmware-huawei-kiwi"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+# Sources
+_commit="2a4db2a026568abfaf342211e9f3d63ac044a9d9"
+source="$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz"
+
+_fwdir="/lib/firmware/postmarketos"
+builddir="$srcdir/$pkgname-$_commit"
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+
+	pkgdesc="Huawei Kiwi Modem/GPU/WiFi/BT/Video firmware"
+	install -Dm644 mba.mbn -t "$pkgdir/$_fwdir"
+	install -Dm644 modem.* -t "$pkgdir/$_fwdir"
+
+	install -Dm644 venus.* -t "$pkgdir/$_fwdir"/qcom/venus-1.8
+
+	install -Dm644 wcnss.* -t "$pkgdir/$_fwdir"
+	install -Dm644 WCNSS_* -t "$pkgdir/$_fwdir"/wlan/prima
+}
+
+sha512sums="a5aa89b37ff2e6ac5e8808cf6be97d7850e0d52c7654abf6c044de54c42c737a0b4242c439856dd56c4c5f2721b79941b604ac5a42506aec8020283c446301d4  firmware-huawei-kiwi-2a4db2a026568abfaf342211e9f3d63ac044a9d9.tar.gz"

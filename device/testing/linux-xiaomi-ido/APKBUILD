@@ -1,0 +1,59 @@
+# Kernel config based on: arch/arm64/configs/lineage_ido_defconfig
+
+pkgname=linux-xiaomi-ido
+pkgver=3.10.107
+pkgrel=9
+pkgdesc="Xiaomi Redmi 3 kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="xiaomi-ido"
+url="https://kernel.org"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev dtbtool python3 gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_xiaomi_msm8916"
+_commit="8f4c7c59fb3a29344af202150030ae712f801d6b"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/LineageOS/$_repository/archive/$_commit.tar.gz
+	$_config
+	01_fix_gcc6_errors.patch
+	gcc-wrapper-port-to-py3.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+	dtbTool -s 2048 -p "scripts/dtc/" -o "arch/arm/boot/dt.img" "arch/arm/boot/"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	install -Dm644 "$builddir/arch/arm/boot/dt.img" "$pkgdir/boot/dt.img"
+}
+
+sha512sums="e22e3cff0819edd2d9f0f16bc952a97773a8b4b36394ab6acf61fd619988d6d0bf1f7d29cba904a09ca0c63209fcedcdf65ee522646193980c5ac6c60e1c3a97  linux-xiaomi-ido-8f4c7c59fb3a29344af202150030ae712f801d6b.tar.gz
+1661854b5e33741d30b45b2558b01acac7fe15592c7408d6b5c30d97a33db3823e782bd89bd7bd27b8ec207a572e44a5394df4b56f4faf49ecc7e9c9e504192d  config-xiaomi-ido.aarch64
+972e98523d6ef06342e69a09e979bdd86904cf7f9a843b519b37791e531b680182564a2ab537c94629c3589f4e775b2c39de04c64e210a0f8b6f10745c3596f1  01_fix_gcc6_errors.patch
+13e289c889a48946cd3d976932f06f749bed5c6596776f4b683aada4e3e2f50b66286d6f550b8f2e260b58867b759591bbf8b54cc07ad9d3bb761ff477f036a1  gcc-wrapper-port-to-py3.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch"

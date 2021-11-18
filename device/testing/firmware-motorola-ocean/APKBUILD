@@ -1,0 +1,39 @@
+pkgname=firmware-motorola-ocean
+pkgver=3
+pkgrel=0
+pkgdesc="Firmware for Motorola Moto G7 Power"
+url="https://gitlab.com/Ultracoolguy/firmware-motorola-ocean"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+depends="linux-firmware-qcom"
+_commit="6552364e63e5a15224c6f0d79e63f69bd6a59fc5"
+source="https://gitlab.com/Ultracoolguy/firmware-motorola-ocean/-/archive/$_commit/firmware-motorola-ocean-$_commit.tar.gz
+	moto-modem-rfs-setup.initd
+	firmware.files
+	$pkgname-openrc.post-install"
+subpackages="$pkgname-openrc"
+
+builddir="$srcdir/$pkgname-$_commit"
+
+package() {
+	install -Dm755 $srcdir/moto-modem-rfs-setup.initd "$pkgdir"/etc/init.d/moto-modem-rfs-setup
+
+	while IFS="" read -r _i || [ -n "$_i" ]; do
+		[ ! -d $(dirname $_i) ] && mkdir -p $(dirname $_i)
+		echo $_i
+		install -Dm644 $_i "$pkgdir/$_i"
+	done < "$srcdir/firmware.files"
+}
+
+openrc() {
+	install="$subpkgname.post-install"
+	default_openrc
+}
+
+sha512sums="
+d3bad428a89fb449d1e976783748defc62178105973e5f82c63b6d0947604065f152f24ae5a43ec413738878eafea15351f59c4a0da3a62f4635096a290bd459  firmware-motorola-ocean-6552364e63e5a15224c6f0d79e63f69bd6a59fc5.tar.gz
+d4fd0f3406c9f004e9cae7bc500c5713aab75f102f8e3ea1af820865f01eb03def01cd9ed3e8a184c7dfc22ab419628fad17957a3782885d96eb36e94461e842  moto-modem-rfs-setup.initd
+495c0044f0d730247c164d3cf66f3a8d6773e533c804609b999ef3ef4dd63519ed5b96ddfc58e3fef7ef903beb072c73a2ab5baf1d4830561bc0a561db6aafe3  firmware.files
+784ac120a2231cfbee153fb8b2634af4ab5091eaa8fe207e66b47641d7531591ee3849e610bb66c7177822c86556f78d51c17ba8e4f3da2f946c4b8c5eaaf310  firmware-motorola-ocean-openrc.post-install
+"

@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-cubietech-cubieboard
+pkgdesc="Cubietech Cubieboard"
+pkgver=0.1
+pkgrel=4
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-edge
+	mesa-dri-gallium
+	postmarketos-base
+	u-boot-cubieboard
+	"
+makedepends="devicepkg-dev"
+source="deviceinfo extlinux.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/extlinux.conf \
+		"$pkgdir"/boot/extlinux/extlinux.conf
+}
+
+sha512sums="
+b83f061da45a453a9dc13d0c2396bbc7980008a8dd04d8611a287737d90c11e7854203dbce91e6f51eb5da370703ba01865e397f10c03b662b41ada127cb7334  deviceinfo
+a33dd1a89548eb95d95e07a879bf412985bd01ebfef8e2ddaaa5c3e2d173743c3530148e36a9fc81a07e67b4a35509f06852bd2f652f64a9b6224ce8d7e12d56  extlinux.conf
+"

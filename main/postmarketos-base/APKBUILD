@@ -1,0 +1,116 @@
+pkgname=postmarketos-base
+pkgver=15
+pkgrel=1
+pkgdesc="Meta package for minimal postmarketOS base"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	alpine-base
+	eudev
+	openssh
+	postmarketos-mkinitfs
+	postmarketos-mvcfg
+	postmarketos-keys
+	sudo
+	"
+install="$pkgname.post-install $pkgname.pre-upgrade $pkgname.post-upgrade"
+triggers="$pkgname.trigger=/etc"
+subpackages="
+	$pkgname-nftables
+	$pkgname-nofde
+	"
+options="!check"
+replaces="
+	alpine-base
+	alpine-baselayout
+	busybox-initscripts
+	sudo
+	"
+replaces_priority=100  # leave plenty for alpine
+
+_source440="
+	etc/sudoers
+	"
+_source644="
+	etc/conf.d/swapfile
+	etc/conf.d/syslog
+	etc/fstab
+	etc/issue
+	etc/motd
+	etc/os-release
+	lib/udev/rules.d/20-tm2-touchkey-leds.rules
+	lib/udev/rules.d/50-firmware.rules
+	lib/udev/rules.d/95-rt5033-battery-refresh.rules
+	"
+_source755="
+	etc/init.d/deferred-initcalls
+	etc/init.d/swapfile
+	sbin/swapfile
+	usr/lib/firmwareload.sh
+	"
+
+# Avoid filename based checksum conflicts by including the whole path:
+# https://gitlab.alpinelinux.org/alpine/abuild/-/issues/10013
+flatpath() {
+	local i
+	for i in $@; do
+		echo "rootfs-$i" | sed s./.-.g
+	done
+}
+
+source="$(flatpath $_source440 $_source644 $_source755)"
+
+prepare() {
+	default_prepare
+
+	# setterm -powersave on -blank 5
+	echo -ne "\033[9;5]" >> rootfs-etc-issue
+}
+
+package() {
+	local i
+	for i in $_source440; do
+		install -Dm440 "$srcdir/$(flatpath "$i")" "$pkgdir/$i"
+	done
+	for i in $_source644; do
+		install -Dm644 "$srcdir/$(flatpath "$i")" "$pkgdir/$i"
+	done
+	for i in $_source755; do
+		install -Dm755 "$srcdir/$(flatpath "$i")" "$pkgdir/$i"
+	done
+
+	postmarketos-mvcfg-package "$pkgdir" "$pkgname"
+}
+
+nftables() {
+	install_if="$pkgname=$pkgver-r$pkgrel nftables"
+	depends="postmarketos-config-nftables"
+	install="$subpkgname.post-install"
+	mkdir "$subpkgdir"
+}
+
+nofde() {
+	# dummy package that satisfies the unlocker dependency for mkinitfs without
+	# installing anything for systems that don't use fde
+	provides="postmarketos-fde-unlocker"
+	provider_priority=1
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+e529f5cef1f31481b577f99b8917704f2cfefb963d98bf40a14b017938e55a00134d2033f81d2cb0b8489c5e9b4a92fdc0a788013f1adb4cd46d9580c9988186  rootfs-etc-sudoers
+e0d2d48b82a03239a4c0a00acaf83e00d397c23a8d7c71053d4e2a383357c22dcedef9e81b0e12a1d7514e1fdbe0bb3eb82613d18b29034a7ce5447f13c84a53  rootfs-etc-conf.d-swapfile
+e4576c58c35f80bedddb1e89e186f37d31a186d3e9eb046581b8c5d7b7d435e18924539e851d3e67dc0ede80f9d44d16bd9ef52e73350d3f13224edc31d73a34  rootfs-etc-conf.d-syslog
+9b8d0493bb64457fe176fea801e0771d3c5279302c61559824bf81b3d2b66d2c1e076f4aaac65f55389005acb18c27e44bed858c2bdbad37d74199f07c86c354  rootfs-etc-fstab
+45bd0742a64a9d3c4a88e152b97edcf3fa1edca28884f9ea69e7c4c365f1e41ef9056dbe204545de7d4b2ba92e1e5872b2a929c2dcc1dd468e627cc3f090b8e6  rootfs-etc-issue
+01403df3b5a2be0dd70387a3c32cf24a77bc097679fbefca585082a0970b7d756723c33687be3809351b5e31c85947db84861118bfeced8f5f865fe2452555ec  rootfs-etc-motd
+6723ae5035b959ed8c0c5ee490ce2e1abc9fe89e6c7348533e488b78b2a15593df406d6691f6b854ed71633960257a6aa5c65aa01db189732e26ba8e15ef23b8  rootfs-etc-os-release
+5fd6dd7f9941e975a6ce559924eb252606943276dc09455bbeb05ff718ecd28f20a08eee8e04ca580e5af71d4c944c256ec04f07b07286394f5dfedfa59273e7  rootfs-etc-init.d-deferred-initcalls
+f5cc0f1265955d2646e5f099dd4b5d4c287945bfc18c16044db57670d456f55c678fc11cc59e6dab3fa340832ce869d516302a3a35c13518539ed0cedca51819  rootfs-etc-init.d-swapfile
+de4d8f258cb2ce654be15abe0188caa6ca9cc163fd45350f2025e7e9d043878e3f1202ef9033b1b15d7e18c4b40c3b19db387ee050a3baf03c4bd4293f4721e3  rootfs-lib-udev-rules.d-20-tm2-touchkey-leds.rules
+0b098828080055d3646ea54891cb0e1b578cbc30f5e16f7284f2814c08192f18079a38fb686d192715ae6a3d2cd6625d9e3cf99f234a6f0d94088bb0cb2ce43d  rootfs-lib-udev-rules.d-50-firmware.rules
+766aace60f7aea2515e03aec9f6d3215fcabcd81a235acb7b79bac1ae44e75c3087c541370fe1565a05a78f70a071fe20380b91e23e1fb48390b9df19354d008  rootfs-lib-udev-rules.d-95-rt5033-battery-refresh.rules
+3ceeee37f558e7c95ad973692b6a437f997e6b46c3d1c2257ddfb1529a5633477373aa123c7f08164e818daae50acb203d151379f27ca11bd458809e6a0d4de7  rootfs-sbin-swapfile
+38dc75c0ed32b76dccd3d8e7e8173e8b7d91847cf2b07123f376b95af46b4f89798b24f45302a0726fdc1cf253aecaac140f431735ac5c6511553f790badd0af  rootfs-usr-lib-firmwareload.sh
+"

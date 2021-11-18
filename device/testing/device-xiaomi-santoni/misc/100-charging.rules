@@ -1,0 +1,2 @@
+SUBSYSTEM=="power_supply", ATTRS{type}=="Battery", ATTRS{status}=="Charging", RUN+="/usr/lib/device-xiaomi-santoni/charging.sh"
+SUBSYSTEM=="power_supply", ATTRS{type}=="Battery", ATTRS{status}=="Discharging", RUN+="/usr/lib/device-xiaomi-santoni/discharging.sh"

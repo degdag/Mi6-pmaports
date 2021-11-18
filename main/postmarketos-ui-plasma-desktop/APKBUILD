@@ -1,0 +1,40 @@
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-plasma-desktop
+pkgver=2
+pkgrel=6
+pkgdesc="(X11/Wayland) KDE Desktop Environment (works well with tablets)"
+url="https://www.kde.org"
+# armhf blocked by plasma
+arch="noarch !armhf"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	plasma
+	postmarketos-base-ui
+	qt5-qtvirtualkeyboard
+	sddm
+	"
+_pmb_recommends="ark
+	audiocd-kio
+	dolphin
+	ffmpegthumbs
+	firefox
+	gwenview
+	kdialog
+	kfind
+	kio-extras
+	kolourpaint
+	konsole
+	kate
+	kwrite
+	okular
+	print-manager
+	postmarketos-artwork-wallpapers
+	spectacle
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+options="!check" # No tests for a metapkg
+
+package() {
+	mkdir -p "$pkgdir"
+}

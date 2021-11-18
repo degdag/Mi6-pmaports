@@ -1,0 +1,105 @@
+# Maintainer: Thiago Foganholi <thiagaoplusplus@outlook.com>
+# Co-Maintainer: Newbyte <newbyte@disroot.org>
+# Kernel config based on: arch/arm/configs/exynos_defconfig
+
+pkgname=linux-postmarketos-exynos4
+pkgver=5.15_rc2
+pkgrel=1
+pkgdesc="Mainline kernel fork for Samsung Exynos4 devices"
+arch="armv7"
+_carch="arm"
+_flavor="${pkgname#linux-}"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-nftables
+	"
+makedepends="
+	bison
+	busybox-static-armv7
+	findutils
+	flex
+	gmp-dev
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+	xz
+"
+
+# Source
+_config="config-$_flavor.$arch"
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.0};;
+	*.*)	_kernver=$pkgver;;
+esac
+source="
+	https://git.kernel.org/torvalds/t/linux-${pkgver//_/-}.tar.gz
+	$_config
+	0001-ARM-decompressor-Flush-tlb-before-swiching-domain-0-.patch
+	0002-ARM-dts-exynos-Add-reboot-modes-to-midas.patch
+	0003-mmc-core-Workaround-VTU00M-0xf1-FTL-metadata-corrupt.patch
+	0004-drivers-drm-Add-backlight-control-support-for-s6e8aa.patch
+	0005-power_supply-max77693-Listen-for-cable-events-and-en.patch
+	0006-mfd-max77693-Add-defines-for-charger-current-control.patch
+	0007-power_supply-max77693-change-the-supply-type-to-POWE.patch
+	0008-power-supply-max17042_battery-use-VFSOC-for-capacity.patch
+	0009-power-supply-max17042_battery-Clear-status-bits-in-i.patch
+	0010-power-supply-max17042_battery-Prevent-int-underflow-.patch
+	initramfs.list
+	init
+"
+builddir="$srcdir/linux-${_kernver//_/-}"
+
+prepare_isorec() {
+	# https://wiki.postmarketos.org/wiki/Boot_process#isorec
+	cp -v /usr/$(arch_to_hostspec $arch)/bin/busybox.static \
+		"$builddir"/usr/
+	cp -v "$srcdir"/init "$builddir"/usr/
+	cp -v "$srcdir"/initramfs.list "$builddir"/usr/
+}
+
+prepare() {
+	default_prepare
+	prepare_isorec
+	cp -v "$srcdir/$_config" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+}
+
+sha512sums="
+a46232c7b389acc68ae0d969078431c415a060e9f667f0ba772b8f3f49babaa9c75570e3feff6e36455daf235ae04118d5c0a7d8f66e9565234c9f38c5f91bd3  linux-5.15-rc2.tar.gz
+0d32f05f3d250ca72913596aadff2a416c25d7d1fda3648851091a012825aef236ac13885c51753c46ca0017f59a305d03222ba6dba905b386786e9c5f5fef00  config-postmarketos-exynos4.armv7
+a033fa9afa05825d5c923f1d5a224e230a8b02e75b02a21e0a0077f1b76c01d663ba54204e66db1e85096d9e44cc29fee0acaf919d3187cb47dba9005f94d8be  0001-ARM-decompressor-Flush-tlb-before-swiching-domain-0-.patch
+57590b105cb6d01e5f2d860a21c1417b197abbcaf8553bf57633b261ac1e161b0d424f8baeb7b14b3ed923ebac6f6e27401ef02c0b53a4b3e34600368fe85219  0002-ARM-dts-exynos-Add-reboot-modes-to-midas.patch
+81430b484a0747717ed8dba45c04c40689d9546b7b9d3eb20f0520e78c94f1438afc1f21a0b06007f60ff718e924d1586acc98f4498671a1a7609ed6e6f2b3f0  0003-mmc-core-Workaround-VTU00M-0xf1-FTL-metadata-corrupt.patch
+0e3aad5d8306c5a957cd8351078cedc583517c2821c0e82e57aeaaffdbf27db32214cdff4607134d5a554645186613540867c9f8c2a1456fa090cee7df2f5e3a  0004-drivers-drm-Add-backlight-control-support-for-s6e8aa.patch
+65049c997705f3b3fe7feff089009b16f142d9138cd5bdd039535640dcabda8c5b3dac0238e0996e31bd909ff11e4cc82aab94dc5c518b641b71af4f7284cae6  0005-power_supply-max77693-Listen-for-cable-events-and-en.patch
+7711e7b7fda4f089fa510ea38431fcf0cad80cbba381b3dddb57118e469b5eb868024cf92c9fa91f892ba2ea060009dbbc522e3bd873d9045338d148cfdd199b  0006-mfd-max77693-Add-defines-for-charger-current-control.patch
+de87e6a6608165cdc35a03bd10dedef1c12a2a9e1f66f500879c05b287bae7181cc95021a3a2aad6abefd024f508ed61c19ee9341ad3cc24e260269b647e1010  0007-power_supply-max77693-change-the-supply-type-to-POWE.patch
+79e28ed7bd5f5f37dccee71455528ef4680aae73f2abe35ea0480bc09da4206bbcb0734d55d9e591676937cd9bb897d4e1ceb4689751ce28a5624d08d165a25e  0008-power-supply-max17042_battery-use-VFSOC-for-capacity.patch
+211457806e8735b330511ae68f6b82f7fc653e37aa58b9af8cfd1eae241e80372fdf3b4c93c29e8452a76a888f3282186652980f80ca74a53c557ebf8ebabcca  0009-power-supply-max17042_battery-Clear-status-bits-in-i.patch
+eeeb338ebe4890abd3c15262ed7bb9fb5b5f3d118f249efb384df2b342f94909146d210704d81346734fd3ce9ae2dd7bf9bd433a1ed02f36e8b595a1922bb6a3  0010-power-supply-max17042_battery-Prevent-int-underflow-.patch
+aaff0332b90e1f9f62de1128cace934717336e54ab09de46477369fa808302482d97334e43a85ee8597c1bcab64d3484750103559fea2ce8cd51776156bf7591  initramfs.list
+09f1f214a24300696809727a7b04378887c06ca6f40803ca51a12bf2176a360b2eb8632139d6a0722094e05cb2038bdb04018a1e3d33fc2697674552ade03bee  init
+"

@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-ali
+pkgdesc="Motorola Moto G6"
+pkgver=0.1
+pkgrel=4
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-ali mkbootimg mesa-dri-swrast msm-fb-refresher mdss-fb-init-hack"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh directfbrc fb.modes"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/directfbrc "$pkgdir"/etc/directfbrc
+}
+
+
+sha512sums="
+a31245b3f4fdc6356765628e8b0d4ea87f167235eb31f9ef333c8c576b92a1908985ab60ffa39d73a9d64beb83b1a3032cc6e3d56d99e609889139a7898916a0  deviceinfo
+977537b59e0f89d0db475108baae1d93a6678569ec4d7ab7c909562ebea7d645efb6a73b509b3e37369c1c556a8760cd9f46ba4e9bbb86e400cabcc0c2960230  initfs-hook.sh
+3db3ec596e159be926ea2b5b2496c18e9bc7be24a64a232a56c89a0c9ee710aa2efb2b6fa9fc08efa34759e8242e6c629d08a4ce688ec8aa125830717c191515  directfbrc
+e8ee37f49b360e06f7b5d54a93fcd2a7b3261436b2a228e8457a5c44fb52510f6173332155701a9d8ed435466732921ea5836aed73f1e7bc4049635f5a71fb31  fb.modes
+"

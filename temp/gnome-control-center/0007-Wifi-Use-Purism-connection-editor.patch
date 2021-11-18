@@ -1,0 +1,62 @@
+From d1d39a439448cd070c0d85ad5eb39d021db6ac69 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pablo=20Correa=20G=C3=B3mez?= <ablocorrea@hotmail.com>
+Date: Sun, 3 Oct 2021 17:56:45 +0200
+Subject: [PATCH 7/8] Wifi: Use Purism connection editor
+
+Build for adaptability.
+
+Based on
+https://source.puri.sm/pureos/packages/gnome-control-center/-/blob/pureos/master/debian/patches/pureos/Add-helper-for-new-connection-editor.patch
+and
+https://source.puri.sm/pureos/packages/gnome-control-center/-/blob/pureos/master/debian/patches/pureos/wifi-Use-new-connection-editor.patch
+avoiding conditional use depending on Phosh.
+---
+ panels/network/net-device-wifi.c | 21 ++++++++++++++++-----
+ 1 file changed, 16 insertions(+), 5 deletions(-)
+
+diff --git a/panels/network/net-device-wifi.c b/panels/network/net-device-wifi.c
+index 69fe2e122..e9be21889 100644
+--- a/panels/network/net-device-wifi.c
++++ b/panels/network/net-device-wifi.c
+@@ -36,7 +36,7 @@
+ #include "panel-common.h"
+ #include "cc-list-row.h"
+ 
+-#include "connection-editor/net-connection-editor.h"
++#include "connection-editor/cc-connection-editor.h"
+ #include "net-device-wifi.h"
+ 
+ #include "cc-wifi-connection-list.h"
+@@ -967,14 +967,25 @@ show_details_for_row (NetDeviceWifi *self, CcWifiConnectionRow *row, CcWifiConne
+ {
+         NMConnection *connection;
+         NMAccessPoint *ap;
+-        NetConnectionEditor *editor;
++        CcConnectionEditor *new_editor;
+ 
+         connection = cc_wifi_connection_row_get_connection (row);
+         ap = cc_wifi_connection_row_best_access_point (row);
+ 
+-        editor = net_connection_editor_new (connection, self->device, ap, self->client);
+-        gtk_window_set_transient_for (GTK_WINDOW (editor), GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (row))));
+-        gtk_window_present (GTK_WINDOW (editor));
++        new_editor = g_object_get_data (G_OBJECT (self), "network-editor");
++        if (!new_editor) {
++                GtkWindow *parent;
++
++                parent = GTK_WINDOW (gtk_widget_get_toplevel (GTK_WIDGET (row)));
++                new_editor = CC_CONNECTION_EDITOR (cc_connection_editor_new (parent, self->client));
++                g_object_set_data (G_OBJECT (self), "network-editor", new_editor);
++        }
++
++        cc_connection_editor_set_connection (new_editor, connection, self->device);
++        cc_connection_editor_set_ap (new_editor, ap);
++
++        gtk_dialog_run (GTK_DIALOG (new_editor));
++        gtk_widget_hide (GTK_WIDGET (new_editor));
+ }
+ 
+ static void
+-- 
+2.25.1
+

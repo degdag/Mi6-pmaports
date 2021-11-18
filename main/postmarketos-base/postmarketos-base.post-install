@@ -1,0 +1,26 @@
+#!/bin/sh -e
+
+# Enable udev OpenRC services and runlevels
+# https://github.com/alpinelinux/aports/blob/master/main/eudev/setup-udev
+setup-udev -n
+
+# Enable other OpenRC services
+for service in devfs dmesg; do
+	rc-update -q add $service sysinit
+done
+for service in hwclock modules sysctl hostname bootmisc syslog; do
+	rc-update -q add $service boot
+done
+for service in sshd swapfile local; do
+	rc-update -q add $service default
+done
+for service in mount-ro killprocs savecache; do
+	rc-update -q add $service shutdown
+done
+
+# Prime swclock with a reasonable date/time on first boot
+mkdir -p /run/openrc
+touch /run/openrc/shutdowntime
+
+exit 0
+

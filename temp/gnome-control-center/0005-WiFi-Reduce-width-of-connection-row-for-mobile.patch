@@ -1,0 +1,48 @@
+From 73c0b7f78f49f1503a6dc16517f3ecefddc59ee7 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pablo=20Correa=20G=C3=B3mez?= <ablocorrea@hotmail.com>
+Date: Sun, 3 Oct 2021 17:48:29 +0200
+Subject: [PATCH 5/8] WiFi: Reduce width of connection row for mobile
+
+The current WiFi panel is not adaptive on small screens. This results in
+the panel being partially off the screen, blocking users from (for
+example) editing connection settings.
+
+This patch was developed for Mobian to shrink the minimum required space
+for each connection row and the Airplane mode toggle. This allows the
+panel to be used on thin screens.
+
+Adapted from https://gitlab.gnome.org/GNOME/gnome-control-center/-/merge_requests/1029
+to avoid modifying strings and breaking translations
+---
+ panels/common/cc-list-row.ui             | 1 +
+ panels/network/cc-wifi-connection-row.ui | 2 +-
+ 2 files changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/panels/common/cc-list-row.ui b/panels/common/cc-list-row.ui
+index 730b8d91a..ce14e7945 100644
+--- a/panels/common/cc-list-row.ui
++++ b/panels/common/cc-list-row.ui
+@@ -30,6 +30,7 @@
+                 <property name="visible">0</property>
+                 <property name="hexpand">1</property>
+                 <property name="xalign">0.0</property>
++                <property name="wrap">True</property>
+                 <property name="wrap-mode">word</property>
+                 <property name="max-width-chars">42</property>
+                 <style>
+diff --git a/panels/network/cc-wifi-connection-row.ui b/panels/network/cc-wifi-connection-row.ui
+index 39bb6db8b..dd8a90ac0 100644
+--- a/panels/network/cc-wifi-connection-row.ui
++++ b/panels/network/cc-wifi-connection-row.ui
+@@ -65,7 +65,7 @@
+             <property name="visible">True</property>
+             <property name="can_focus">False</property>
+             <property name="margin_end">6</property>
+-            <property name="label" translatable="yes">Connected</property>
++            <property name="label" translatable="no">✓</property>
+             <style>
+               <class name="dim-label"/>
+             </style>
+-- 
+2.25.1
+

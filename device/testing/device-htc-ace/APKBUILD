@@ -1,0 +1,39 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-ace
+pkgver=1
+pkgrel=20
+pkgdesc="HTC Desire HD"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base linux-htc-ace mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	initfs-hook.sh
+	90-android-touch-dev.rules
+"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-aosp-broadcom-wlan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+1659f9c098fc34c3b71806531a17e453f7a3cdd9ab785aeb6efce86049df448a3c7e940daa40ffe96aae54c229ae63e45d5d599b62cb5d03428be0d8f012a4b4  deviceinfo
+3ce2d134aa59677e25a160b5985c552fbf048b237169bbeb85e2b8824f734627064b51c097036db10eee0254064d45d804d17372dffcd1ba246938968fe1e225  initfs-hook.sh
+ab8fb357bb45ba44723f1ecb01a10db26f8f74b605499673e1ba90c69a9b11a1555983ce90235e3b636d75461c81c81eea0f8318ded06b72dad17f924d8b9901  90-android-touch-dev.rules
+"

@@ -1,0 +1,67 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=device-samsung-serranove
+pkgdesc="Samsung Galaxy S4 Mini Value Edition"
+pkgver=6
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo rootston.ini"
+subpackages="
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-kernel-mainline-modem:kernel_mainline_modem
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+"
+_substitutes="device-samsung-serranovelte"
+replaces="$_substitutes"
+provides="$replaces=$pkgver-r$pkgrel"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel (no modem, audio routed directly)"
+	depends="linux-postmarketos-qcom-msm8916"
+	replaces="$_substitutes-kernel-mainline"
+	provides="$replaces=$pkgver-r$pkgrel"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline_modem() {
+	pkgdesc="Close to mainline kernel (non-free modem, audio routed through ADSP)"
+	depends="linux-postmarketos-qcom-msm8916 soc-qcom-msm8916-modem"
+	replaces="$_substitutes-kernel-mainline-modem"
+	provides="$replaces=$pkgver-r$pkgrel"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader firmware-samsung-serranove-wcnss-nv"
+	replaces="$_substitutes-nonfree-firmware"
+	provides="$replaces=$pkgver-r$pkgrel"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	replaces="$_substitutes-phosh"
+	provides="$replaces=$pkgver-r$pkgrel"
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+b0f7f042e48b664837bae2251ee2bec21dd9ce916da6f5a5cf1fbc2f4b158e4e035cb317a89fd522394e33c1bb079be2eedb13358fb789a04cd61f62798c1d8f  deviceinfo
+94c866b6583faadc4a96a4d737983ba7838ede52afa5e29e261ef0ad0f2afe29fd3b793c9208ae74c7d48db6b991ad21800b9e457fbba4c69ce9dec2cda268ea  rootston.ini
+"

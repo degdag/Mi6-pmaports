@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-t2m-flame
+pkgver=1
+pkgrel=20
+pkgdesc="Mozilla Flame"
+url="https://postmarketos.org"
+arch="armhf"
+license="MIT"
+depends="postmarketos-base linux-t2m-flame mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install"
+source="deviceinfo 90-android-touch-dev.rules"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-t2m-flame"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+a3e90fafe17559ed9c59eb205f092dbad33d52f564f32e678f828e2f60f822b72845a60e6e0f8813fb6031441ee038d6e769f0aa0ffe1ef4451cd24c918cdb7c  deviceinfo
+25256120a19cba6b6f9ae0cda7b2c8c84d168a6457e82afee438d50d2c28b9598bfe690301c15156d866b77cd87652d9b7cc3d9b0637f69414aae09fec159c91  90-android-touch-dev.rules
+"

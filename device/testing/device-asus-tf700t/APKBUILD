@@ -1,0 +1,67 @@
+# Maintainer: Svyatoslav Ryhel <clamor95@gmail.com>
+# Co-Maintainer: Maxim Schwalm <maxim.schwalm@gmail.com>
+
+pkgname=device-asus-tf700t
+pkgdesc="Asus Transformer Infinity TF700T"
+pkgver=3
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	alsa-ucm-conf
+	asus-transformer-blobtools
+	libvdpau-tegra
+	linux-postmarketos-grate
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	pointercal
+	rootston.ini
+"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+	$pkgname-x11
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# osk-sdl touchscreen calibration
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Asus Transformers WiFi & BT firmware"
+	depends="firmware-asus-transformer"
+	mkdir "$subpkgdir"
+}
+
+x11() {
+	install_if="$pkgname=$pkgver-r$pkgrel xorg-server"
+	depends="xf86-video-opentegra"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+52a5910f3d404793918710a8c6f03e670fe6310d47e13df7c224329e234afde55a85d4ad52657ed8aed21a544736e388a705cdb725ef62eb7b093a7df9478a96  deviceinfo
+715e4814b7357442ad848626c9210dd1f1c54ed8707fafcfabbf691001ecafd85e28b39eadd32a633887488eb58a34e1d4592d99647ab3133cbaa834b8b7694d  pointercal
+c15e0d54e311892556cf9447d8431b6239fcce29bb011bf4931c909b4d59af2f00b87637b0eb67554ccd063f569ad24c868433c551e27354b3b9af604a08f3d8  rootston.ini
+"

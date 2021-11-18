@@ -1,0 +1,23 @@
+# Maintainer: Daniele Debernardi <drebrez@gmail.com>
+pkgname=charging-sdl
+pkgver=0.1
+pkgrel=1
+pkgdesc="SDL2 charging application for the initramfs"
+url="https://gitlab.com/postmarketOS/charging-sdl"
+arch="all"
+license="GPL-3.0-or-later"
+depends="mesa-gl directfb"
+makedepends="linux-headers sdl2-dev sdl2_ttf-dev"
+source="$pkgname-$pkgver.tar.gz::https://gitlab.com/postmarketOS/charging-sdl/-/archive/$pkgver/charging-sdl-$pkgver.tar.gz"
+options="!strip !check" # No tests
+
+build() {
+	make
+}
+
+package() {
+	install -D -m755 charging_sdl \
+		"$pkgdir"/usr/bin/charging-sdl
+}
+
+sha512sums="61cb132da5780f230280eb9cd24971cc2ea038890b098ccd04f842eb80c2ebfa3a27d619e28d8a37fe64c5a3863fbab68e2842d830f7f4658e52888436647858  charging-sdl-0.1.tar.gz"

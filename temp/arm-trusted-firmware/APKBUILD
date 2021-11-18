@@ -1,0 +1,59 @@
+# Forked for adding rk3399, rk3328 support and crust compatibility
+pkgname=arm-trusted-firmware
+pkgver=9999
+_pkgver=2.5
+pkgrel=5
+pkgdesc="ARM Trusted Firmware-A (TF-A)"
+url="https://github.com/ARM-software/arm-trusted-firmware"
+arch="aarch64"
+license="BSD-3-Clause"
+makedepends="dtc openssl-dev gcc-arm-none-eabi"
+source="
+	$pkgname-$_pkgver.tar.gz::https://github.com/ARM-software/$pkgname/archive/v$_pkgver.tar.gz
+	rk3399-baudrate.patch
+	0001-bl_common-Import-BL_NOBITS_-BASE-END-when-defined.patch
+	0002-allwinner-Rename-static-mmap-region-constant.patch
+	0003-allwinner-Map-SRAM-as-device-memory-by-default.patch
+	0004-allwinner-Do-not-map-BL32-DRAM-at-EL3.patch
+	0005-allwinner-Clean-up-some-platform-definitions.patch
+	0006-allwinner-Choose-PSCI-states-to-avoid-translation.patch
+	0007-allwinner-Simplify-CPU_SUSPEND-power-state-encoding.patch
+"
+options="!check" # no tests
+builddir="$srcdir/$pkgname-$_pkgver"
+_plats="sun50i_a64 sun50i_h6 rk3399 rk3328"
+
+build() {
+	unset LDFLAGS
+	for plat in $_plats; do
+		make PLAT=$plat DEBUG=0 bl31
+	done
+}
+
+package() {
+	for plat in $_plats; do
+		case $plat in
+			rk3399|rk3328)
+				install -D "$builddir"/build/$plat/release/bl31/bl31.elf \
+					"$pkgdir"/usr/share/$pkgname/$plat/bl31.elf
+					;;
+			*)
+				install -D "$builddir"/build/$plat/release/bl31.bin \
+					"$pkgdir"/usr/share/$pkgname/$plat/bl31.bin
+					;;
+		esac
+	done
+}
+
+
+sha512sums="
+3c99f1d849c3c536e8e2e4838ee48a1a431f0bef35eaf27eb14f9caebde71a577589b10efbbd7db49bed3b9763bed46583d0b26e72f61fcd0d34cc46ff684846  arm-trusted-firmware-2.5.tar.gz
+86d8c60157145ab05e9b870aad11d2acaf2137ba00bf71419f8a54a4fd2b1906c19bc8bfeccc735344d1dcf11ba81bd9396bfd8854cdb972a72503b632d1e900  rk3399-baudrate.patch
+b1b36fd5219c608500f763bc784cb52349c7c3344273483594672bb1917ede21f2dd09ec37a383f39fca39b05b7a29fadbbeecfde1ae4f31319277f6561c2fbb  0001-bl_common-Import-BL_NOBITS_-BASE-END-when-defined.patch
+2b0e3d879a8e08301288a1eb233640e9366e107b621fa4a92a358b0b3aa4beaa68d1bb1f5b0d4bc7013369aa08d0f9a360e77c8b027daa40a4d2438fe804dde3  0002-allwinner-Rename-static-mmap-region-constant.patch
+fe2c975c2b5bbc583427be1ef4b2c3c901b22d8044eecf7058b3dcd9167710a40500dbfa12986c8010c9030b4a580dd62a772a76262010ddb4dc2b310f28721c  0003-allwinner-Map-SRAM-as-device-memory-by-default.patch
+f3c7c97a014939e09a3161a4ffd01ce2d7e1eb9f0556dc67a4e8c62fc95ec469d5c51b74279e373b0d411b6c6f8c3dd097901bdaace1750745d6ac66a6b61dac  0004-allwinner-Do-not-map-BL32-DRAM-at-EL3.patch
+b5848397f552b19c427e1675e2054e3ade8d7957df9e4e03c5dad1dcaa47bbfea8061374917250ecf6a83ba9fe9fd2dd273ee10d47abea1cf35e8c375a701165  0005-allwinner-Clean-up-some-platform-definitions.patch
+b37e0763182abaec1892d70ac8bfcf468185c0095749c96df3541cce7612be55b99f8c6fc51c2c2465db6d3b7d779ed08fe2da2dfa20c8e002c0cff8c2df33d9  0006-allwinner-Choose-PSCI-states-to-avoid-translation.patch
+341d51db93fed9c1ae8e7c295d00f9e021333485a70dc823b5729ed7ee84ddb1feb272b2ec9470ee06cc1df93da638eb84a10baf0f4cc1b24a48033ac97eaf5f  0007-allwinner-Simplify-CPU_SUSPEND-power-state-encoding.patch
+"

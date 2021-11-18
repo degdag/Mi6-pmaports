@@ -1,0 +1,80 @@
+From b91a8942f1d391fcc050188d2334b288f1e7b642 Mon Sep 17 00:00:00 2001
+From: Alexey Min <alexey.min@gmail.com>
+Date: Wed, 11 Sep 2019 21:51:40 +0300
+Subject: [PATCH 8/8] Add config option to fix bootloader cmdline args
+
+Android bootloader passes some arguments in kernel command
+line, that make booting custom OSes harder:
+
+ * skip_initramfs
+ * root=PARTUUID=...
+ * init=/init
+
+Those parameters override default boot partition to hardcoded,
+set init binary to /init, disable booting from initramfs.
+
+If enabled, those parameters will be erased from bootloader's
+command line, and custom OS can boot the way it likes.
+
+Signed-off-by: Alexey Min <alexey.min@gmail.com>
+---
+ arch/arm64/Kconfig | 17 +++++++++++++++++
+ drivers/of/fdt.c   | 14 ++++++++++++++
+ 2 files changed, 31 insertions(+)
+
+diff --git a/arch/arm64/Kconfig b/arch/arm64/Kconfig
+index 29035f3a..87d86b98 100644
+--- a/arch/arm64/Kconfig
++++ b/arch/arm64/Kconfig
+@@ -1134,6 +1134,23 @@ config CMDLINE_FORCE
+ 	  command-line options your boot loader passes to the kernel.
+ endchoice
+ 
++config CMDLINE_DROP_DANGEROUS_ANDROID_OPTIONS
++	bool "Drop certain dangerous options from cmdline"
++	default n
++	help
++	  Android bootloader passes some arguments in kernel command
++	  line, that make booting custom OSes harder:
++	  
++	    * skip_initramfs
++	    * root=PARTUUID=...
++	    * init=/init
++	  
++	  Those parameters override default boot partition to hardcoded,
++	  set init binary to /init, disable booting from initramfs.
++	  
++	  If enabled, those parameters will be erased from bootloader's
++	  command line, and custom OS can boot the way it likes.
++
+ config EFI_STUB
+ 	bool
+ 
+diff --git a/drivers/of/fdt.c b/drivers/of/fdt.c
+index 744f6250..f5d720c3 100644
+--- a/drivers/of/fdt.c
++++ b/drivers/of/fdt.c
+@@ -1128,6 +1128,20 @@ int __init early_init_dt_scan_chosen(unsigned long node, const char *uname,
+ 
+ 	pr_debug("Command line is: %s\n", (char*)data);
+ 
++#ifdef CONFIG_CMDLINE_DROP_DANGEROUS_ANDROID_OPTIONS
++	pr_err("Replacing dangerous cmdline options...");
++	cmdline = strstr((const char *)data, "skip_initramfs");
++	if (cmdline)
++		*cmdline = '_';
++	cmdline = strstr((const char *)data, "root=");
++	if (cmdline)
++		*cmdline = '_';
++	cmdline = strstr((const char *)data, "init=");
++	if (cmdline)
++		*cmdline = '_';
++	pr_err("Command line now is: %s\n", (char*)data);
++#endif
++
+ 	/* break now */
+ 	return 1;
+ }
+-- 
+2.25.1
+

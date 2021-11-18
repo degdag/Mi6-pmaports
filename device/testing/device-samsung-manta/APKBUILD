@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-manta
+pkgdesc="Google Nexus 10"
+pkgver=0.4
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-manta mkbootimg mesa-dri-swrast watchdog-kick"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+98c474bd11150036f18701eaedb72f1038e2318caebd2f9d48ec1ab6d1fd47ccb3d49fff002c25a499f97cee59dd09b206c068bfcf642155a224422b233a37f4  deviceinfo
+"

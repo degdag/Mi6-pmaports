@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-ariesve
+pkgdesc="Samsung Galaxy S Plus"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-ariesve mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+a176ea05ae92958e12ee9121e66c7a4c3299d39dc98350ba10fe4d94c5aba0801d2005907c40257ef3baee9240437106fb41a84865dde99cd6c281c5e4c4f369  deviceinfo
+"

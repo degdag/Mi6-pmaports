@@ -1,0 +1,91 @@
+# Forked from Alpine for qmi voicecall support & smdpkt patches
+
+pkgname=ofono
+pkgver=9999
+_pkgver=1.33
+pkgrel=12
+pkgdesc="Infrastructure for building mobile telephony (GSM/UMTS) applications [$_pkgver]"
+url="https://01.org/ofono"
+arch="armhf armv7 aarch64"
+license="GPL-2.0-only"
+depends="bluez mobile-broadband-provider-info"
+makedepends="glib-dev dbus-dev ell-dev eudev-dev
+	linux-headers bsd-compat-headers libexecinfo-dev
+	autoconf automake libtool"
+subpackages="$pkgname-dev $pkgname-doc $pkgname-openrc $pkgname-scripts::noarch"
+source="https://www.kernel.org/pub/linux/network/ofono/ofono-$_pkgver.tar.xz
+	fix-TEMP_FAILURE_RETRY.patch
+	skip-broken-test.patch
+	support-smdpkt.patch
+	wda-set-data-format.patch
+	0001-common-create-GList-helper-ofono_call_compare.patch
+	0002-common-atmodem-move-at_util_call_compare_by_status-t.patch
+	0003-common-atmodem-move-at_util_call_compare_by_id-to-dr.patch
+	0004-add-call-list-helper-to-manage-voice-call-lists.patch
+	0005-qmimodem-implement-voice-calls.patch
+	0006-qmimodem-Fix-dialing-to-an-international-number.patch
+	0007-qmimodem-implement-dtmf.patch
+	$pkgname.initd
+	$pkgname-auto-enable.initd
+	udev.rules
+	ofono-wheel.conf
+	"
+builddir="$srcdir/$pkgname-$_pkgver"
+
+prepare() {
+	default_prepare
+	autoreconf -fi
+}
+
+build() {
+	./configure \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--localstatedir=/var \
+		--sbindir=/usr/sbin \
+		--enable-external-ell \
+		--enable-tools \
+		--enable-test \
+		--with-dbusconfdir=/usr/share
+	make
+}
+
+check() {
+	make -j1 check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+	install -Dm755 tools/auto-enable "$pkgdir"/usr/bin/ofono-auto-enable
+	install -Dm644 plugins/ofono.rules "$pkgdir"/usr/lib/udev/rules.d/60-ofono.rules
+	install -Dm644 "$srcdir"/udev.rules "$pkgdir"/usr/lib/udev/rules.d/60-ofono-pmos.rules
+	install -Dm755 "$srcdir"/$pkgname.initd "$pkgdir"/etc/init.d/$pkgname
+	install -Dm755 "$srcdir"/$pkgname-auto-enable.initd "$pkgdir"/etc/init.d/$pkgname-auto-enable
+	install -Dm755 "$srcdir"/ofono-wheel.conf -t "$pkgdir"/usr/share/dbus-1/system.d/
+}
+
+scripts() {
+	pkgdesc="$pkgdesc (test scripts)"
+	depends="python3 py3-dbus py3-gobject3"
+
+	amove usr/lib/ofono/test
+}
+
+sha512sums="
+8d88226aa2b43eca840c6330045ee7a96c91f6003b06fca5ea55b74fc229f0e0ba0c8d98f7945f8c23ec5a8e7057bffef6335c61842e245686e0ed7c5feda589  ofono-1.33.tar.xz
+687a2fd592add40122b789073ab9970d6e966752fdecc4077afe1c1bba705fe541dd0e457094f1d9cde747c571b7810b5b1a30835a3f1869bcd810751d5bf76f  fix-TEMP_FAILURE_RETRY.patch
+777ab2e13eebd1ccbe12a304310a83b262a5d934207c6a8d410e75aff380838eed1a52f3c2fe0d80c1e7db7faa9b55bf17e78a1e1acd8cfb95a3c6aef49c5b67  skip-broken-test.patch
+57c6896d44b5417aa4bfee4d14db01d5006a52f6ab5aa1a2fec367a5ccd1d676e3af13d29f237694c3fc1082654dbae4fdaa86825b541ce204a3a6988c03ac8b  support-smdpkt.patch
+80a0ea003c4dd3afd8bea7abbfa21b7045b28e46e0a7fcd908a2695999e29657e047eb8d346f81a41ad659e8ce5c4a0f752210594c7e3b7f3c7b04c366d2ddc5  wda-set-data-format.patch
+ad25dcc34bf710287c9a03fdcd61f2f2fd675691f55be30dbe7c8421753aa857906dd23b2d4f7f752fbc62caf2857b00bf5eaa8916e62718d1da7d0abc083ca0  0001-common-create-GList-helper-ofono_call_compare.patch
+7e2f7fb1e661cc9f2180c55c701823050328ee906171148e4ba200e6365f1c40382dab608e78e383e62c9029a6a41d7d7a18b971132df30839f625eb576cb080  0002-common-atmodem-move-at_util_call_compare_by_status-t.patch
+1a55f558c2e3058eee7dae2a60538417ae0fc058f322f4740a0f46a080cc2fda2c8a8cd522d243ab8f0be2ea461ad7dc1c27d2e73bcaac5848d9c592d6386d8a  0003-common-atmodem-move-at_util_call_compare_by_id-to-dr.patch
+3e0dce12bcb65d3c6db15cfd50058e793bf1f1ae6e330bf804565afde54614227746a8d4316ccd36093f22e2cc4f62e3a32e46276ab81a7b1f3a61f56984ed78  0004-add-call-list-helper-to-manage-voice-call-lists.patch
+72d0f63c091d4b1fc5b405ec67e73f377887ee3dffd4791272122462bf4feaeec207de9b177632756e1f973a7bf7bde119c6ec6556568a6307287ba43998b7a0  0005-qmimodem-implement-voice-calls.patch
+6dd4d5f829d66b5b9a13aed6d5a991a2cd3dee6db04a122bcc1d87d0eddc37637468bec58f9fe6027c89eac3b14411201d324150e6be4b103622340da6a599fe  0006-qmimodem-Fix-dialing-to-an-international-number.patch
+7d28bcec2dc8b13003c05d74202aced9c86efe35447fbcb0f444fb04447fab8e80a47fa20a662aa0148d42c25333b3261e3cd570991deee9cdfd76effd24af7e  0007-qmimodem-implement-dtmf.patch
+bc76c404a7de626210dbd78f659444567a95b6e6d8db0661d5d67ea361e2941ad55242d43a5957995817145d4d5323476fbc42d1830b20608a5e90a7a4ba1194  ofono.initd
+54a2cb55547e77c22a98c4260f2e94d9327d5d98e1b604f9413a7380ae4489247a97561cc2ab39476bc6e6fb5e673dca8053218b18ac4626addb51ecb29f0167  ofono-auto-enable.initd
+6149be86d6feeb63f8a16e067be5b148551b8121340c257d778aea2082fb09baf5bf479c57f87e3c24a4dc988da15a2f0dec8b4bf13f72e67e025933cb6986ff  udev.rules
+72cd0cd4bee1f885a990c84f7ed3ef27e0d9d2db37d9a486342204152cb02a67d5197e8014dfea59f1a95285c674695b3dc3cb2b53941781bcfc9b73d5580b1f  ofono-wheel.conf
+"

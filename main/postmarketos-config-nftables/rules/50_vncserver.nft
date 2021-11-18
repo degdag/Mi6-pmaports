@@ -1,0 +1,11 @@
+#!/usr/sbin/nft -f
+
+table inet filter {
+        chain input {
+                # drop VNC from wwan
+                iifname "wwan*" tcp dport 5900 drop comment "drop VNC from wwan"
+                
+                # allow vnc
+                tcp dport 5900 accept comment "accept VNC"
+        }
+}

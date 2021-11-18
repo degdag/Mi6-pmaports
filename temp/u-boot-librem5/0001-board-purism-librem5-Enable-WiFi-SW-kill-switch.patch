@@ -1,0 +1,29 @@
+From 08579a1a7c2a6897af952ef8dd5511b1f4830f88 Mon Sep 17 00:00:00 2001
+From: Angus Ainslie <angus@akkea.ca>
+Date: Mon, 8 Feb 2021 07:50:28 -0800
+Subject: [PATCH] board: purism: librem5: Enable WiFi SW kill switch
+
+Due to probe ordering in the kernel the SW kill switch might not get enabled
+before the wifi driver is probed.
+
+Signed-off-by: Angus Ainslie <angus@akkea.ca>
+---
+ board/purism/librem5/librem5.h | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/board/purism/librem5/librem5.h b/board/purism/librem5/librem5.h
+index 461b1f7339..420b8d17b3 100644
+--- a/board/purism/librem5/librem5.h
++++ b/board/purism/librem5/librem5.h
+@@ -138,6 +138,8 @@ static inline void init_pinmux(void)
+ 	gpio_direction_output(WWAN_EN, 0);
+ 	gpio_direction_output(WWAN_nRESET, 1);
+ 
++	gpio_direction_output(WIFI_EN, 1);
++
+ 	gpio_direction_output(HUB_EN, 0);
+ 	gpio_direction_output(HUB_nRESET, 1);
+ 	gpio_direction_output(SD_EN, 0);
+-- 
+2.26.2
+

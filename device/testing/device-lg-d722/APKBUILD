@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-d722
+pkgdesc="LG G3 Beat"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-lg-d722 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+7e40d0a4a47f7bbd4925cc37be269188814781dbf8f1c7aa276e0edcad3339593c617b1422bf7fe0da2e0e1f2207272869e0e087b36e5a1a9dde24ed8e5085e4  deviceinfo
+"

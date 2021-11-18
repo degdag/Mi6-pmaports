@@ -1,0 +1,25 @@
+From bacc31890b3a2101a7518011513bea3c87a3d759 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 20:23:07 +0200
+Subject: [PATCH 06/10] RX-51: Symbols: Bind bar to fourth level L
+
+---
+ symbols/nokia_vndr/rx-51 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 5b0dbd0..b866ad2 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -403,7 +403,7 @@ xkb_symbols "english_base" {
+     key <AC06>	{ [	h,		H,		parenleft,	parenleft	] };
+     key <AC07>	{ [	j,		J,		parenright,	parenright	] };
+     key <AC08>	{ [	k,		K,		ampersand,	ampersand	] };
+-    key <AC09>	{ [	l,		L,		exclam,		exclam		] };
++    key <AC09>	{ [	l,		L,		exclam,		bar		] };
+     key <AB09>	{ [	period,		colon,		question,	question	] };
+ 
+     // 3. row
+-- 
+1.8.1.4
+

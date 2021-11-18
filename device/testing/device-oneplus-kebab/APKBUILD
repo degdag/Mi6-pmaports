@@ -1,0 +1,43 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-oneplus-kebab
+pkgdesc="OnePlus 8T"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-oneplus-kebab
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-weston"
+source="
+	deviceinfo
+	weston.ini
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+weston() {
+	install_if="$pkgname weston"
+
+	# weston use drm backend, 2x dpi, don't use virtual output
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+
+sha512sums="
+f10ce9f8cc15f362f0c3ef45af32aebba53db9da83cd89d83be071b3e4ac52b05cab9fc31ffb15184ae3bc995c5bfe7ed5f06f083f2e2b08d9d9c2df06fd4e75  deviceinfo
+4fdc188f9cd5c0316959322568916a6e36e67ff316e90fa7bd7c7b642cb137a9ff7002b0475728c6ba53abcbfe8c50d82112e4943460ee424aee4bbfd0efecfe  weston.ini
+"

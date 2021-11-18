@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i747m
+pkgdesc="Samsung Galaxy SIII (USA/Canada)"
+pkgver=0.1
+pkgrel=13
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-i747m mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo 90-android-touch-dev.rules fb.modes"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+	install -Dm644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-i747m"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+408110de6d1cb3c92331acd9fe7af90b32bb8dd1efadb6e20ff43d370373f6da06569bd45d55ec2d3285424cd02ce12be351a94d1b250ed614cccbb8c31bf44b  deviceinfo
+1ef4aa9206e6aa61cef80dd4fd4dc2d834e3582e40978d2da8a768964bbaa854a4068fb263e4dcc3cb1a745d42ebf5d457084801dd28fa2de50706ed5a5a9c7c  90-android-touch-dev.rules
+bd5aba648930678aea38d2a67e584c94f5ab53d235c8f6ce785bc7e31db00e1cdf08fb84fd3fe78bd7b409a4120b2c7beadf77e028ec8580d4df48248a2c414f  fb.modes
+"

@@ -1,0 +1,51 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-chuwi-hi10plus
+pkgdesc="CHUWI Hi10 Plus"
+pkgver=0.2
+pkgrel=7
+url="https://postmarketos.org"
+license="MIT"
+arch="x86_64"
+options="!check !archcheck"
+depends="postmarketos-base linux-chuwi-hi10plus mkbootimg mesa-dri-intel libva-intel-driver wireless-regdb pulseaudio pulseaudio-alsa alsa-plugins-pulse"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-x11
+	$pkgname-weston
+	"
+source="deviceinfo
+	initfs-hook.sh
+	weston.ini"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+x11() {
+	install_if="$pkgname xorg-server"
+	depends="xf86-video-intel gstreamer-vaapi"
+	mkdir "$subpkgdir"
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Touch, Wi-Fi, Bluetooth, Sound Firmware"
+	depends="firmware-chuwi-hi10plus linux-firmware-intel linux-firmware-rtlwifi linux-firmware-rtl_bt"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+151b60e4e5192aa5f747c550d7114fe9b0e49d7f9c2b151e36e18be73e3c5ed8ca52f642c955b0f8e43e5c3a98914f97c3bea9885d95266536ddbf370384b016  deviceinfo
+8191c479588ccd0c44d23a06cee975635ad9353a7469489c3436ca22051410ff5153dccfb38284dd3976fd6bb8ea6979d32224b652ce68b51f4448c2aa8fc9dd  initfs-hook.sh
+15497cf556750d2b91ef81dab7c4071dc5d1d62bab6f98db0b240e74d8b26ebcda5af2f80fe998518c3b53e72e0daa762d063c87dff46d73d70a8d879cb9aaa8  weston.ini
+"

@@ -1,0 +1,67 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-huawei-angler
+pkgver=2
+pkgrel=0
+pkgdesc="Huawei Nexus 6P"
+url="https://postmarketos.org"
+arch="aarch64"
+license="MIT"
+depends="
+	mesa-dri-swrast
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+	postmarketos-update-kernel
+"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+source="
+	deviceinfo
+	90-android-touch-dev.rules
+	bcmdhd.cal
+"
+
+# Note: bcmdhd.cal is from https://github.com/LineageOS/android_device_huawei_angler/blob/752aaf664ab079f4ce9cbdeae6978f615d39b783/bcmdhd.cal
+# TODO: this calibration file isn't valid for all variants of this device
+# See https://github.com/LineageOS/android_device_huawei_angler/blob/cm-14.1/init.angler.rc#L450
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-huawei-angler"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel (only basic hardware support)"
+	depends="linux-postmarketos-qcom-msm8994"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+	install -D -m644 "$srcdir"/bcmdhd.cal \
+		"$pkgdir"/etc/wifi/bcmdhd.cal
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-aosp-broadcom-wlan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c964279eba16e5bb4e74bb4389144e51463419e6ba8731363dc07609a6c9effa43ea8de0192f3983c704c9fb8f55e0ee5023f6e3f19cee781feae81daca7200f  deviceinfo
+262f9f3e28cbb28d236cf6edce4919766baabb18e5b0cf35d672d306efeaf12fd66ffba57e6d9bef0eee90203dc98f95aab17145e4c12383055afb58b922ae58  90-android-touch-dev.rules
+61fe1f91d7b0b570b77fcca76503373cbac2515ca3dcc2f2543b910dfaeb1e935a11975f824f6a72001df4e63329356a6aff2d016e9b4f5d8f7b739fee065c4e  bcmdhd.cal
+"

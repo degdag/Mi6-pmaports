@@ -1,0 +1,52 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=postmarketos-ui-sway
+pkgver=3
+pkgrel=2
+pkgdesc="(Wayland) Tiling WM, drop-in replacement for i3wm (DOES NOT RUN WITHOUT HW ACCELERATION!)"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+subpackages="$pkgname-logo-key-alt:logo_key_alt"
+depends="
+	dnsmasq
+	elogind
+	networkmanager
+	postmarketos-base-ui
+	pulseaudio
+	sway
+	tinydm
+	tinydm-openrc
+	"
+_pmb_recommends="
+	dmenu
+	foot
+	postmarketos-artwork-wallpapers
+	swayidle
+	swaylock
+	xwayland
+	"
+_pmb_groups="
+	seat
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="
+	etc-sway-config
+	etc-sway-config.d-00-logo-key.conf
+	"
+options="!check pmb:gpu-accel" # no testsuite
+replaces="sway"
+
+package() {
+	install -Dm644 "$srcdir"/etc-sway-config \
+		"$pkgdir"/etc/sway/config
+}
+
+logo_key_alt() {
+	install -Dm644 "$srcdir"/etc-sway-config.d-00-logo-key.conf \
+		"$subpkgdir"/etc/sway/config.d/00-logo-key.conf
+}
+
+sha512sums="
+07d8d0f93e6437b62299baf472242adfb84502420659a6fc3f1bea2e5f64556b409552ee35de1ef1a0806653fdfc504bb222ed3ef488a25fd589f9a4bc734ce9  etc-sway-config
+889f10fb247396a11375057f7e81eae0f0b21ec90cd47964e02ba24fc0f6db8bb7678545e3272149535cf0bb6a2019456cc59d06a9564ce4a1797bb434013b78  etc-sway-config.d-00-logo-key.conf
+"

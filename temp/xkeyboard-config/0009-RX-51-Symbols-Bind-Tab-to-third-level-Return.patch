@@ -1,0 +1,25 @@
+From 95b8be003cf2ef8887d1936d38a0214ff724ca69 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 21:12:00 +0200
+Subject: [PATCH 09/10] RX-51: Symbols: Bind Tab to third level Return
+
+---
+ symbols/nokia_vndr/rx-51 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index a91db61..aaa653a 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -425,7 +425,7 @@ xkb_symbols "common_keys" {
+     key <TAB>	{ [	Tab		] };
+ 
+     // broken UI spec.
+-    key <RTRN>	{ [	KP_Enter	] };
++    key <RTRN>	{ type[Group1] = "PC_FN_LEVEL2", symbols[Group1] = [	KP_Enter,	Tab	] };
+ 
+     key <KPEN>	{ [	Return		] };
+     key <ESC>	{ [	Escape		] };
+-- 
+1.8.1.4
+

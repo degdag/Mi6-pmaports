@@ -1,0 +1,109 @@
+# Forked from Alpine, so we can build it with Librem 5 phone support
+pkgname=u-boot-librem5
+pkgver=0.9
+pkgrel=1
+# 'librem5' branch in atf repo
+_atfversion="92c2de12d36b31938ce940d5cac3c30a98665237"
+# 'librem5' branch in uboot repo
+_ubootversion="e9f7caf70a5c4f468ba00392ad0ca0badecea20a"
+_m4version="a017421c340a69f2392086da93841244f78a03c5"
+_firmwareversion="8.10"
+pkgdesc="u-boot bootloader for the Purism Librem5 phone"
+url="http://www.denx.de/wiki/U-Boot/"
+arch="aarch64"
+license="GPL-2.0-or-later OFL-1.1 BSD-2-Clause BSD-3-Clause eCos-2.0 IBM-pibs"
+makedepends="$depends_dev bc dtc python3-dev swig binutils coreutils zlib-dev newlib-arm-none-eabi bison flex"
+options="!check !tracedeps pmb:cross-native"
+source="
+	uboot-imx-${_ubootversion}.tar.gz::https://source.puri.sm/Librem5/uboot-imx/-/archive/${_ubootversion}/uboot-imx-${_ubootversion}.tar.gz
+	m4-${_m4version}.tar.gz::https://source.puri.sm/Librem5/Cortex_M4/-/archive/${_m4version}/Cortex_M4-${_m4version}.tar.gz
+	arm-trusted-firmware-${_atfversion}.tar.gz::https://source.puri.sm/Librem5/arm-trusted-firmware/-/archive/${_atfversion}/arm-trusted-firmware-${_atfversion}.tar.gz
+	https://www.nxp.com/lgfiles/NMG/MAD/YOCTO/firmware-imx-${_firmwareversion}.bin
+	update-u-boot
+	0001-board-purism-librem5-Enable-WiFi-SW-kill-switch.patch
+	"
+install="$pkgname.post-upgrade"
+subpackages="$pkgname-devkit"
+
+_ubootbuilddir="$srcdir"/uboot-imx-${_ubootversion}
+_atfbuilddir="$srcdir"/arm-trusted-firmware-${_atfversion}
+_m4builddir="$srcdir"/Cortex_M4-${_m4version}
+_firmwarebuilddir="$srcdir"/firmware-imx-${_firmwareversion}
+builddir="$_ubootbuilddir"
+
+prepare() {
+	default_prepare
+
+	msg "Extracting DDR & HDMI firmware"
+	cd "$srcdir"
+	chmod +x firmware-imx-${_firmwareversion}.bin
+	./firmware-imx-${_firmwareversion}.bin --auto-accept
+	cp -v "$_firmwarebuilddir"/firmware/ddr/synopsys/lpddr4*.bin "$_ubootbuilddir"/
+	cp -v "$_firmwarebuilddir"/firmware/hdmi/cadence/signed*.bin "$_ubootbuilddir"/
+}
+
+build() {
+	msg "Building M4"
+	cd "$_m4builddir"
+	make
+
+	msg "Building ARM trusted firmware"
+	cd "$_atfbuilddir"
+	LDFLAGS="" make PLAT=imx8mq bl31
+	# Overwrite default bl31 binary with one made here
+	cp -v "$_atfbuilddir"/build/imx8mq/release/bl31.bin "$_ubootbuilddir"/
+
+	msg "Building u-boot"
+	cd "$_ubootbuilddir"
+	# Note: HOSTCC is set explicitly here else it tries to use cc, which
+	# doesn't exist on Alpine
+	#
+	# Devkit uboot firmware
+	make distclean
+	make ARCH=arm HOSTCC=gcc librem5_devkit_defconfig
+	make ARCH=arm HOSTCC=gcc flash.bin
+	mv flash.bin devkit-flash.bin
+
+	# Phone uboot firmware
+	make distclean
+	make ARCH=arm HOSTCC=gcc librem5_defconfig
+	make ARCH=arm HOSTCC=gcc flash.bin
+	mv flash.bin phone-flash.bin
+
+	msg "Building u-boot flashing images"
+	# devkit
+	dd if=/dev/zero of=devkit-boot.img bs=1024 count=1055
+	dd if="$_m4builddir"/m4.bin conv=notrunc of="$_ubootbuilddir"/devkit-boot.img bs=1024
+	dd if="$_ubootbuilddir"/devkit-flash.bin conv=notrunc of="$_ubootbuilddir"/devkit-boot.img bs=1024 seek=31
+
+	# phone
+	dd if=/dev/zero of=phone-boot.img bs=1024 count=1055
+	dd if="$_m4builddir"/m4.bin conv=notrunc of="$_ubootbuilddir"/phone-boot.img bs=1024
+	dd if="$_ubootbuilddir"/phone-flash.bin conv=notrunc of="$_ubootbuilddir"/phone-boot.img bs=1024 seek=31
+	msg "done!"
+}
+
+package() {
+	install -D -m644 "$_ubootbuilddir"/phone-boot.img \
+		"$pkgdir/usr/share/u-boot/librem5/phone-boot.img"
+	install -D -m 755 "$srcdir"/update-u-boot \
+		"$pkgdir"/usr/sbin/update-u-boot
+}
+
+devkit() {
+	pkgdesc="u-boot bootloader for the Purism Librem5 devkit"
+	install -D -m644 "$_ubootbuilddir"/devkit-boot.img \
+		"$subpkgdir/usr/share/u-boot/librem5/devkit-boot.img"
+	install -D -m 755 "$srcdir"/update-u-boot \
+		"$subpkgdir"/usr/sbin/update-u-boot
+}
+
+
+sha512sums="
+feab35fae6450f24da54998b44b1d834bc33c9597ff8f9a4275e9ec7a1d1f442e133e51635eaabb9b759499728a0f70256d7bd6bc8bbeeb2133992f9c606d607  uboot-imx-e9f7caf70a5c4f468ba00392ad0ca0badecea20a.tar.gz
+035a4358ddf586c829da7fa2fb0d9d1df913c0c454f2d0e57ff0c6794552e49950fb6373f9aaf72e0e4c78ab411496aabbc60bf66cd76e35053f7a2d77911735  m4-a017421c340a69f2392086da93841244f78a03c5.tar.gz
+cd8c9411ae0e57d2c8c700bf3e8c8d03e7dab955ace249a00911dd8c42b42929e0de3a5885eb9b1d945174abc8cfb177595d83c235e757c70640f451b62547ba  arm-trusted-firmware-92c2de12d36b31938ce940d5cac3c30a98665237.tar.gz
+24d4466b3c2202ceb1c22be2b3db4482eee54d09e167083cc53e82cd9f22ef9ac0cba5a1a3341cacf8ee01adf014eb25f4aa437f35a43ac102dd2f22e935821b  firmware-imx-8.10.bin
+63b6339d2a06b58f47d0f0b6f9a2c0fe25aa8edd523599b630ee3ea683f24ce31150a012e6ec5313b9c247529d0b8813d0c87cb6d0d2e91321c1cf7864cca475  update-u-boot
+acec9f7fa5fb3f4e84c6f6f74794325d5d18ea4557ab98fd0915ba5e41748e338f94604815b2f6d595119359462b48d2ee285b2e4025282d3118051b601b23a1  0001-board-purism-librem5-Enable-WiFi-SW-kill-switch.patch
+"

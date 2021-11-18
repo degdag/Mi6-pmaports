@@ -1,0 +1,3 @@
+SYMLINK=="modem", SUBSYSTEM=="smdpkt",   ENV{OFONO_DRIVER}="gobi"
+SYMLINK=="modem", SUBSYSTEM=="rpmsg",    ENV{OFONO_DRIVER}="gobi", ENV{OFONO_NETWORK_INTERFACE}="rmnet0"
+SUBSYSTEM=="wwan", ATTR{type}=="QMI",    ENV{OFONO_DRIVER}="gobi", ENV{OFONO_NETWORK_INTERFACE}="rmnet0"

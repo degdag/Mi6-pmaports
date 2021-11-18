@@ -1,0 +1,27 @@
+pkgname=firmware-asus-me176c-acpi
+pkgver=0_git20190206
+pkgrel=2
+arch="x86_64"
+pkgdesc="Patched ACPI DSDT table for ASUS MeMO Pad 7 (ME176C(X))"
+url="https://github.com/me176c-dev/me176c-acpi"
+license="unknown"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+makedepends="iasl"
+
+_commit="9c25272d67965b7bbc03283e333822f02a8f9a9a"
+source="$url/archive/$_commit.tar.gz"
+builddir="$srcdir/me176c-acpi-$_commit"
+
+build() {
+	iasl dsdt.dsl
+
+	mkdir -p kernel/firmware/acpi
+	cp dsdt.aml kernel/firmware/acpi/dsdt.aml
+	echo kernel/firmware/acpi/dsdt.aml | cpio -o -H newc -R 0:0 > acpi.img
+}
+
+package() {
+	install -Dm644 acpi.img "$pkgdir"/boot/acpi-me176c.img
+}
+
+sha512sums="c85db14df9e6d90d3e63f496243d27ee9750b302c1829a678ea51e9070f5e8679ea51e65609a43d8ae359287f713da37ea98df2e39b22e0a7a797bff4c63768d  9c25272d67965b7bbc03283e333822f02a8f9a9a.tar.gz"

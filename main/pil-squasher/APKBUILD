@@ -1,0 +1,22 @@
+# Maintainer: Luca Weiss <luca@z3ntu.xyz>
+pkgname=pil-squasher
+pkgver=0_git20190708
+pkgrel=0
+_commit="170b62d29faa7c1f54fc2a7718e4d0c912384ec1"
+pkgdesc="Convert split .mdt + .bXX files into a .mbn file"
+url="https://github.com/andersson/pil-squasher"
+arch="all"
+license="BSD-3-Clause"
+source="$pkgname-$_commit.tar.gz::https://github.com/andersson/pil-squasher/archive/$_commit.tar.gz"
+builddir="$srcdir/$pkgname-$_commit"
+options="!check" # No tests
+
+build() {
+	make
+}
+
+package() {
+	make prefix=/usr DESTDIR="$pkgdir" install
+}
+
+sha512sums="431a7e404f090bcf043bd1f8fa3c83bdfe1d8890e0fb3b3300c05af4fb9dab5319182d86a828289c2eb7ee897bbe846c75eee90e5fb89c5d4123b19ffd1effed  pil-squasher-170b62d29faa7c1f54fc2a7718e4d0c912384ec1.tar.gz"

@@ -1,0 +1,25 @@
+From 5034f2bef0d102015c1596047b01bb44bdbfe61e Mon Sep 17 00:00:00 2001
+From: Wiktor Tkaczynski <wiktor.tkaczynski@gmail.com>
+Date: Fri, 7 Aug 2020 18:05:19 +0200
+Subject: [PATCH 5/8] narrow down include path for msm_isp
+
+---
+ include/trace/events/msm_cam.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/trace/events/msm_cam.h b/include/trace/events/msm_cam.h
+index 3fc1a299..bff8aab0 100644
+--- a/include/trace/events/msm_cam.h
++++ b/include/trace/events/msm_cam.h
+@@ -16,7 +16,7 @@
+ #if !defined(_TRACE_MSM_VFE_H) || defined(TRACE_HEADER_MULTI_READ)
+ #define _TRACE_MSM_VFE_H
+ 
+-#include "msm_isp.h"
++#include "../../../drivers/media/platform/msm/camera_v2/isp/msm_isp.h"
+ #include <linux/types.h>
+ #include <linux/tracepoint.h>
+ 
+-- 
+2.25.1
+

@@ -1,0 +1,23 @@
+# Maintainer: Ferenc Bakonyi <bakonyi.ferenc@gmail.com>
+pkgname=fbkeyboard
+pkgver=0.4
+pkgrel=1
+pkgdesc="Framebuffer softkeyboard for use on devices with touchscreen input like smartphones"
+url="https://github.com/bakonyiferenc/fbkeyboard"
+arch="all"
+license="GPL-3.0-or-later"
+depends="freetype ttf-dejavu"
+makedepends="linux-headers freetype-dev"
+source="https://github.com/bakonyiferenc/fbkeyboard/archive/$pkgver/fbkeyboard-$pkgver.tar.gz"
+options="!check" # No tests
+
+build() {
+	make
+}
+
+package() {
+	install -Dm755 fbkeyboard "$pkgdir"/usr/bin/fbkeyboard
+}
+
+
+sha512sums="cd3c9057b4ef86d5678eb448cc51631342d643695f5ba0210ec8d0e282c85d1353afc86633e8e570913e104d9c2aa063d33ebc867d756f0d1d609fc47542c3a1  fbkeyboard-0.4.tar.gz"

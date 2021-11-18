@@ -1,0 +1,44 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Xiaomi Mi A2 Lite"
+deviceinfo_manufacturer="Xiaomi"
+deviceinfo_codename="xiaomi-daisy"
+deviceinfo_year="2018"
+deviceinfo_arch="aarch64"
+
+# Mainline
+deviceinfo_dtb_mainline="qcom/sdm625-xiaomi-daisy"
+deviceinfo_append_dtb_mainline="true"
+deviceinfo_modules_initfs_mainline="edt_ft5x06"
+deviceinfo_gpu_accelerated="true"
+deviceinfo_mesa_driver="msm"
+
+# Downstream
+deviceinfo_append_dtb_downstream="false"
+
+# Device related
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="1080"
+deviceinfo_screen_height="2280"
+deviceinfo_dev_touchscreen_downstream="/dev/input/event1"
+deviceinfo_dev_touchscreen_calibration="/etc/pointercal"
+deviceinfo_swap_size_recommended="1024"
+
+# Bootloader related
+deviceinfo_flash_method="fastboot"
+deviceinfo_generate_bootimg="true"
+deviceinfo_kernel_cmdline_mainline="earlycon console=ttyMSM0,115200 PMOS_NO_OUTPUT_REDIRECT"
+deviceinfo_kernel_cmdline_downstream="console=ttyHSL0,115200,n8 androidboot.console=ttyHSL0 androidboot.hardware=qcom msm_rtb.filter=0x237 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 androidboot.bootdevice=7824900.sdhci earlycon=msm_hsl_uart,0x78af000 androidboot.usbconfigfs=false loop.max_part=7 buildvariant=user veritykeyid=id:5560e7863b4d8118c2f1b065595cf93bb2447992"
+deviceinfo_bootimg_qcdt="false"
+deviceinfo_bootimg_dtb_second="false"
+deviceinfo_flash_offset_base="0x80000000"
+deviceinfo_flash_offset_kernel="0x00008000"
+deviceinfo_flash_offset_ramdisk="0x01000000"
+deviceinfo_flash_offset_second="0x00f00000"
+deviceinfo_flash_offset_tags="0x00000100"
+deviceinfo_flash_pagesize="2048"
+deviceinfo_flash_sparse=true

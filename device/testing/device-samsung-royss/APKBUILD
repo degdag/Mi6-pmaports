@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-royss
+pkgdesc="Samsung Galaxy Young"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-royss mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	fb.modes
+	initfs-hook.sh
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+12c53381ca912d7441d385f6cab77f872d9d44fea6f4b8a66a98c0f318dc98ebcea8dd1cdb40e7b76b09befa459fc2b540b569259dd4683db4713445af497fae  deviceinfo
+b246f5832618356e4519e6cac15b3700a219eba625a16799e80acf85f62e33bf3c110c35f63007479e1caf2ff8a87f169a3dcdc6ba0980fa0ac5781d63cbd40d  fb.modes
+b3d8e6d90b9996c444738f3bda1fa2afc411cfab9506f20f72bb7b16ca03f4db844138e4443c27d00f4ae809d9b28f4313c5c54512524aa86300efbb54907725  initfs-hook.sh
+"

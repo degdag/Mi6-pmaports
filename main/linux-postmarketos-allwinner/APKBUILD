@@ -1,0 +1,120 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+# Co-Maintainer: Luca Weiss <luca@z3ntu.xyz>
+# Co-Maintainer: Bart Ribbers <bribbers@disroot.org>
+# Co-Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+# Co-Maintainer: Clayton Craft <clayton@craftyguy.net>
+_flavor=postmarketos-allwinner
+_config="config-$_flavor.$CARCH"
+pkgname=linux-$_flavor
+pkgver=5.14.6_git20210920
+pkgrel=2
+_tag="orange-pi-5.14-20210920-2006"
+pkgdesc="Kernel fork with Pine64 patches (megi's tree, slightly patched)"
+arch="aarch64 armv7"
+url="https://megous.com/git/linux/"
+license="GPL-2.0-only"
+makedepends="
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	gmp-dev
+	installkernel
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	rsync
+	xz
+	"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-zram
+	"
+source="$pkgname-$_tag.tar.gz::https://github.com/megous/linux/archive/$_tag.tar.gz
+	config-$_flavor.aarch64
+	config-$_flavor.armv7
+	0001-dts-add-dontbeevil-pinephone-devkit.patch
+	0002-dts-add-pinetab-dev-old-display-panel.patch
+	0003-dts-pinetab-add-missing-bma223-ohci1.patch
+	0004-arm64-dts-allwinner-Add-bluetooth-node-to-the-PineTa.patch
+	0005-dts-pinetab-make-audio-routing-consistent-with-pinep.patch
+	0006-dts-pinephone-remove-bt-firmware-suffix.patch
+	0007-media-ov5640-Implement-autofocus.patch
+	0008-dts-pinephone-drop-modem-power-node.patch
+	0009-drm-panel-simple-Add-Hannstar-TQTM070CB501.patch
+	0010-ARM-dts-sun6i-Add-GoClever-Orion-70L-tablet.patch
+	0011-drm-panel-simple-Add-Hannstar-HSD070IDW1-A.patch
+	0012-ARM-dts-sun6i-Add-Lark-FreeMe-70.2S-tablet.patch
+	0013-sunxi-mmc-h6-fix.patch
+	0014-arm64-dts-allwinner-orangepi-3-fix-ethernet.patch
+	0015-add-kb151-support.patch
+	0016-add-kb151-fn-layer-support.patch
+	"
+subpackages="$pkgname-dev"
+builddir="$srcdir/linux-$_tag"
+
+case "$CARCH" in
+	aarch64*) _carch="arm64" ;;
+	arm*) _carch="arm" ;;
+esac
+
+
+prepare() {
+	default_prepare
+
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor" \
+		CFLAGS_MODULE=-fno-pic
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	make -j1 modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+dev() {
+	provides="linux-headers"
+	replaces="linux-headers"
+
+	cd $builddir
+
+	# https://github.com/torvalds/linux/blob/master/Documentation/kbuild/headers_install.rst
+	make -j1 headers_install \
+		ARCH="$_carch" \
+		INSTALL_HDR_PATH="$subpkgdir"/usr
+}
+sha512sums="
+8f3b5b21498c5a9f10d2a3bfaa9ad7d9dabc532799cebfab65f1de766bfd5c4b9d2b92e42214dd17b1f4b64a98b13baaa877db7e3f7976f7f7903585ac207da2  linux-postmarketos-allwinner-orange-pi-5.14-20210920-2006.tar.gz
+f799bac9d8e55ddf5028c234014a57ea273c06aabc835313dee69d4f6eae90efa19021f799bcad9a13d3827dc7fddf042c7856b903cb2ef500e9334bea9595da  config-postmarketos-allwinner.aarch64
+50bd168fbdcd5d8e8a0dfcb2d7349da95b4e8fa6d5beb224631d1eaa948c86e74ec695a8d68202bbaa422f9cb0a408a92a925dcf81f1e4fb1cd285651d1d287f  config-postmarketos-allwinner.armv7
+126e0a65e04f22f14eac1281a69000d9d5b107ed8fd1b52f37e812751f55e6c45b0240ceac61c9d95ae7f0543aaf9d96b85a8532baf59283c077b9945e615367  0001-dts-add-dontbeevil-pinephone-devkit.patch
+1dc710f5abacdd5698169d5e985efeca8114986c774c3d65e89812d08ceb3db5ebdc6dd64dd76a262c761f3bfc3ffb6bc237fd5236bd1f89c5975d12e42eda04  0002-dts-add-pinetab-dev-old-display-panel.patch
+96849f40f6defc4ad7646256814bea5ac353c4e0479fd069365ff27456d63da801541ec616f6db736d60f3134384321a9eeb5bfbd555363bf1259c8de63d17fa  0003-dts-pinetab-add-missing-bma223-ohci1.patch
+925bd630f3694d118b24f2f5a838ba105e4ca9ed8dd4294b6632310d8d6b1f421cdd673e2013758f9de7159050aa54e0f76e04edcff65f755842b1c95b6637e7  0004-arm64-dts-allwinner-Add-bluetooth-node-to-the-PineTa.patch
+9bc6c2afadae8d367471f901b86a94be7fa70daf7a4bdde5bc6d4b1458b5ddd0e063a7765d962c68231c8f022d1c660d422124c31a2c899de768985d91d377ea  0005-dts-pinetab-make-audio-routing-consistent-with-pinep.patch
+f6b35e61e88d933b612ee3212d71bb3e1aba8590c4985d9c17817426283df578476c00f3297683e43b570599384e78bb1fe76c506b3df93428e2101c4ccb1f3d  0006-dts-pinephone-remove-bt-firmware-suffix.patch
+5e0566074fcb18b95c8ea079178f5d6716eb1ea325a25176e67f80eff1e5b10f90e282c8059a0a3315606546c61f05bd9ebad06adb67086cd123f0276cccbdc8  0007-media-ov5640-Implement-autofocus.patch
+62809ac84db9d684b02d56dfc543451a1a13f319287466cfe913a847b945584ec60f7f556b1259ad3e26a44259a3fe587eeabeef6333f73a77204c3d3573f2ab  0008-dts-pinephone-drop-modem-power-node.patch
+c61d4f86eddecca99df1ea1323f988e575f9c49130b64a0c50d61028ff96e24aaa3131fb3731e62e9b07db67019104d98933e31457891a5ce1e6010e06232875  0009-drm-panel-simple-Add-Hannstar-TQTM070CB501.patch
+7f57e4ebc0b0cebb624f340c568f22e93116f2753b634d9bc75eea1a1bc013b8f9375e1efd24a20bff79c3725166df210a3a30bb7643a4525e3d40b63b91c536  0010-ARM-dts-sun6i-Add-GoClever-Orion-70L-tablet.patch
+71fad7ecff66a2cb692f3dd3d02301c4b419873f27693de81f50226b8ab93c229299e7dc663fdd07a7e8f03a6541527f3bb449626f865fcfde6a780ef1b91976  0011-drm-panel-simple-Add-Hannstar-HSD070IDW1-A.patch
+902708a5a8dd8a815d3d1793933d307c551e3c10368d1805431b70691ee5d4438b7146c466549f457468e365f94073a35ae3304928af7581e5dc91ba5c8fa682  0012-ARM-dts-sun6i-Add-Lark-FreeMe-70.2S-tablet.patch
+2feeab0a6c3db46e514d45c9708f351c6d7dfb0bf951a5cb6f2dc01b4bdc8d4c46931000758a819a6d7317b16cb1933bb3946e6a78cbf448cc77f57a56c503bf  0013-sunxi-mmc-h6-fix.patch
+22af33264090dac027ee054b4345a07f0b2ee077e2ae1620e83960bfeea096169aec710973fdd50531ed4f1db6cfd59b5796cd235316cb3512aee034f741a694  0014-arm64-dts-allwinner-orangepi-3-fix-ethernet.patch
+20efcc7169620ee3114e3b1a11c92cacafe87ffd4bf248a6ba3b36916e4b89cf37d3099535e811769de8b735c2730b2eb313f2bb17d4bd7fd7979dc5f7750d06  0015-add-kb151-support.patch
+0c258c09ca8b962495bbfd5981972885ee13952f94316b75cda33c47ddaa8434315e0d7c929ce0ef556a048c622e139965366ce09be14f919e8f93e93ac3ed2b  0016-add-kb151-fn-layer-support.patch
+"

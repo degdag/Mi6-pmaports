@@ -1,0 +1,111 @@
+# Maintainer: Jonathan Bakker <xc-racer2@live.ca>
+
+pkgname=mesa-pvr-dri-classic
+pkgver=20.3.2
+pkgrel=1
+_tag=mesa-pvr-20.3.2
+pkgdesc="Mesa DRI OpenGL library with PowerVR patches"
+url="https://github.com/xc-racer99/mesa-pvr/"
+arch="armhf armv7 aarch64"
+license="MIT SGI-B-2.0 BSL-1.0"
+_llvmver=11
+depends_dev="
+	libdrm-dev
+	libxext-dev
+	libxdamage-dev
+	libxcb-dev
+	libxshmfence-dev
+	"
+makedepends="
+	$depends_dev
+	bison
+	eudev-dev
+	expat-dev
+	findutils
+	flex
+	gettext
+	elfutils-dev
+	libtool
+	libxfixes-dev
+	libva-dev
+	libvdpau-dev
+	libx11-dev
+	libxrandr-dev
+	libxt-dev
+	libxvmc-dev
+	libxxf86vm-dev
+	mesa-glapi
+	llvm$_llvmver-dev
+	makedepend
+	meson
+	py3-mako
+	py3-libxml2
+	python3
+	talloc-dev
+	wayland-dev
+	wayland-protocols
+	xorgproto
+	zlib-dev
+	zstd-dev
+	"
+depends="mesa sgx-ddk-um-soc"
+source="
+	https://github.com/xc-racer99/mesa-pvr/archive/$_tag.tar.gz
+	"
+options="!check" # we skip tests intentionally
+builddir="$srcdir/mesa-pvr-$_tag"
+
+_dri_driverdir=/usr/lib/xorg/modules/dri
+_dri_drivers="exynos,tidss,tilcdc,omapdrm"
+
+build() {
+	export CFLAGS="$CFLAGS -D_XOPEN_SOURCE=700"
+	export MESA_GIT_SHA1_OVERRIDE=53b2b224dc2de982c37915a0ad218e33365ff75e
+
+	python3 bin/git_sha1_gen.py --output include/git_sha1.h
+
+	# Reasoning for gallium-drivers="swrast":
+	# https://gitlab.com/postmarketOS/pmaports/-/merge_requests/2049#note_543436715
+	abuild-meson \
+		-Ddri-drivers-path=$_dri_driverdir \
+		-Dgallium-drivers="swrast" \
+		-Ddri-drivers=$_dri_drivers \
+		-Dvulkan-drivers="" \
+		-Dplatforms=x11,wayland \
+		-Dllvm=true \
+		-Dshared-llvm=true \
+		-Dshared-glapi=true \
+		-Dgbm=true \
+		-Dglx=dri \
+		-Dopengl=true \
+		-Dgles1=false \
+		-Dgles2=true \
+		-Degl=true \
+		-Db_ndebug=true \
+		$_arch_opts \
+		. output
+
+	# Print config
+	meson configure output
+
+	# parallel build workaround
+	ninja -C output src/compiler/nir/nir_intrinsics.h
+
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	install -Dm644 output/src/mesa/drivers/dri/libmesa_dri_drivers.so \
+		"$pkgdir/$_dri_driverdir"/omapdrm_dri.so
+	install -Dm644 output/src/mesa/drivers/dri/libmesa_dri_drivers.so \
+		"$pkgdir/$_dri_driverdir"/exynos_dri.so
+	install -Dm644 output/src/mesa/drivers/dri/libmesa_dri_drivers.so \
+		"$pkgdir/$_dri_driverdir"/tilcdc_dri.so
+	install -Dm644 output/src/mesa/drivers/dri/libmesa_dri_drivers.so \
+		"$pkgdir/$_dri_driverdir"/tidss_dri.so
+
+	install -Dm644 output/src/gallium/targets/dri/libgallium_dri.so \
+		"$pkgdir/$_dri_driverdir"/swrast.so
+}
+
+sha512sums="a922fc58b4f42a9cc6b8bb0b8c640090d8cd49a03f630a0b9ffb9b208dad1607451433996ca8b658c77226b5a4bd9de67f1559f58a07925583c4de0a1c070503  mesa-pvr-20.3.2.tar.gz"

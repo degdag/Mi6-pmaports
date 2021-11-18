@@ -1,0 +1,28 @@
+From 8471ec6f7574e27f714dee60d35814b6c719c18f Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 18:38:10 +0200
+Subject: [PATCH 04/10] RX-51: Symbols: Bind less and greater to fourth level V
+ and B
+
+---
+ symbols/nokia_vndr/rx-51 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 5ca6aaa..1f66785 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -410,8 +410,8 @@ xkb_symbols "english_base" {
+     key <AB01>	{ [	z,		Z,		sterling,	sterling	] };
+     key <AB02>	{ [	x,		X,		dollar,		dollar		] };
+     key <AB03>	{ [	c,		C,		EuroSign,	EuroSign	] };
+-    key <AB04>	{ [	v,		V,		slash,		slash		] };
+-    key <AB05>	{ [	b,		B,		backslash,	backslash	] };
++    key <AB04>	{ [	v,		V,		slash,		less		] };
++    key <AB05>	{ [	b,		B,		backslash,	greater		] };
+     key <AB06>	{ [	n,		N,		quotedbl,	quotedbl	] };
+     key <AB07>	{ [	m,		M,		apostrophe,	apostrophe	] };
+     key <SPCE>	{ [	space,		space,		at,		at		] };
+-- 
+1.8.1.4
+

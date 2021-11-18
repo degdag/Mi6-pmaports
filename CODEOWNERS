@@ -1,0 +1,10 @@
+# https://docs.gitlab.com/ee/user/project/code_owners.html
+
+device/*/*-pine64-pinephone/        @craftyguy @milesalan @bshah @proycon @anjandev @StacyHarper
+device/*/*-purism-librem5/          @craftyguy @bshah
+main/osk-sdl/                       @craftyguy
+main/mesa-pvr-dri-classic/          @xc-racer99
+main/postmarketos-ui-plasma-mobile/ @bshah
+temp/u-boot-librem5/                @craftyguy @bshah
+
+# vim: ts=4 sw=4 et

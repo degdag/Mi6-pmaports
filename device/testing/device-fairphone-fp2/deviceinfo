@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Fairphone 2"
+deviceinfo_manufacturer="Fairphone"
+deviceinfo_codename="fairphone-fp2"
+deviceinfo_year="2015"
+deviceinfo_dtb_mainline="qcom-msm8974-fairphone-fp2"
+deviceinfo_append_dtb_mainline="true"
+deviceinfo_modules_initfs_mainline="pm8941_pwrkey ili210x"
+deviceinfo_arch="armv7"
+
+# Device related
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="1080"
+deviceinfo_screen_height="1920"
+deviceinfo_getty_downstream="ttyHSL0;115200"
+deviceinfo_getty_mainline="ttyMSM0;115200"
+deviceinfo_mesa_driver_mainline="msm"
+
+# Bootloader related
+deviceinfo_flash_method="fastboot"
+deviceinfo_kernel_cmdline_downstream="console=ttyHSL0,115200,n8 PMOS_NO_OUTPUT_REDIRECT androidboot.hardware=qcom user_debug=31 msm_rtb.filter=0x3b7 ehci-hcd.park=3 androidboot.bootdevice=msm_sdcc.1"
+deviceinfo_kernel_cmdline_mainline="earlycon=msm_serial_dm,0xf991e000 PMOS_NO_OUTPUT_REDIRECT msm.vram=192m msm.allow_vram_carveout=1"
+deviceinfo_generate_bootimg="true"
+deviceinfo_bootimg_qcdt_downstream="true"
+deviceinfo_flash_offset_base="0x00000000"
+deviceinfo_flash_offset_kernel="0x00008000"
+deviceinfo_flash_offset_ramdisk="0x02000000"
+deviceinfo_flash_offset_second="0x00f00000"
+deviceinfo_flash_offset_tags="0x00000100"
+deviceinfo_flash_pagesize="2048"

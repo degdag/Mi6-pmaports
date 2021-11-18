@@ -1,0 +1,55 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname="device-xiaomi-sagit"
+pkgdesc="Xiaomi Mi 6"
+pkgver=3
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	mkbootimg
+	postmarketos-base
+	postmarketos-update-kernel
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	phoc.ini
+"
+subpackages="
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel"
+	depends="linux-postmarketos-qcom-msm8998 soc-qcom-sdm845"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Firmware for GPU, Wi-Fi, Bluetooth etc. (mainline only, also needed for osk-sdl)"
+	depends="firmware-xiaomi-sagit"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/phoc.ini \
+		"$subpkgdir"/etc/phosh/phoc.ini
+}
+
+sha512sums="
+6fcd7bd2bb5b20b54a6eb8df7210f062141905ba17245fabc625c68150bf1aafa2cf99ced212a5577fea0576c16acc83c130406451bd34c4aa06bba29cae70ea  deviceinfo
+b196dfe169e14b0b8ef3534bf8efce1ea556f090e6f9d5d19d32526375a92aae04ad2d031c3b9eab9b059ae9fdffdb152ec1b126a18d6ff7a92a5227a6eac0e5  phoc.ini
+"

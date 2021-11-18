@@ -1,0 +1,32 @@
+# Unmaintained: Downstream port, only for testing. Use mainline port (motorola-ocean)!
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-ocean-downstream
+pkgdesc="Motorola Moto G7 Power"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-ocean-downstream mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi, GPU, modem, and audio firmware"
+	depends="firmware-motorola-ocean"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+28fbf43b00ab02535fb8c5822e7adb32025b0593a3f99f43778ab891fb2c8ac5db9dfc0d6ecefca7ad3484bd72e3d26a73fee06d723419921ad513a6f7f08177  deviceinfo
+"

@@ -1,0 +1,63 @@
+# Unmaintained: Downstream port, only for testing. Use mainline port (samsung-klte)!
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-klte-downstream
+pkgdesc="Samsung Galaxy S5 (SM-G900F)"
+pkgver=1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	cpufrequtils
+	linux-samsung-klte-downstream
+	mesa-dri-gallium
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	cpufreq.start
+	deviceinfo
+	fstab.android
+	NetworkManager-klte.conf
+"
+install="$pkgname.post-install"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# Disable v4l udev rules (video4linux), because without the camera
+	#   firmware blobs this makes udev helper hang (#1033).
+	mkdir -p "$pkgdir"/etc/udev/rules.d
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+
+	# NetworkManager configuration - ignore unsupported devices and set default dhcp client
+	install -Dm644 "$startdir"/NetworkManager-klte.conf \
+		"$pkgdir"/etc/NetworkManager/conf.d/10-klte.conf
+
+	# Power/battery saver, prevent device from overheating
+	install -Dm755 "$startdir"/cpufreq.start "$pkgdir"/etc/local.d/cpufreq.start
+
+	# fstab with android mountpoints
+	install -Dm644 "$startdir"/fstab.android "$pkgdir"/etc/fstab.android
+}
+
+nonfree_firmware() {
+	pkgdesc="Wi-Fi firmware"
+	depends="firmware-samsung-klte-wifi"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c66e0c57e911b644cf6c340ea19ce0a9399b8e9e6cb0da38f612e0f8b3d0812ad109cd7b7506184e840a653397a64e3e57fdc71ab8b0fc52733bf74365b9c0e7  cpufreq.start
+64f4951e064ecd598e19a187c9d03989f37954ddb5726f97d54e21a46ad9ea49b0945f93bc04e3dcb97183bd03c87c66c28f2d3b8cc88e5bd8427795a4865d31  deviceinfo
+6648d792ffd9fc002e45834fe12a77d20935a8936246d4a06f1835a4370c2de1cb3191650d02c21d637cfe68a5a7286a5c9e5f9c00b9c56c299176b210f6af3f  fstab.android
+3753dcd8c25cfbbdd8f087a3168537df1334f0d33f36bc8923ec3d225ceb88121aa8d1670d6c6a2baab3d7067c86a43571695ce22e3b47076f97fcb53d1d7e6f  NetworkManager-klte.conf
+"

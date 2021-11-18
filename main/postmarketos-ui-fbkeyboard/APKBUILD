@@ -1,0 +1,23 @@
+# Maintainer: Ferenc Bakonyi <bakonyi.ferenc@gmail.com>
+pkgname=postmarketos-ui-fbkeyboard
+pkgver=1
+pkgrel=3
+pkgdesc="Plain framebuffer console with touchscreen keyboard support"
+url="https://github.com/bakonyiferenc/fbkeyboard"
+arch="all"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	fbkeyboard
+	networkmanager
+	postmarketos-base-ui
+	"
+install="$pkgname.post-install $pkgname.pre-deinstall $pkgname.post-upgrade"
+source="fbkeyboard.init"
+options="!check" # No tests
+
+package() {
+	install -Dm755 "$srcdir"/fbkeyboard.init "$pkgdir"/etc/init.d/fbkeyboard
+}
+
+sha512sums="1341e2a4ba9187f2538f210c3c4bcd8e2e79341552391b3ce57fb2f0d9a8c99a4d7c182d82d2d8f73caea22ace25530fe42e6b16040e8aa7dc62b4e96a5db81d  fbkeyboard.init"

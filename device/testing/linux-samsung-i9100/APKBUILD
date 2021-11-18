@@ -1,0 +1,74 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/i9100_defconfig
+
+pkgname=linux-samsung-i9100
+pkgver=3.0.101
+pkgrel=18
+pkgdesc="Samsung Galaxy SII kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-i9100"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev
+	findutils busybox-static-armv7"
+
+# Source
+_repository="android_kernel_samsung_smdk4412"
+_commit="349a3e91e76d17e67ef6213e1f6712e700695631"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/LineageOS/$_repository/archive/$_commit.tar.gz
+	$_config
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+	init
+"
+
+builddir="$srcdir/$_repository-$_commit"
+
+prepare_isorec() {
+	# Use Alpine's busybox.static instead of the pre-compiled busybox shipped
+	# with the source
+	cp -v /usr/$(arch_to_hostspec $arch)/bin/busybox.static \
+		"$builddir"/usr/galaxys2_initramfs_files/busybox
+
+	# do not use ramdisk.cpio and ramdisk-recovery-device.cpio, always use
+	# the initramfs from the recovery partition ("isorec"), so we can build
+	# it later and independently from the kernel. also directly boot that
+	# partition, not only when the recovery key combination was used.
+	cd "$builddir"/usr/
+	mv galaxys2_initramfs.list galaxys2_initramfs.list_old
+	grep -v "../../ramdisk" galaxys2_initramfs.list_old > galaxys2_initramfs.list
+	cp -v "$srcdir"/init "$builddir"/usr/galaxys2_initramfs_files/init
+
+	# Paths supplied to gen_initramfs_list.sh are prefixed with "source/".
+	ln -s "$builddir" "$builddir"/source
+
+	cd "$builddir"
+}
+
+prepare() {
+	default_prepare
+	prepare_isorec
+
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="285ffd2c82d0444b99da583573d19443b73de22d7382aae54413af229a28bebf4ea32ecbe248ae54ae64bbbc0af7d722b1ef86d5dd099e2990dcc6284fb195fa  linux-samsung-i9100-349a3e91e76d17e67ef6213e1f6712e700695631.tar.gz
+da19880398a1ed7728da141fb74c49d21111757c1aa64f9e86f8ab6ca743f9b0f7bf22d9142aadee93157ff597ff495df30ceeca92b050c8cc3e7d13a7e8fbf9  config-samsung-i9100.armv7
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+dd4094d5f4ec281d32f12af88cb22a782e497c8e52f69cf60b73ac7d6171fc95f1f8040b3d0ad2ff3f016d22ac1d91c5b522e5d03203534a76742bc55a082af5  init"

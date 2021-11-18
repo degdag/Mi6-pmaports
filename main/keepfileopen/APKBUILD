@@ -1,0 +1,20 @@
+# Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=keepfileopen
+pkgver=1
+pkgrel=0
+pkgdesc="Small utility to keep a file open. Yes, that's all it does :)"
+url="https://postmarketos.org"
+arch="all"
+license="MIT"
+source="keepfileopen.c"
+options="!check" # No tests. Not much can go wrong here...
+
+build() {
+	gcc -o keepfileopen keepfileopen.c
+}
+
+package() {
+	install -Dm755 "$srcdir"/keepfileopen "$pkgdir"/usr/bin/keepfileopen
+}
+
+sha512sums="ac9ed0f6ec07ef813ce3a539919acbe8a5a70d5765a5fff267674a3fb239cdb1dba58a14d72a64f990bdcb87c6476d30ef7add21f152df7cb48e36932ef14dbb  keepfileopen.c"

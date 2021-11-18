@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-payton
+pkgdesc="Motorola Moto X4"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-payton mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo directfbrc fb.modes"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/directfbrc "$pkgdir"/etc/directfbrc
+}
+
+
+sha512sums="
+c5e3605061850c0e2388d989308ac768de05a2535ce839bbef7b61492629df586f9b76dc8e1a6a08f03cc4409c311309d1e5f00a333ef37f00f40665b0291c91  deviceinfo
+3db3ec596e159be926ea2b5b2496c18e9bc7be24a64a232a56c89a0c9ee710aa2efb2b6fa9fc08efa34759e8242e6c629d08a4ce688ec8aa125830717c191515  directfbrc
+fed190ea8ef9470e30046bcd421b475684b88a03912730813d6364bf669dc01b1e311ceb68c3ae7fdd0b3a7ce75ff24ee546ecd0be40119ecf79a097870613ea  fb.modes
+"

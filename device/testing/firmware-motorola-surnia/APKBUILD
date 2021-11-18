@@ -1,0 +1,41 @@
+pkgname=firmware-motorola-surnia
+pkgver=0.1
+pkgrel=0
+pkgdesc="Firmware for Motorola Moto E 2015 (2nd gen)"
+url="https://github.com/linuxgorl/vendor_motorola_surnia"
+subpackages="$pkgname-wcnss $pkgname-venus $pkgname-modem"
+arch="armhf"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+
+_commit="b8dbec48197c086d22371d360fa41387880a1dcb"
+source="$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz"
+
+_fwdir="/lib/firmware/postmarketos"
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+wcnss() {
+	pkgdesc="Motorola Moto E 2015 (2nd gen) Wi-Fi/Bluetooth firmware"
+	cd "$srcdir/vendor_motorola_surnia-$_commit"
+	install -Dm644 wcnss.* -t "$subpkgdir/$_fwdir"
+	install -Dm644 wlan/prima/WCNSS_qcom_wlan_nv.bin -t "$subpkgdir/$_fwdir/wlan/prima"
+}
+
+venus() {
+	pkgdesc="Motorola Moto E 2015 (2nd gen) video firmware"
+	cd "$srcdir/vendor_motorola_surnia-$_commit"
+	install -Dm644 venus.b* -t "$subpkgdir/$_fwdir"
+	install -Dm644 venus.mdt -t "$subpkgdir/$_fwdir"
+}
+
+modem() {
+	pkgdesc="Motorola Moto E 2015 (2nd gen) modem firmware"
+	cd "$srcdir/vendor_motorola_surnia-$_commit"
+	install -Dm644 modem.* -t "$subpkgdir/$_fwdir"
+	install -Dm644 mba.mbn -t "$subpkgdir/$_fwdir"
+}
+
+sha512sums="859f81ef316ee025245e217e8bca891c89dade23781cc386d6c930608cbd8aba78b0f3c93a0ad1a265ba20554379fe60331e32c1924ee4dd9151f8c146be347f  firmware-motorola-surnia-b8dbec48197c086d22371d360fa41387880a1dcb.tar.gz"

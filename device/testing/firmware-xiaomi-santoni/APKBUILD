@@ -1,0 +1,35 @@
+pkgname=firmware-xiaomi-santoni
+pkgver=1
+pkgrel=4
+_commit="926d2ffbcb572ede8ad5942acea69175908afbb7"
+pkgdesc="Firmware files for Xiaomi Redmi 4X"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+options="!strip !check !archcheck !spdx !tracedeps pmb:cross-native"
+
+# Source
+_files="wcnss.b00 wcnss.b01 wcnss.b02 wcnss.b04 wcnss.b06
+	wcnss.b09 wcnss.b10 wcnss.b11 wcnss.b12 wcnss.mdt
+	adsp.b00 adsp.b01 adsp.b02 adsp.b03 adsp.b04 adsp.b05
+	adsp.b06 adsp.b07 adsp.b08 adsp.b09 adsp.b10 adsp.b11
+	adsp.b12 adsp.b13 adsp.b14 adsp.mdt"
+_files_prima="WCNSS_wlan_dictionary.dat WCNSS_qcom_cfg.ini WCNSS_qcom_wlan_nv.bin"
+source="$pkgname-$_commit.tar.gz::https://github.com/Danct12/vendor_xiaomi_santoni/archive/$_commit.tar.gz"
+builddir="$srcdir/vendor_xiaomi_santoni-$_commit"
+
+package() {
+	# /lib/firmware/postmarketos
+	for _i in $_files; do
+		install -D -m644 "$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/"$_i"
+	done
+
+	# /lib/firmware/postmarketos/wlan/prima
+	for _i in $_files_prima; do
+		install -D -m644 wlan/prima/"$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/wlan/prima/"$_i"
+	done
+}
+
+sha512sums="389f5915fd9004f0256a8d29702da125c04f483805d0caf432db2d228f19660c00c01458d5df5faf5b83fd2766fbae10c28db5d0a82323d3ee64e367dfcef396  firmware-xiaomi-santoni-926d2ffbcb572ede8ad5942acea69175908afbb7.tar.gz"

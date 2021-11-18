@@ -1,0 +1,44 @@
+From 854cd3c0d4d6a735339ce1c259952c082b8bb894 Mon Sep 17 00:00:00 2001
+From: Wolfgang Wiedmeyer <wolfgit@wiedmeyer.de>
+Date: Mon, 26 Sep 2016 23:33:05 +0200
+Subject: [PATCH 06/10] mfd: max77693: Add defines for charger current control
+
+This prepares for an updated regulator and charger driver. The defines
+are needed to set the maximum input current and the fast charge
+current.
+
+Signed-off-by: Wolfgang Wiedmeyer <wolfgit@wiedmeyer.de>
+GNUtoo@cyberdimension.org: small fix
+Signed-off-by: Denis 'GNUtoo' Carikli <GNUtoo@cyberdimension.org>
+---
+ include/linux/mfd/max77693-private.h | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/include/linux/mfd/max77693-private.h b/include/linux/mfd/max77693-private.h
+index 311f7d3d2323..f6df8bafe996 100644
+--- a/include/linux/mfd/max77693-private.h
++++ b/include/linux/mfd/max77693-private.h
+@@ -217,6 +217,9 @@ enum max77693_charger_battery_state {
+ #define CHG_CNFG_01_CHGRSTRT_MASK	(0x3 << CHG_CNFG_01_CHGRSTRT_SHIFT)
+ #define CHG_CNFG_01_PQEN_MAKS		BIT(CHG_CNFG_01_PQEN_SHIFT)
+ 
++/* MAX77693_CHG_REG_CHG_CNFG_02 register */
++#define CHG_CNFG_02_CC_MASK		0x3F
++
+ /* MAX77693_CHG_REG_CHG_CNFG_03 register */
+ #define CHG_CNFG_03_TOITH_SHIFT		0
+ #define CHG_CNFG_03_TOTIME_SHIFT	3
+@@ -245,6 +248,10 @@ enum max77693_charger_battery_state {
+ 
+ /* MAX77693 CHG_CNFG_09 Register */
+ #define CHG_CNFG_09_CHGIN_ILIM_MASK	0x7F
++#define CHG_CNFG_09_CHGIN_ILIM_500_MAX	500000
++#define CHG_CNFG_09_CHGIN_ILIM_500_MIN	470000
++#define CHG_CNFG_09_CHGIN_ILIM_0_MAX	60000
++#define CHG_CNFG_09_CHGIN_ILIM_0_MIN	0
+ 
+ /* MAX77693 CHG_CTRL Register */
+ #define SAFEOUT_CTRL_SAFEOUT1_MASK	0x3
+-- 
+2.33.0
+

@@ -1,0 +1,81 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i9100
+pkgver=4
+pkgrel=4
+pkgdesc="Samsung Galaxy SII"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base libsamsung-ipc"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install"
+options="!check !archcheck"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-nonfree-firmware-front-camera:nonfree_firmware_front_camera
+	$pkgname-weston:weston
+	$pkgname-media-pipeline:media_pipeline
+"
+source="
+	deviceinfo
+	90-android-touch-dev.rules
+	weston.ini
+	media-pipeline.initd
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-samsung-i9100 mesa-dri-swrast"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel"
+	depends="linux-postmarketos-exynos4 mesa-dri-gallium mesa-egl"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-i9100"
+	mkdir "$subpkgdir"
+}
+
+nonfree_firmware_front_camera() {
+	pkgdesc="Front camera firmware"
+	install_if="$pkgname-kernel-mainline"
+	depends="firmware-samsung-s5k5baf"
+	mkdir "$subpkgdir"
+}
+
+weston() {
+	install_if="$pkgname-kernel-mainline weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+media_pipeline() {
+	install_if="$pkgname-kernel-mainline"
+	depends="v4l-utils"
+	install="$subpkgname.post-install"
+	install -Dm755 "$srcdir"/media-pipeline.initd "$subpkgdir"/etc/init.d/media-pipeline
+}
+
+sha512sums="
+3f9eea389812bb95efdc7921d50dc7589aafc70f7ad4ce7f2e16cda135ff2683ca07bfa899a000e9272ea7abf2cc28870782ade02f0a1f164dc6370e56918fa7  deviceinfo
+089635daddd88eec35451bfe98dc3713035e3623c896dd21305b990ecf422e8fbb54e010cf347919bbb3a7385f639ab119280477fe0783df3228168d97d96fc6  90-android-touch-dev.rules
+de794566118f1744d068a94e6a75b61d43f6749a4b0871a5270fa7a2048164d609c71fcffa61845c2a7dd4cb5fbeb72c0e4f8b73b382f36d6ff0bcc9b8a5ae25  weston.ini
+d3f06476be583f095189557e5269866cfc9346ddbf8d78267d7562fad7f5eca6b09b81fd08cd9690ecf88105bafe8f3ebd9136b68ab5cdaa8bfff740a8bdf3d2  media-pipeline.initd
+"

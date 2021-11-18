@@ -1,0 +1,13 @@
+#!/usr/sbin/nft -f
+
+table inet filter {
+	chain input {
+
+		# drop ssh from wwan
+		iifname "wwan*" tcp dport 22 drop comment "drop SSH from wwan"
+
+		# allow ssh
+		tcp dport 22 accept comment "accept SSH"
+
+	}
+}

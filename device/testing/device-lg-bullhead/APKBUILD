@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-bullhead
+pkgdesc="Google Nexus 5X"
+pkgver=0.1
+pkgrel=13
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-lg-bullhead mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+nonfree_firmware() {
+	pkgdesc="Proprietary WiFi, Modem, GPU and sensors firmware"
+	depends="firmware-lg-bullhead"
+	mkdir "$subpkgdir"
+}
+
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+e98b8a6f31dd5ba6cad8940771a5e5c7d0ff6e236ba79f52083f012292a6becea1452f7a53d06b7a1ed7ac1bf3187e994aeae1d6315dcdb757af4578c3c41173  deviceinfo
+"

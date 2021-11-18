@@ -1,0 +1,45 @@
+pkgname=firmware-bq-piccolo
+pkgver=1
+pkgrel=0
+_commit=c7a376fd46f103642ec81a10e1f079bce0df2075
+pkgdesc="Firmware for BQ Aquaris M5"
+url="https://gitlab.com/a_a/firmware-bq-piccolo"
+subpackages="$pkgname-modem $pkgname-venus $pkgname-wcnss"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck pmb:cross-native !tracedeps"
+source="https://gitlab.com/a_a/firmware-bq-piccolo/-/archive/$_commit/firmware-bq-piccolo-$_commit.tar.gz"
+builddir="$srcdir/$pkgname-$_commit"
+
+_fwdir="/lib/firmware/postmarketos"
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+}
+
+modem() {
+	pkgdesc="BQ Aquaris M5 modem firmware"
+	install -Dm644 "$builddir"/modem.* -t "$subpkgdir/$_fwdir"
+	install -Dm644 "$builddir"/mba.* -t "$subpkgdir/$_fwdir"
+}
+
+venus() {
+	pkgdesc="BQ Aquaris M5 video firmware"
+	install -Dm644 "$builddir"/venus.mdt "$builddir"/venus.b* \
+		-t "$subpkgdir/$_fwdir"/qcom/venus-1.8
+}
+
+wcnss() {
+	pkgdesc="BQ Aquaris M5 WiFi/BT firmware"
+	_files="WCNSS_cfg.dat WCNSS_qcom_cfg.ini WCNSS_qcom_wlan_nv.bin"
+	install -Dm644 "$builddir"/wcnss.* -t "$subpkgdir/$_fwdir"
+	for file in $_files; do
+		install -Dm644 "$builddir"/wlan/prima/"$file" -t "$subpkgdir/$_fwdir"/wlan/prima
+	done
+}
+
+
+sha512sums="
+451a15cc01efa955c035ade5cdd7ce066eb9816bcc1facd7d0e6649aa746509f235a798e33d92a47c649a3cd05ed886fdcf6d817470789e5af4a7e41f8330c0f  firmware-bq-piccolo-c7a376fd46f103642ec81a10e1f079bce0df2075.tar.gz
+"

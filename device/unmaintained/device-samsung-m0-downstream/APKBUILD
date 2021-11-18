@@ -1,0 +1,45 @@
+# Unmaintained: Downstream port, only for testing. Use mainline port (samsung-m0/samsung-m3)!
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-m0-downstream
+pkgdesc="Samsung Galaxy S III"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-m0-downstream
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	90-android-touch-dev.rules
+	"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi firmware"
+	depends="firmware-samsung-m0-downstream"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+ecdeec198c6e07f2f91fc6c6d28403c54111f84625f7cb85129a8c3d4142f8d9d3e639b1be2ef3519de0eee5ed88c6a586db95e7712fd702315dd2b02afa4ba3  deviceinfo
+1376f0eb7c6ba459ca5c44b3eb7e9919d9c5f48d71ec30c006d1b4843e31cdade9f980415a166e977b2567b26f4e87d4554ee1143fdc62453d60a93bed129d06  90-android-touch-dev.rules
+"

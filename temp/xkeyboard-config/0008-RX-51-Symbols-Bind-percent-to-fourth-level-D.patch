@@ -1,0 +1,25 @@
+From e2ebb55a2e722b4b141b2538395f93df3c730d09 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 21:05:42 +0200
+Subject: [PATCH 08/10] RX-51: Symbols: Bind percent to fourth level D
+
+---
+ symbols/nokia_vndr/rx-51 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 3edba1f..a91db61 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -397,7 +397,7 @@ xkb_symbols "english_base" {
+     // 2. row
+     key <AC01>	{ [	a,		A,		asterisk,	asterisk	] };
+     key <AC02>	{ [	s,		S,		plus,		plus		] };
+-    key <AC03>	{ [	d,		D,		numbersign,	numbersign	] };
++    key <AC03>	{ [	d,		D,		numbersign,	percent		] };
+     key <AC04>	{ [	f,		F,		minus,		asciitilde	] };
+     key <AC05>	{ [	g,		G,		underscore,	underscore	] };
+     key <AC06>	{ [	h,		H,		parenleft,	parenleft	] };
+-- 
+1.8.1.4
+

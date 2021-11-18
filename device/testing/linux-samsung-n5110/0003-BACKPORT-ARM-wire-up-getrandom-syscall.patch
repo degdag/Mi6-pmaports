@@ -1,0 +1,71 @@
+From d919f1f5c38205ad2ab38d4c061e8b28e606559b Mon Sep 17 00:00:00 2001
+From: Russell King <rmk+kernel@arm.linux.org.uk>
+Date: Fri, 8 Aug 2014 10:56:34 +0100
+Subject: [PATCH 3/3] BACKPORT: ARM: wire up getrandom syscall
+
+Clean cherry pick of eb6452537b280652eee66801ec97cc369e27e5d8.
+
+Add the new getrandom syscall for ARM.
+
+Signed-off-by: Russell King <rmk+kernel@arm.linux.org.uk>
+
+Bug: http://b/29621447
+Change-Id: I6d50b57f3a61fbf9102c69103b9a5b7ebf239860
+(cherry picked from commit eb6452537b280652eee66801ec97cc369e27e5d8)
+[flex1911]: backport to 3.4
+[michitux]: backport to 3.0
+---
+ arch/arm/include/asm/unistd.h | 9 +++++++++
+ arch/arm/kernel/calls.S       | 9 +++++++++
+ 2 files changed, 18 insertions(+)
+
+diff --git a/arch/arm/include/asm/unistd.h b/arch/arm/include/asm/unistd.h
+index 2c04ed5efeb5..96e290b9fecf 100644
+--- a/arch/arm/include/asm/unistd.h
++++ b/arch/arm/include/asm/unistd.h
+@@ -402,6 +402,7 @@
+ #define __NR_syncfs			(__NR_SYSCALL_BASE+373)
+ #define __NR_sendmmsg			(__NR_SYSCALL_BASE+374)
+ #define __NR_setns			(__NR_SYSCALL_BASE+375)
++#define __NR_getrandom			(__NR_SYSCALL_BASE+384)
+ 
+ /*
+  * The following SWIs are ARM private.
+@@ -413,6 +414,14 @@
+ #define __ARM_NR_usr32			(__ARM_NR_BASE+4)
+ #define __ARM_NR_set_tls		(__ARM_NR_BASE+5)
+ 
++/*
++ * This may need to be greater than __NR_last_syscall+1 in order to
++ * account for the padding in the syscall table
++ */
++#ifdef __KERNEL__
++#define __NR_syscalls  (388)
++#endif
++
+ /*
+  * *NOTE*: This is a ghost syscall private to the kernel.  Only the
+  * __kuser_cmpxchg code in entry-armv.S should be aware of its
+diff --git a/arch/arm/kernel/calls.S b/arch/arm/kernel/calls.S
+index 80f7896cc016..612627f899d4 100644
+--- a/arch/arm/kernel/calls.S
++++ b/arch/arm/kernel/calls.S
+@@ -385,6 +385,15 @@
+ 		CALL(sys_syncfs)
+ 		CALL(sys_sendmmsg)
+ /* 375 */	CALL(sys_setns)
++		CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++/* 380 */	CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++		CALL(sys_ni_syscall)
++		CALL(sys_getrandom)
+ #ifndef syscalls_counted
+ .equ syscalls_padding, ((NR_syscalls + 3) & ~3) - NR_syscalls
+ #define syscalls_counted
+-- 
+2.19.0
+

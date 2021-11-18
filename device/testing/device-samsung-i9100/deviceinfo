@@ -1,0 +1,27 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Samsung Galaxy SII"
+deviceinfo_manufacturer="Samsung"
+deviceinfo_codename="samsung-i9100"
+deviceinfo_year="2011"
+deviceinfo_append_dtb_mainline="true"
+deviceinfo_dtb_mainline="exynos4210-i9100"
+deviceinfo_external_storage="true"
+deviceinfo_flash_method="heimdall-isorec"
+deviceinfo_arch="armv7"
+deviceinfo_mesa_driver_mainline="exynos"
+
+# Device related
+deviceinfo_gpu_accelerated="true"
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_screen_width="480"
+deviceinfo_screen_height="800"
+
+# Heimdall related
+deviceinfo_flash_heimdall_partition_kernel="KERNEL"
+deviceinfo_flash_heimdall_partition_initfs="RECOVERY"
+deviceinfo_flash_heimdall_partition_system="DATAFS"
+deviceinfo_flash_sparse="true"

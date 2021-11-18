@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-shamu
+pkgdesc="Motorola Google Nexus 6"
+pkgver=0.3
+pkgrel=11
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-shamu mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+2b4c741cdbb699ca1ecbd19020f706ced7a7f83d527eceba8bbc84a26a5c48b34e4f0a9b69d79c68c91d00495b09911ffc8068129c0d0f8a0d556efa3d1c46cc  deviceinfo
+c4f4785a9fea1d8b461e1de4dcd04daae45bd9df94f8123655b981de5ac5718f082a59169c39c506aa996c1642f465249fbc8b6e1c0463aeca6abf74ff523d9c  initfs-hook.sh
+"

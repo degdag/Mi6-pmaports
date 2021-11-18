@@ -1,0 +1,42 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-tablet-x86uefi
+pkgdesc="Various tablets with atom CPU"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="x86_64"
+options="!check !archcheck"
+depends="postmarketos-base linux-lts mesa-dri-intel libva-intel-driver grub-x86 alsa-ucm-conf"
+makedepends="devicepkg-dev"
+source="deviceinfo grub.cfg rootston.ini"
+subpackages="$pkgname-phosh $pkgname-x11"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D "$srcdir"/grub.cfg \
+		"$pkgdir"/boot/grub/grub.cfg
+}
+
+# most tablets don't need scaling, at least x2
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+x11() {
+	install_if="$pkgname=$pkgver-r$pkgrel xorg-server"
+	depends="xf86-video-modesetting"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+ba983dcd9980ccf7477cfa8f2f2f5235a26425fd5364c6c0c6686814f86c1db6975f77cafb7152f3c1ad933a3a1cca0223f82a1ec15d73cce2abda86b3d6d444  deviceinfo
+2d951d71102181db85a2468fd770ee3a7958c06b14e27e52e0d4ff0e9b88f3ab3c5c9b15c8a938d1cd2ae0c94ad2aad7001f1b6fe943f96a38602085f481a4cf  grub.cfg
+f3667b914bb955be9e97db31dc7ed4a7c5d0c369be9549d587bb7208e270590c0c3fa36a0dd997d6f8305c5c9afb3b906423af6ca8724e806f995e61226cfc83  rootston.ini
+"

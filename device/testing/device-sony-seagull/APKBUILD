@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-seagull
+pkgdesc="Sony Xperia T3"
+pkgver=0.1
+pkgrel=7
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-sony-seagull mdss-fb-init-hack mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+12f80fd8334beab3149eea4671c1b83e365d010b8c4d44433c1d1fff3dfae722571dbf57522a2563eb04ba3c89b5cdd535b975e6e56a93054d76b92427086919  deviceinfo
+"

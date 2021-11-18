@@ -1,0 +1,50 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-xiaomi-armani
+pkgdesc="Redmi 1S"
+pkgver=0.1
+pkgrel=12
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-xiaomi-armani mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install $pkgname.pre-deinstall $pkgname.post-upgrade"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	90-touchscreen.rules
+	100-charging.rules
+	armani_battery_charging.sh
+	armani_battery_discharging.sh
+	wlanarmani
+	fb.modes"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-touchscreen.rules "$pkgdir"/etc/udev/rules.d/90-touchscreen.rules
+	install -Dm644 "$srcdir"/100-charging.rules "$pkgdir"/etc/udev/rules.d/100-charging.rules
+	install -Dm744 "$srcdir"/armani_battery_charging.sh "$pkgdir"/usr/bin/armani_battery_charging.sh
+	install -Dm744 "$srcdir"/armani_battery_discharging.sh "$pkgdir"/usr/bin/armani_battery_discharging.sh
+	install -Dm755 "$srcdir"/wlanarmani "$pkgdir"/etc/init.d/wlanarmani
+	install -Dm755 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-xiaomi-armani"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c215c71f60d9d83da085daf4dae4e56fb65575438c7a01e8bdc64be62b34b9a090645d39403a58460d454fa86891d30596eaa49890c932c420434cb359d3ef9e  deviceinfo
+abf694ebe949025268630457ad14ae69f6a33c151236c1a193da32c27f836591e932517f011f6eb7ce750ab74d2f1e9a70724fed7150210d4da1b80a6e86a801  90-touchscreen.rules
+862f9a8d81af74c0a1c99c6255d4ec9d4bdd7828636ee29fbaf4b3ceef53f236fd2b2078e3150baf0f1d78a3da87d7b3a5b975fef33014238eb7658428642571  100-charging.rules
+cf82b3bf37c4975668d7bb6f0e573fa5b44ed596d80a7ac2cdfa78dd619b7dc58c085fe1a0703953a143a46a4d917abf94f658e268578fe1c40664fa639959d3  armani_battery_charging.sh
+c2ae3887712a209a8c8dc60ee87ff1ec8944246cc1a69d1f6f9f2725434e05b6c8388c0b3756423d5cec6a6e0ffc7272c30ccc20b77f0dac0813bb25476d4997  armani_battery_discharging.sh
+22339e8b1c854e740034fe305d8447a88f7be98f8f2ef86b7e9ea6e373a30643993d95865c820df6c3598605d3390eb93a859c7a423f04de54a3b06a69adcb55  wlanarmani
+cf2b75e766f6ed5b7372179dfe160ecf1fa24a1c4f054abacc98e69794db90ca2c7f686325f7ce806b102c8eb93a345da3c016b17f280eda47f5891322162362  fb.modes
+"

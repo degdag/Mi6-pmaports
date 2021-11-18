@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-wiko-v12bnlite
+pkgdesc="Wiko View"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-wiko-v12bnlite
+	mkbootimg
+	postmarketos-base
+	mesa-dri-gallium
+	mdss-fb-init-hack
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+49b3893a089386135cd9b8ac3a278e8f68d18ba840eb503bb666b0b9b26f0456457acd87f6086a2eb29461c50ea44169fa3accbe91ae1b58f89d96a7a467da4d  deviceinfo
+"

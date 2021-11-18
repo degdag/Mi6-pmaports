@@ -1,0 +1,43 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="OnePlus 6T"
+deviceinfo_manufacturer="OnePlus"
+deviceinfo_codename="oneplus-fajita"
+deviceinfo_year="2018"
+deviceinfo_arch="aarch64"
+
+# Device related
+deviceinfo_gpu_accelerated="true"
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="false"
+deviceinfo_screen_width="1080"
+deviceinfo_screen_height="2340"
+
+# Bootloader related
+deviceinfo_flash_method="fastboot"
+deviceinfo_kernel_cmdline="PMOS_NO_OUTPUT_REDIRECT console=ttyMSM0,115200"
+deviceinfo_generate_bootimg="true"
+deviceinfo_bootimg_qcdt="false"
+deviceinfo_bootimg_dtb_second="false"
+deviceinfo_flash_offset_base="0x00000000"
+deviceinfo_flash_offset_kernel="0x00008000"
+deviceinfo_flash_offset_ramdisk="0x01000000"
+deviceinfo_flash_offset_second="0x00f00000"
+deviceinfo_flash_offset_tags="0x00000100"
+deviceinfo_flash_pagesize="4096"
+deviceinfo_flash_sparse="true"
+
+# Kernel options
+deviceinfo_dtb="qcom/sdm845-oneplus-fajita"
+deviceinfo_append_dtb="true"
+deviceinfo_flash_kernel_on_update="true"
+
+# Required for devices using UFS as storage (instead of e.g. eMMC)
+deviceinfo_rootfs_image_sector_size="4096"
+
+# osk-sdl
+deviceinfo_modules_initfs="i2c_qcom_geni rmi_core rmi_i2c qcom_spmi_fg qcom_spmi_haptics"
+deviceinfo_mesa_driver="msm"

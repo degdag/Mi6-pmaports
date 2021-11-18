@@ -1,0 +1,1 @@
+SUBSYSTEM=="backlight", KERNEL=="edp-backlight", GROUP="video", MODE="0664"

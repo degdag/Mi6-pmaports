@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# special patching for s5pv210, overwriting omapdrm with exynos
+printf "exynos\x00" > /tmp/exynos
+dd if=/tmp/exynos of=/usr/lib/libsrv_um.so.1.17.4948957 obs=1 seek=110644 conv=notrunc
+dd if=/tmp/exynos of=/usr/lib/libdbm.so.1.17.4948957 obs=1 seek=5960 conv=notrunc
+rm /tmp/exynos

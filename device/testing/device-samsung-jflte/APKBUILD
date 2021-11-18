@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-jflte
+pkgdesc="Samsung Galaxy S4"
+pkgver=0.5
+pkgrel=9
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-jflte mkbootimg mesa-dri-swrast
+	msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo fb.modes"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	install -D -m644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-jflte"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c404d7771005a716e876561c67411f151e05ca783c321c8a7a22906d2fcd79b6d263b32854373b1af202d9f9875ef3cb826fe37435bc2663d323e08d909c33c5  deviceinfo
+515cd3be1816bea9a1859a37f6568e3e82a9f8f16cbbc71ba13d60723f98eafbda9046ebb1ee7f4ae23dd2b2b2b18506f64516ca45ff71af18e7c163f12248bd  fb.modes
+"

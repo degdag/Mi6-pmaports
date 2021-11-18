@@ -1,0 +1,33 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-acer-picasso
+pkgdesc="Acer Iconia Tab A500"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-postmarketos-grate mkbootimg mesa-dri-gallium xf86-video-opentegra"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Acer Iconia Tab A500 WiFi & BT firmware"
+	depends="firmware-acer-picasso"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+416ce1ed6d18112994aca16c241cea5686d464daebf7a045944213eb67bee4d61b31472a90ac83ca275d9d22cd4eaf9afce49322b6a5e27923e791dbbcab780f  deviceinfo
+"

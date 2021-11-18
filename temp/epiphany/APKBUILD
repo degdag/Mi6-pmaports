@@ -1,0 +1,47 @@
+# Forked from Alpine to apply adaptability mobile patches
+pkgname=epiphany
+pkgver=9999_git20210916
+_pkgver=41.0
+pkgrel=0
+pkgdesc="A simple, clean, beautiful view of the web"
+url="https://wiki.gnome.org/Apps/Web"
+# s390x, mips64 and riscv64 blocked by rust -> libhandy1
+arch="all !s390x !mips64 !riscv64"
+license="GPL-3.0-or-later"
+depends="gsettings-desktop-schemas dbus:org.freedesktop.Secrets"
+makedepends="meson iso-codes-dev gtk+3.0-dev gsettings-desktop-schemas-dev
+	icu-dev json-glib-dev libdazzle-dev libhandy1-dev libnotify-dev libsecret-dev
+	libsoup-dev libxml2-dev nettle-dev sqlite-dev webkit2gtk-dev gcr-dev itstool
+	libportal-dev libarchive-dev"
+checkdepends="appstream-glib desktop-file-utils xvfb-run ibus"
+options="!check" # Fail due to our webkitgtk patches!
+subpackages="$pkgname-lang $pkgname-doc $pkgname-dbg"
+
+_purism_commit="326e2f6b05bf057dc25f3e80c74d617188836c17"
+_purism_patches="https://source.puri.sm/Librem5/debs/epiphany/-/raw/$_purism_commit/debian/patches"
+
+source="https://download.gnome.org/sources/epiphany/${_pkgver%.*}/epiphany-$_pkgver.tar.xz
+	$_purism_patches/pureos/Disable-fullscreen.patch
+	$_purism_patches/pureos/firefox-sync-dialog-Use-GtkHeaderBar.patch
+	"
+builddir="$srcdir/$pkgname-$_pkgver"
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	# https://gitlab.gnome.org/GNOME/epiphany/issues/829
+	env PATH="$PATH:$builddir/output/src" xvfb-run meson test --no-rebuild -v -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+3e3f8209238b0b7fb181c48899e815896a24aae5b318c2ca6a75ce334423290d006e138c63496a0bcd4f32846439426f46b84875b2306aabb5b87e53368f8118  epiphany-41.0.tar.xz
+63290c9b52751e4adc324e5f39790ae809fe77067371c15e757e53244706e84063781e4ac9d38c892e0bf616c9dea0414157ba5db4c93a4523d291527603f56f  Disable-fullscreen.patch
+9d281bcdcc4263fb9302b381a9e2903b372ec83fd8a5fac85843a5cf45211d65d0a1b85272e0b80738e3268710fd361341e178fc06c6a2d643974114e836b14b  firefox-sync-dialog-Use-GtkHeaderBar.patch
+"

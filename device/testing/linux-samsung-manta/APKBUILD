@@ -1,0 +1,50 @@
+# Kernel config based on: arch/arm/configs/lineage_manta_defconfig
+
+pkgname=linux-samsung-manta
+pkgver=3.4.113
+pkgrel=6
+pkgdesc="Google Nexus 10 kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-manta"
+url="https://github.com/LineageOS/android_kernel_samsung_manta"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_samsung_manta"
+_commit="21157195150c268c19303513e4e1327dc01ff89e"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/LineageOS/$_repository/archive/$_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="11f8c197810438082bb103be9f26857e7ec1e1e49a1a8aca3bade12332ed1def62142b58219f4d17d07f0ab076708bef6c709312b784ab1c5339aa2e9db0232f  linux-samsung-manta-21157195150c268c19303513e4e1327dc01ff89e.tar.gz
+903b8cbb7090197b1d203350cb0590e158081719a4b50807c60bc89d25bdfce768adc6097891946be4f5574fc17bb94847f9531a9218d05c32f6ae19457816a1  config-samsung-manta.armv7"

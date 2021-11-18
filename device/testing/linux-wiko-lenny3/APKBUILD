@@ -1,0 +1,58 @@
+# Kernel config based on: arch/arm/configs/v3702_defconfig
+
+pkgname=linux-wiko-lenny3
+pkgver=3.18.19
+pkgrel=5
+pkgdesc="Wiko Lenny 3 Kernel"
+arch="armhf"
+_carch="arm"
+_flavor="wiko-lenny3"
+url="https://wikomobile.com"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_download_url="http://www.wikogeek.com/index.php?tel="
+_download_id="65b9eea6e1cc6bb9f0cd2a47751a186f"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_download_id.zip::$_download_url$_download_id
+	$_config
+	00_disable_drvgen.patch
+	01_add_generated_cust_dtsi.patch
+	02_fix_various_include_directives.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+"
+builddir="$srcdir/LENNY3_OpenSource/kernel-3.18"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="83c56f0c8569b7ca3cd29ebb5769ebcc1bb457c9eefeacfa1ad3620436693fc7cbaeda93c7a2157ab92f463b0b1431a3f3a79e14a783000199dea1cc5b2d3e77  linux-wiko-lenny3-65b9eea6e1cc6bb9f0cd2a47751a186f.zip
+74ecd467ded8a641e901b1165efd6cc2f1547a2bbd5c9ec6772fefceaccf7a8431177775bfafa7a050ddc8f52c8701a01c6d796482b7725201cc0446a3d991c0  config-wiko-lenny3.armhf
+8a04940e6f5424df67a3cc4c75dd19be1c9b560859e9db0ae67b766d52982a46156b601698afb80f90b9b99f63ef74e1f6147902b43ec97c25d2b75ba2f8d2b3  00_disable_drvgen.patch
+adda36d779a79b2f840361a7df91028fdb86dd9aa7d2b431b8bd1fc674175d6c5bd098f7a6765cc4e3f7b3428ff7d35d9f5bac31cb7602ea270a6affe843a2e9  01_add_generated_cust_dtsi.patch
+42a7ef954d517f945bdbca16d92aff63b6b07260d666119dc96c33db577231f907c7968d9466bf163c397a37f4fb23a6886047b1eb821aa14687d43442c8e615  02_fix_various_include_directives.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch"

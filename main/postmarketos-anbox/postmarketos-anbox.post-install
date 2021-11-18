@@ -1,0 +1,3 @@
+#!/bin/sh
+
+rc-update add anbox-container-manager default

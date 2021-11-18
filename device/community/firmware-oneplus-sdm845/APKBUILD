@@ -1,0 +1,44 @@
+# Maintainer: Caleb Connolly <caleb@connolly.tech>
+
+pkgname=firmware-oneplus-sdm845
+pkgver=5
+pkgrel=0
+pkgdesc="Firmware for OnePlus 6 / 6T"
+url="https://gitlab.com/sdm845-mainline/firmware-oneplus-sdm845"
+arch="aarch64"
+depends="soc-qcom-sdm845-nonfree-firmware linux-firmware-qcom linux-firmware-ath10k"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps"
+
+_version="3ec855b2247291c79652b319dfe93f7747363c86"
+
+source="$pkgname.tar.gz::$url/-/archive/$_version/$pkgname-$_version.tar.gz
+	firmware.files
+	30-gpu-firmware.files"
+subpackages="
+	$pkgname-initramfs:firmware_initramfs"
+
+package() {
+	cd "$srcdir/$pkgname-$_version/"
+	while IFS="" read -r _i || [ -n "$_i" ]; do
+		[ ! -d $(dirname $_i) ] && mkdir -p $(dirname $_i)
+		echo $_i
+		install -Dm644 $_i "$pkgdir/$_i"
+	done < "$srcdir/firmware.files"
+}
+
+firmware_initramfs() {
+	pkgdesc="Files to be included in the initramfs to support osk-sdl"
+	depends="$pkgname"
+	install_if="$pkgname-nonfree-firmware"
+	mkdir "$subpkgdir"
+
+	install -Dm644 "$srcdir/30-gpu-firmware.files" \
+		"$subpkgdir/etc/postmarketos-mkinitfs/files/30-gpu-firmware.files"
+}
+
+sha512sums="
+65c71ef0b121fd1d9931043a7fe953d146a20e569839e8ef76aaa357fb4d7529db7a315a7b6c2ae8c06eba40a54c96ceffa5f33ba77e813ed87d5a989884b0db  firmware-oneplus-sdm845.tar.gz
+abe5bbc2b9e603d3d59dccdcc256232a281a6b82d7a0a7f618a26f6ddc0a7e32f45386333028fe6f93780fa9c1ce20db1d78bb2483fe27c5c302920bfe9a0fd5  firmware.files
+bc6c329bf6bb9622320ab610f4f5fb944129e276855a4cf5646cb29a553f4c47cd9a4ef4305cbcd94a991471bc109b8f615cefd6871be99bf6a457fe0fa5aa19  30-gpu-firmware.files
+"

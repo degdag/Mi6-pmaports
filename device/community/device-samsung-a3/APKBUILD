@@ -1,0 +1,75 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Mis012 <Michael.Srba@seznam.cz>
+# Co-Maintainer: Nikita Travkin <nikita@trvn.ru>
+# Co-Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=device-samsung-a3
+pkgdesc="Samsung Galaxy A3 (2015)"
+pkgver=6
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo rootston.ini"
+subpackages="
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-kernel-mainline-modem:kernel_mainline_modem
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+"
+
+# Backwards compatibility for old device package names
+_substitutes="device-samsung-a3lte device-samsung-a3ulte"
+replaces="$_substitutes"
+for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel (no modem, audio routed directly)"
+	depends="linux-postmarketos-qcom-msm8916"
+	replaces=""
+	for pkg in $_substitutes; do replaces="$replaces $pkg-kernel-mainline"; done
+	for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline_modem() {
+	pkgdesc="Close to mainline kernel (non-free modem, audio routed through ADSP)"
+	depends="linux-postmarketos-qcom-msm8916 soc-qcom-msm8916-modem"
+	replaces=""
+	for pkg in $_substitutes; do replaces="$replaces $pkg-kernel-mainline-modem"; done
+	for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader firmware-samsung-a3-wcnss-nv"
+	replaces=""
+	for pkg in $_substitutes; do replaces="$replaces $pkg-nonfree-firmware"; done
+	for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	replaces=""
+	for pkg in $_substitutes; do replaces="$replaces $pkg-phosh"; done
+	for pkg in $replaces; do provides="$provides $pkg=$pkgver-r$pkgrel"; done
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+35999e456ef4035d5ec67f04b159f830fa2ffff6f815925714b8a47d10cd0eb245207b1551808521786657403b1140ddc649c7f15b18ad6091fcbd31f53ee275  deviceinfo
+f3667b914bb955be9e97db31dc7ed4a7c5d0c369be9549d587bb7208e270590c0c3fa36a0dd997d6f8305c5c9afb3b906423af6ca8724e806f995e61226cfc83  rootston.ini
+"

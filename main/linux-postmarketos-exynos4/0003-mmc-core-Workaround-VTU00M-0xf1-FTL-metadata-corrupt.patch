@@ -1,0 +1,343 @@
+From 3827de610edb21045623955af5f3c04e10f58d55 Mon Sep 17 00:00:00 2001
+From: belgin <belginstirbu@hotmail.com>
+Date: Tue, 29 Jun 2021 20:31:12 +0300
+Subject: [PATCH 03/10] mmc: core: Workaround VTU00M 0xf1 FTL metadata
+ corruption bug
+
+Some versions of the 0xf1 revision of the firmware of the
+VTU00M eMMC from Samsung have a bug that triggers an FTL
+metadata corruption.
+
+These eMMC are used at least in the Samsung Galaxy SIII
+(GT-I9300) and Galaxy Note II (GT-N7100).
+
+The corrupted FTL metadata can make the eMMC CPU crash.
+
+In practice as the eMMC has several hardware partitions, in
+some cases the bootloader hadware partition (which is used
+to store the phone bootloader in the Galaxy SIII and Note II)
+still works, while the main hardware partition (that contains
+the phone operating system) doesn't.
+
+In other cases the eMMC crashes during the very begining of
+its boot procedure. In that case the phones botloaders can't
+be loaded anymore, which results in a black screen and no
+visible signs that the phone has been powered on.
+
+This patch has been ported from the Samsung patch made to
+address this issue.
+
+It uses MMC vendor specific commands to patch the eMMC
+firmware in RAM. The patch hangs the eMMC CPU right before
+the corruption is about to happen.
+
+So while it's not ideal, it still better to have devices
+hanging, even repetedly, than breaking devices completely.
+
+Since VTU00M eMMC firmwares are not free software nor
+redistributable, we cannot simply dump newer firmwares,
+and redistribute them. In addition the only tested way
+to do a firmware update destroys all the data on the
+eMMC (including the FTL metadata as well) in the process.
+
+A proper fix would be to write a compatible free software
+eMMC firmware and to investigate the firmware update command
+that doesn't erase the FTL metadata and/or the data, however
+this could be quite time consuming.
+
+References:
+- https://media.ccc.de/v/34c3-8784-emmc_hacking_or_how_i_fixed_long-dead_galaxy_s3_phones
+
+TODO:
+- Adapt this patch to use the SD/eMMC hook system for eMMC cards.
+- upstream it
+
+Signed-off-by: belgin <belginstirbu@hotmail.com>
+GNUtoo: Rewrite the commit message
+Signed-off-by: Denis 'GNUtoo' Carikli <GNUtoo@cyberdimension.org>
+---
+ drivers/mmc/core/mmc.c     |  17 +++
+ drivers/mmc/core/mmc_ops.c | 206 +++++++++++++++++++++++++++++++++++++
+ include/linux/mmc/card.h   |   1 +
+ include/linux/mmc/core.h   |   3 +
+ 4 files changed, 227 insertions(+)
+
+diff --git a/drivers/mmc/core/mmc.c b/drivers/mmc/core/mmc.c
+index 29e58ffae379..12fa14e88ef6 100644
+--- a/drivers/mmc/core/mmc.c
++++ b/drivers/mmc/core/mmc.c
+@@ -1894,6 +1894,12 @@ static int mmc_init_card(struct mmc_host *host, u32 ocr,
+ 	if (!oldcard)
+ 		host->card = card;
+ 
++	err = mmc_start_movi_operation(host->card);
++	if (err) {
++		pr_warn("%s: movi operation failed\n", mmc_hostname(host));
++		goto free_card;
++	}
++
+ 	return 0;
+ 
+ free_card:
+@@ -2294,6 +2300,17 @@ int mmc_attach_mmc(struct mmc_host *host)
+ 	if (err)
+ 		goto remove_card;
+ 
++	if (!strncmp(host->card->cid.prod_name, "VTU00M", 6) &&
++			(host->card->cid.prv == 0xf1) &&
++			(mmc_start_movi_smart(host->card) == 0x2))
++		host->card->movi_ops = 0x2;
++
++	err = mmc_start_movi_operation(host->card);
++	if (err) {
++		pr_warn("%s: movi operation failed\n", mmc_hostname(host));
++		goto remove_card;
++	}
++
+ 	mmc_claim_host(host);
+ 	return 0;
+ 
+diff --git a/drivers/mmc/core/mmc_ops.c b/drivers/mmc/core/mmc_ops.c
+index 0c54858e89c0..b53e1544acba 100644
+--- a/drivers/mmc/core/mmc_ops.c
++++ b/drivers/mmc/core/mmc_ops.c
+@@ -826,6 +826,212 @@ int mmc_bus_test(struct mmc_card *card, u8 bus_width)
+ 	return mmc_send_bus_test(card, card->host, MMC_BUS_TEST_R, width);
+ }
+ 
++static int mmc_send_cmd(struct mmc_host *host,
++			u32 opcode, u32 arg, unsigned int flags, u32 *resp)
++{
++	int err;
++	struct mmc_command cmd;
++
++	memset(&cmd, 0, sizeof(struct mmc_command));
++
++	cmd.opcode = opcode;
++	cmd.arg = arg;
++	cmd.flags = flags;
++	*resp = 0;
++
++	err = mmc_wait_for_cmd(host, &cmd, 0);
++
++	if (!err)
++		*resp = cmd.resp[0];
++	else
++		printk(KERN_ERR "[CMD%d] FAILED!!\n", cmd.opcode);
++
++	return err;
++}
++
++static int mmc_movi_cmd(struct mmc_host *host, u32 arg)
++{
++	int err;
++	u32 resp;
++
++	err = mmc_send_cmd(host, 62, arg,
++			MMC_RSP_R1B | MMC_CMD_AC, &resp);
++	mdelay(10);
++
++	if (!err)
++		do {
++			err = mmc_send_cmd(host, MMC_SEND_STATUS,
++				host->card->rca << 16,
++				MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC,
++				&resp);
++			if (err) {
++				printk(KERN_ERR "CMD13(VC) failed\n");
++				break;
++				}
++			/*wait until READY_FOR_DATA*/
++			} while (!(resp & 1<<8));
++
++	return err;
++}
++
++static int mmc_movi_erase_cmd(struct mmc_host *host, u32 arg1, u32 arg2)
++{
++	int err;
++	u32 resp;
++
++	err = mmc_send_cmd(host, MMC_ERASE_GROUP_START, arg1,
++					MMC_RSP_R1 | MMC_CMD_AC, &resp);
++	if (err)
++		return err;
++
++	err = mmc_send_cmd(host, MMC_ERASE_GROUP_END, arg2,
++					MMC_RSP_R1 | MMC_CMD_AC, &resp);
++	if (err)
++		return err;
++
++	err = mmc_send_cmd(host, MMC_ERASE, 0,
++					MMC_RSP_R1B | MMC_CMD_AC, &resp);
++	if (!err)
++		do {
++			err = mmc_send_cmd(host, MMC_SEND_STATUS,
++				host->card->rca << 16,
++				MMC_RSP_SPI_R2 | MMC_RSP_R1 | MMC_CMD_AC,
++				&resp);
++			if (err) {
++				printk(KERN_ERR "CMD13(VC) failed\n");
++				break;
++				}
++			/*wait until READY_FOR_DATA*/
++			} while (!(resp & 1<<8));
++
++	return err;
++}
++
++
++static int mmc_movi_read_req(struct mmc_card *card,
++					void *data_buf, u32 arg, u32 blocks)
++{
++	struct mmc_request mrq = {0};
++	struct mmc_command cmd = {0};
++	struct mmc_data data = {0};
++	struct scatterlist sg;
++
++	/*send request*/
++	mrq.cmd = &cmd;
++	mrq.data = &data;
++
++	if (blocks > 1)
++		cmd.opcode = MMC_READ_MULTIPLE_BLOCK;
++	else
++		cmd.opcode = MMC_READ_SINGLE_BLOCK;
++	cmd.arg = arg;
++
++	cmd.flags = MMC_RSP_SPI_R1 | MMC_RSP_R1 | MMC_CMD_ADTC;
++
++	data.blksz = 512;
++	data.blocks = blocks;
++	data.flags = MMC_DATA_READ;
++	data.sg = &sg;
++	data.sg_len = 1;
++
++	sg_init_one(&sg, data_buf, data.blksz * data.blocks);
++
++	mmc_set_data_timeout(&data, card);
++
++	mmc_wait_for_req(card->host, &mrq);
++
++	if (cmd.error)
++		return cmd.error;
++
++	if (data.error)
++		return data.error;
++
++	return 0;
++}
++
++int mmc_start_movi_smart(struct mmc_card *card)
++{
++	int err;
++	u8 data_buf[512];
++	u32 date = 0;
++
++	err = mmc_movi_cmd(card->host, 0xEFAC62EC);
++	if (err)
++		return err;
++
++	err = mmc_movi_cmd(card->host, 0x0000CCEE);
++	if (err)
++		return err;
++
++	err = mmc_movi_read_req(card, (void *)data_buf, 0x1000, 1);
++	if (err)
++		return err;
++
++	err = mmc_movi_cmd(card->host, 0xEFAC62EC);
++	if (err)
++		return err;
++
++	err = mmc_movi_cmd(card->host, 0x00DECCEE);
++	if (err)
++		return err;
++
++	date = ((data_buf[327] << 24) | (data_buf[326] << 16) |
++				(data_buf[325] << 8) | data_buf[324]);
++
++	if (date !=  0x20120413) {
++		err = -1;
++		return err;
++		}
++
++	return 0x2;
++}
++EXPORT_SYMBOL_GPL(mmc_start_movi_smart);
++
++int mmc_start_movi_operation(struct mmc_card *card)
++{
++	int err = 0;
++
++	if (card->movi_ops != 0x2)
++		return 0;
++
++	err = mmc_movi_cmd(card->host, 0xEFAC62EC);
++	if (err)
++		return err;
++	err = mmc_movi_cmd(card->host, 0x10210000);
++	if (err)
++		return err;
++
++	err = mmc_movi_erase_cmd(card->host, 0x00040300, 0x4A03B510);
++	if (err)
++		return err;
++	err = mmc_movi_erase_cmd(card->host, 0x00040304, 0x28004790);
++	if (err)
++		return err;
++	err = mmc_movi_erase_cmd(card->host, 0x00040308, 0xE7FED100);
++	if (err)
++		return err;
++	err = mmc_movi_erase_cmd(card->host, 0x0004030C, 0x0000BD10);
++	if (err)
++		return err;
++	err = mmc_movi_erase_cmd(card->host, 0x00040310, 0x00059D73);
++	if (err)
++		return err;
++	err = mmc_movi_erase_cmd(card->host, 0x0005C7EA, 0xFD89F7E3);
++	if (err)
++		return err;
++
++	err = mmc_movi_cmd(card->host, 0xEFAC62EC);
++	if (err)
++		return err;
++	err = mmc_movi_cmd(card->host, 0x00DECCEE);
++	if (err)
++		return err;
++
++	return err;
++}
++EXPORT_SYMBOL_GPL(mmc_start_movi_operation);
++
++
+ static int mmc_send_hpi_cmd(struct mmc_card *card)
+ {
+ 	unsigned int busy_timeout_ms = card->ext_csd.out_of_int_time;
+diff --git a/include/linux/mmc/card.h b/include/linux/mmc/card.h
+index 37f975875102..56a0157c09a3 100644
+--- a/include/linux/mmc/card.h
++++ b/include/linux/mmc/card.h
+@@ -336,6 +336,7 @@ struct mmc_card {
+ 	unsigned int    nr_parts;
+ 
+ 	struct workqueue_struct *complete_wq;	/* Private workqueue */
++	unsigned int movi_ops;
+ };
+ 
+ static inline bool mmc_large_sector(struct mmc_card *card)
+diff --git a/include/linux/mmc/core.h b/include/linux/mmc/core.h
+index 71101d1ec825..72a0568edf6d 100644
+--- a/include/linux/mmc/core.h
++++ b/include/linux/mmc/core.h
+@@ -179,4 +179,7 @@ int mmc_hw_reset(struct mmc_host *host);
+ int mmc_sw_reset(struct mmc_host *host);
+ void mmc_set_data_timeout(struct mmc_data *data, const struct mmc_card *card);
+ 
++int mmc_start_movi_smart(struct mmc_card *card);
++int mmc_start_movi_operation(struct mmc_card *card);
++
+ #endif /* LINUX_MMC_CORE_H */
+-- 
+2.33.0
+

@@ -1,0 +1,108 @@
+From 27afc3e0e791b6dbf0fb2c1ee5073a646089eb59 Mon Sep 17 00:00:00 2001
+From: Clayton Craft <clayton@craftyguy.net>
+Date: Fri, 5 Mar 2021 18:55:28 -0800
+Subject: [PATCH] bq25890_charger: enter ship mode on power off
+
+This sets the charger device into 'ship mode' when powering off by
+hooking onto pm_power_off. 'Ship mode' is skipped if the device is
+actively charging. This feature is disabled by default, and can be
+enabled by setting 'ship_mode=1' when loading this module.
+
+Since the poweroff can be aborted (i.e. when charging), any previous
+value for pm_power_off is saved and run in the cases where the
+bq25890 is *not* used to power off system.
+---
+ drivers/power/supply/bq25890_charger.c | 56 ++++++++++++++++++++++++++
+ 1 file changed, 56 insertions(+)
+
+diff --git a/drivers/power/supply/bq25890_charger.c b/drivers/power/supply/bq25890_charger.c
+index ef3f152e2ba8..4e31a137bcba 100644
+--- a/drivers/power/supply/bq25890_charger.c
++++ b/drivers/power/supply/bq25890_charger.c
+@@ -40,6 +40,10 @@ static const char *const bq25890_chip_name[] = {
+ 	"BQ25896",
+ };
+ 
++static bool ship_mode;
++module_param(ship_mode, bool, 0644);
++MODULE_PARM_DESC(ship_mode, "Put device into 'ship mode' when powering off the computer");
++
+ enum bq25890_fields {
+ 	F_EN_HIZ, F_EN_ILIM, F_IILIM,				     /* Reg00 */
+ 	F_BHOT, F_BCOLD, F_VINDPM_OFS,				     /* Reg01 */
+@@ -928,6 +932,43 @@ static int bq25890_power_supply_init(struct bq25890_device *bq)
+ 	return PTR_ERR_OR_ZERO(bq->charger);
+ }
+ 
++static struct bq25890_device *bq25890_dev;
++void (*previous_pm_power_off)(void) = NULL;
++static void bq25890_power_off(void)
++{
++	int ret;
++
++	/* Don't enable ship mode if charging */
++	if (bq25890_dev->state.online) {
++		dev_info(bq25890_dev->dev, "Charging, not entering ship mode");
++		goto end;
++	}
++
++	dev_info(bq25890_dev->dev, "Entering ship mode!");
++
++	/* Enable HIZ */
++	dev_info(bq25890_dev->dev, "Enabling HIZ");
++	ret = bq25890_field_write(bq25890_dev, F_EN_HIZ, 1);
++	if (ret < 0)
++		goto error;
++
++	/* Enable ship mode with no delay */
++	dev_info(bq25890_dev->dev, "Ship mode w/ no delay");
++	ret = bq25890_field_write(bq25890_dev, F_BATFET_DLY, 0);
++	if (ret < 0)
++		goto error;
++	ret = bq25890_field_write(bq25890_dev, F_BATFET_DIS, 1);
++	if (ret < 0)
++		goto error;
++
++error:
++	dev_err(bq25890_dev->dev, "Error entering ship mode.\n");
++
++end:
++	if (previous_pm_power_off)
++		previous_pm_power_off();
++}
++
+ static void bq25890_usb_work(struct work_struct *data)
+ {
+ 	int ret;
+@@ -1232,6 +1273,17 @@ static int bq25890_probe(struct i2c_client *client,
+ 		goto battery_fail;
+ 	}
+ 
++	if (ship_mode) {
++		if (pm_power_off)
++			previous_pm_power_off = pm_power_off;
++		dev_info(bq->dev, "ship mode will be enabled");
++		bq25890_dev = bq;
++		pm_power_off = &bq25890_power_off;
++	} else {
++		dev_info(bq->dev, "ship mode not enabled");
++	}
++
++
+ 	return 0;
+ 
+ battery_fail:
+@@ -1255,6 +1307,10 @@ static int bq25890_remove(struct i2c_client *client)
+ 	/* reset all registers to default values */
+ 	bq25890_chip_reset(bq);
+ 
++	if (pm_power_off == &bq25890_power_off)
++		/* restore previous pm_power_off */
++		pm_power_off = previous_pm_power_off;
++
+ 	return 0;
+ }
+ 
+-- 
+2.31.1
+

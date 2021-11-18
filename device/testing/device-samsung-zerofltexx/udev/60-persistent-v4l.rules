@@ -1,0 +1,4 @@
+# This file is intentionally empty, to disable the default rule with the same name.
+# You can find the default rule in /lib/udev/rules.d/60-persistent-v4l.rules.
+#
+# See https://gitlab.com/postmarketOS/pmaports/-/merge_requests/1160 for why this is needed.

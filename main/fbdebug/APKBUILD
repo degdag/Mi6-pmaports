@@ -1,0 +1,23 @@
+# Maintainer: Daniele Debernardi <drebrez@gmail.com>
+pkgname=fbdebug
+pkgver=1.0.0
+pkgrel=0
+pkgdesc="Framebuffer debugging tool"
+url="https://postmarketos.org"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="linux-headers"
+source="https://gitlab.com/postmarketos/fbdebug/-/archive/$pkgver/fbdebug-$pkgver.tar.gz"
+options="!check" # No tests
+
+build() {
+	gcc fbdebug.c -o fbdebug.o -c
+	gcc fbdebug.o -o fbdebug
+}
+
+package() {
+	install -Dm755 fbdebug \
+		"$pkgdir"/usr/sbin/fbdebug
+}
+
+sha512sums="4a9c472ff47a10c8aad8c86b3c5f09b0b93f1a3da0e4bf70d0b09d4a8139d7b17f8e9630fc007c7f88c646e85910bb906249c64da7652a59dd3b256b578a48b4  fbdebug-1.0.0.tar.gz"

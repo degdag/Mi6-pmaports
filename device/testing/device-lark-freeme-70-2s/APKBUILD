@@ -1,0 +1,62 @@
+# Maintainer: Jacek Pruciak <pmos@juniorjpdj.pl>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lark-freeme-70-2s
+pkgdesc="Lark FreeMe 70.2S"
+pkgver=0.2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-allwinner
+	mesa-egl
+	mesa-dri-gallium
+	postmarketos-base
+	u-boot-tools
+	u-boot-lark-freeme-70-2s
+	"
+makedepends="devicepkg-dev linux-postmarketos-allwinner"
+source="
+	deviceinfo
+	u-boot-script.cmd
+	"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+
+	mkimage \
+		-A arm \
+		-O linux \
+		-T script \
+		-C none \
+		-a 0 \
+		-e 0 \
+		-n postmarketos \
+		-d "$srcdir"/u-boot-script.cmd \
+		"$srcdir"/boot.scr
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# U-Boot boot script
+	install -Dm644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/boot.scr
+
+	# Device Tree - temporary workaround: copy from kernel package
+	install -Dm644 /usr/share/dtb/sun4i-a10-lark-freeme-70-2s.dtb \
+		"$pkgdir"/boot/dtbs-postmarketos-allwinner/sun4i-a10-lark-freeme-70-2s.dtb
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware (rtl8188ctv)"
+	depends="linux-firmware-rtlwifi"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+fcb57962828c6629971c19279b89d262b998cb34293f46709e9872f53893e13c4e8f4d2cee574a2937ccc2c9f48bf843a99aae19e7e8fa1c30e648739e08cc6d  deviceinfo
+6cfb7a8a996468441779207a24b6f346bc13b248758822f2a0cc78c296f68c97d1a7dd96bf226a039fb5936d93ff2659c25396466e97fb7e94ddf0ee4d11be67  u-boot-script.cmd
+"

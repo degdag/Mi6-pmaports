@@ -1,0 +1,101 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/lineage-a5y17lte_defconfig
+
+pkgname=linux-samsung-a5y17lte
+pkgver=3.18.14
+pkgrel=11
+pkgdesc="Samsung Galaxy A5 (2017) kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="samsung-a5y17lte"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev dtbtool-exynos gcc6"
+
+# Source
+_repository="android_kernel_samsung_universal7880"
+_commit="9af43285ff43d74f3f40f910023e57dfad1c8e63"
+_qca_commit="48f9ab5d5c161549be098997fa0e3602c1547213"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/LineageOS/$_repository/archive/$_commit.tar.gz
+	qcacld-$_qca_commit.tar.gz::https://github.com/codeauroraforum/quic-la-platform-vendor-qcom-opensource-wlan-qcacld-2.0/archive/$_qca_commit.tar.gz
+	$_config
+	fix_firmware_path.patch
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+	0007-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+	qcacld-2.0.config
+	disable_wlan_werror.qcapatch
+	skbuff_increased.patch
+	disable_knox.patch
+	debug_muic.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_qcaclddir="$srcdir/quic-la-platform-vendor-qcom-opensource-wlan-qcacld-2.0-$_qca_commit"
+
+# Compiler: GCC 6 (doesn't boot when compiled with newer versions)
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+	prepare_modules
+}
+
+prepare_modules() {
+	cd $_qcaclddir
+	patch -p1 -i "$srcdir"/disable_wlan_werror.qcapatch
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+	build_modules
+
+	dtbTool-exynos --pagesize 2048 --platform 0x50a6 --subtype 0x217584da \
+		-o "arch/arm64/boot/dtb.img" $(find "arch/arm64/boot/dts/" -name *a5y17lte*.dtb)
+}
+
+build_modules() {
+	(
+		set -a
+		source "$srcdir"/qcacld-2.0.config
+		# Use GCC-6, because when compiled with GCC-10 it fails to initialize:
+		# "module wlan: overflow in relocation type 261 val ffffffbffc000000"
+		make M=$_qcaclddir WLAN_ROOT=$_qcaclddir modules ARCH="$_carch" CC="${CC:-gcc}"
+	)
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	mkdir -p "$pkgdir"/lib/modules/$pkgver
+	cp -v "$builddir"/modules.builtin "$pkgdir"/lib/modules/$pkgver
+	make INSTALL_MOD_PATH="$pkgdir" INSTALL_MOD_STRIP=1 M=$_qcaclddir modules_install
+
+	# Master DTB (deviceinfo_bootimg_qcdt)
+	install -Dm644 "$builddir/arch/arm64/boot/dtb.img" \
+		"$pkgdir/boot/dt.img"
+}
+
+sha512sums="96794c6c5c91375a0110906c512644ccfb7c1d1f6e9275a0807e123bd8d02c93047856228298e38c9d24ddb663d58c33dbeaedb8f433cd54a07e4ae4e91ad243  linux-samsung-a5y17lte-9af43285ff43d74f3f40f910023e57dfad1c8e63.tar.gz
+1dfcf7d1965d1a4fa86ac05d4408f1ffbedaf864689e0228d09d3d964fca08edf33dcf77bb0ab4dfcf1f8a37d6ee300c9e480457710745f9f5b7df9587e265e8  qcacld-48f9ab5d5c161549be098997fa0e3602c1547213.tar.gz
+ee89743e520abf5b477cace95d7e8f271ca7aef2f3b257def46b624e4bd8b4701e529060f4df4cafd9d9b804b2de395a973677b35d1f9f6bda6074c267f44c55  config-samsung-a5y17lte.aarch64
+9b13cccc9323f343d0aa676de6c6a83f34815cf06656adfa7ba20b559d94fc46c04b1508f1db22d12a14d4cdd531994f548b77a4a4d7d07481ee88a56564c0c9  fix_firmware_path.patch
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch
+b5f7aed0d4c78fcd9ea6f65e11606c4d33004b45eed39017baa8b0a78db801396aa04ba7cd3a4a669c23f878f5462ae1b5f753e0e26b65c9962fd1e98855e524  0007-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+83a432ab7e3ee3cae47b0c751cf0a268f4291411789a1cf9187ef003a0f09b46316c0669e92bd91d3062b3d020005e67aea6fbf48b8ef87ba9b7f3a86a44612b  qcacld-2.0.config
+23278ca0660f17723506ca5befea757d736bd2cf4f01bccfaf4c154f94d42828fc2f49fd599f3295623a65f85b3b89bea18389a65c63f82f0496a92e8e6d8d72  disable_wlan_werror.qcapatch
+f763033e73f5a00ad42273c11058446ff365d09d5f204c828d111aa48bc816baca74c333cbd2fa61c21ccdebc7329d0a3cfe971f5991026cb5abe7871b51a32b  skbuff_increased.patch
+24fde35d01ecc706120d808ca7283e302f6de2d66bb0c58af855b9033f6e815261ed38719d3eb93129b52c2db58f1045993abd9a1d16e264b4fcfa74c01a9c40  disable_knox.patch
+d40153e1d86d407301ff3e6824b8445bf259bffdd50179149f67012b42829e565ce9dbeeeb2eca34bb14ddabcc694dd28793e6faa4f44a88f962e33490766ff7  debug_muic.patch"

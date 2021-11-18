@@ -1,0 +1,58 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Vincent Knecht <vincent.knecht@mailoo.org>
+pkgname=device-alcatel-idol347
+pkgdesc="Alcatel OneTouch Idol 3 (4.7)"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo phoc.ini pointercal"
+subpackages="
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-kernel-mainline-modem:kernel_mainline_modem
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/pointercal "$pkgdir"/etc/pointercal
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel (no modem, audio routed directly)"
+	depends="linux-postmarketos-qcom-msm8916"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline_modem() {
+	pkgdesc="Close to mainline kernel (non-free modem, audio routed through ADSP)"
+	depends="linux-postmarketos-qcom-msm8916 soc-qcom-msm8916-modem"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Modem/Video firmware"
+	depends="firmware-qcom-adreno-a300 msm-firmware-loader
+		 firmware-alcatel-idol347-wcnss-nv firmware-alcatel-idol347-venus"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel postmarketos-ui-phosh"
+	install -D -m644 "$srcdir"/phoc.ini "$subpkgdir"/etc/phosh/phoc.ini
+}
+
+sha512sums="
+6a3f64ad5d56ab4b006ee2bd5c427368e7d04b9e706f6293ec2f3beaa64ef788a0bc03b359f7945ef9be9d434628e1d8572e7ea976d908e710714f035cf2e06b  deviceinfo
+a60d1785f0163d4a4eb63ea5e3017631aab7dd6683baad6a74b09809d33888d581ca8b14526c19d18234dcf727d1fdb4ff0489ed4bd5523905d0e4da7d93bc56  phoc.ini
+ccdfe80d56c7bf8ecce0919a9b1c6721df3c4d0f819585475d4e78b44adf66306f7c2c7082bc7c669dfbfd066028fd2ac3cf4cd2878b34262547ea1fd1f6ae3e  pointercal
+"

@@ -1,0 +1,25 @@
+# Unmaintained: Downstream port, only for testing. Use mainline port (alcatel-idol347)!
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-alcatel-idol347-downstream
+pkgdesc="Alcatel OneTouch Idol 3 (4.7) (Downstream)"
+pkgver=1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-alcatel-idol347-downstream mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+2b6ba0e6e6d8f90d907a7a8089718c8a1ff8ee3ad0ea17f204e2e9fa2a514a06af9c2b91b7bfb0b8b8362ba2d44b53aad52fd88d506682f1f61b9fe6c19d206e  deviceinfo
+"

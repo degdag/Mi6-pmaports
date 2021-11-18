@@ -1,0 +1,71 @@
+# Kernel config based on: arch/arm/configs/kobo_defconfig
+
+pkgname=linux-kobo-clara-mainline
+pkgver=5.13.0
+pkgrel=2
+pkgdesc="Kobo Clara HD kernel fork, close to mainline"
+arch="armv7"
+_carch="arm"
+_flavor="kobo-clara-mainline"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-nftables"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	gmp-dev
+	lzop
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+"
+
+# Source
+_repository="linux"
+_commit="b5908f2984910829a26594c5ea6b43ffeb9ce1e8"
+_rtl8189fs_repository="rtl8189ES_linux"
+_rtl8189fs_commit="62c31d577c385316bb99107f60e63169dacc37db"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/akemnade/$_repository/archive/$_commit.tar.gz
+	$_rtl8189fs_repository-$_rtl8189fs_commit.tar.gz::https://github.com/jwrdegoede/$_rtl8189fs_repository/archive/$_rtl8189fs_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+_rtl8189fs_dir="$srcdir/$_rtl8189fs_repository-$_rtl8189fs_commit"
+
+prepare() {
+	REPLACE_GCCH=0
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$(( pkgrel + 1 ))-postmarketOS"
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$(( pkgrel + 1 ))-postmarketOS" \
+		-C "$_rtl8189fs_dir" KSRC="$builddir"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+	make modules_install dtbs_install \
+		O="$_outdir" ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+	install -Dm644 "$_rtl8189fs_dir"/8189fs.ko "$pkgdir/lib/modules/$pkgver/kernel/drivers/net/wireless"
+}
+
+sha512sums="
+85622e760d4b73bf2b9d42b53b8af0538a2ea15d7c9a47d320cde03514342824939e9bf0667af9289055241dc1a31444c3a183a0966b61be5b1453d78d3175c7  linux-kobo-clara-mainline-b5908f2984910829a26594c5ea6b43ffeb9ce1e8.tar.gz
+c7ffab0eaed9c57fb32cbfc01c47c1ed5c7c8c3a36633c93e43a61bb42f107687d0ccd8855e61b86fc04dcffcd7b2116cf57e2fe4b6ce17522fa68d1c1cc89a0  rtl8189ES_linux-62c31d577c385316bb99107f60e63169dacc37db.tar.gz
+aaba528262a1c7ec1f71bbe07ced6e729240f89859b0518fdfb64feea6b6a116ac8401bddf28957056e2e8dc0b90b66928e22c0523d10158df143e8b0b4a9c7c  config-kobo-clara-mainline.armv7
+"

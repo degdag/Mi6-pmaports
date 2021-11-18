@@ -1,0 +1,17 @@
+pkgname=firmware-analogix
+pkgver=0_git20200620
+pkgrel=0
+pkgdesc="Firmware for Analogix controllers"
+url="https://megous.com/git/linux-firmware"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+_commit="331f8c0826b6b89fa51a13df2c632e5f632e6e19"
+source="anx7688-fw-$_commit.bin::https://megous.com/git/linux-firmware/plain/anx7688-fw.bin?id=$_commit"
+
+package() {
+	install -Dm644 "$srcdir"/anx7688-fw-$_commit.bin \
+		"$pkgdir"/lib/firmware/anx7688-fw.bin
+}
+
+sha512sums="627b40cfd7fb02a1c4c2cb3628075e162745292d54875957de8f2913339db9048dbd59cb8cd088419861c5fdc77e658040b3111c79be265afb56fca9c407dfcb  anx7688-fw-331f8c0826b6b89fa51a13df2c632e5f632e6e19.bin"

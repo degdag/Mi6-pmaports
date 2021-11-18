@@ -1,0 +1,33 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=postmarketos-welcome-gtk3
+pkgver=0.3.0
+pkgrel=0
+pkgdesc="postmarketOS welcome app"
+url="https://gitlab.com/postmarketOS/postmarketos-welcome-gtk3"
+arch="all"
+license="GPL-3.0-or-later"
+makedepends="meson libhandy1-dev"
+source="https://gitlab.com/postmarketOS/postmarketos-welcome-gtk3/-/archive/$pkgver/postmarketos-welcome-gtk3-$pkgver.tar.bz2"
+options="!check" # No tests
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install -C output
+
+	install -Dm644 "data/welcome-message" \
+		"$pkgdir/etc/welcome-message"
+
+	# Autostart on first login, the app removes the symlink when started
+	local _autostartdir="$pkgdir/etc/skel/.config/autostart"
+	mkdir -p "$_autostartdir"
+	ln -s "/usr/share/applications/org.postmarketos.Welcome.desktop" \
+		"$_autostartdir/org.postmarketos.Welcome.desktop"
+}
+
+sha512sums="
+0bffbf16dac78c76824cc76e04d3b97465cf5cb3504c6b475345856308dd695b73e6fb3549874ea10882b41cf1593174e07537e77516f60376050e8a3afc1ceb  postmarketos-welcome-gtk3-0.3.0.tar.bz2
+"

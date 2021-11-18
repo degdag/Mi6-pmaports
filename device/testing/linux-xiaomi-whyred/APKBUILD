@@ -1,0 +1,78 @@
+# Maintainer: Nikita Utkin <shockck84@gmail.com>
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/whyred-perf_defconfig
+
+pkgname=linux-xiaomi-whyred
+pkgver=4.4.78
+pkgrel=2
+pkgdesc="Xiaomi Redmi Note 5 kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="xiaomi-whyred"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+# Compiling with latest gcc causes kernel panic, so here we use gcc6
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl gcc6"
+
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="Xiaomi_Kernel_OpenSource"
+_commit="efbbb9cce47475c49f28d227b2a52eca6f0d02a7"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.zip::https://github.com/MiCode/$_repository/archive/$_commit.zip
+	$_config
+	gcc8-fix-put-user.patch
+	fix-includes.patch
+	fix-trace-includes.patch
+	fix-vl53l0-includes.patch
+	03_fix_rndis_ipa_trace_header_not_found.patch
+	fix-usb-redundant-module-funcs.patch
+	export-usb-gadget-funcs.patch
+	exclude-unrelated-device-trees.patch
+"
+# exclude-unrelated-device-trees.patch removes device trees for Wayne (Redmi 6X)
+# and Tulip (Redmi Note 6 Pro), leaving only Whyred's.
+# This patch is neccessary to point the kernel to the correct device tree,
+# as it was using Wayne's device trees otherwise for some reason.
+# TODO: Find better way to force to use the correct device tree.
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC=$CC CROSS_COMPILE=$CROSS_COMPILE HOSTCC=$HOSTCC \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	# Modules
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		INSTALL_MOD_PATH="$pkgdir" INSTALL_MOD_STRIP=1 \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS" \
+		modules_install
+}
+
+sha512sums="a4da46628917ed4b486a4c12ba8e75fde8db8a23f9311ef1a907f7a664d5c4f7266a9174b131a62cfd0c00f0498d05388fc9c20a68bf3ab4dd9565d3bd033393  linux-xiaomi-whyred-efbbb9cce47475c49f28d227b2a52eca6f0d02a7.zip
+613d46d5142f3765a23ff1e3a8f7f593df29319c242163fb5d0d07ef8253de0814dd133e9109636d64d0ba62fe31ed578c8b9f40b147ba0a80eab08b42f2b4cb  config-xiaomi-whyred.aarch64
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+2d72e13a68c67c6af07b0e7e709f3feb57187964adef79d3c1cc7d73f75f5acccfcaa0d733d8d8746deadc220cb71d0bbd67ed11861bf9ee8dd07005f5d643eb  fix-includes.patch
+a7885d5ea79026f88723bab685b86f2e3d7d14dbc29c1220ec6fa007a6ed5f5c6a1773b0f57c9ec413bca069deff16ca8cb2126bf428aff2e0957a9c1a0339a8  fix-trace-includes.patch
+f8ca292ebc8bffac59f31fca191f9a95cdbd405c0382299779a5dfcfadde5116dec3d868f9d5ea4e2b3965f6fb9822241121bc6121264af796c59bc2cd6da29e  fix-vl53l0-includes.patch
+9c549714f03c7a7666e8aa7508a48cfdccab7cf3e97fb59c4df8fa97f75492365926f82c4a677c50780d68d4905504dcccbdd6de6344bd8d4b88b2331933ed46  03_fix_rndis_ipa_trace_header_not_found.patch
+85086f455f7ba08db2421862151b838cfefbd5131990bfa391863e0296cbb716f500cece07ad71a229274ae097bcebc81a2c99521c1b4e7ebdd65fa925a9ddf8  fix-usb-redundant-module-funcs.patch
+6bb86b54c7002e056a8eb21b159d4beb001ca6745645faf86d9208106390816aa07674dc6a11152a8b3fafae5ba93e0352de0813d1a9235b745150253be84e72  export-usb-gadget-funcs.patch
+4eff7d21cb15f769ee9667eb0a7d42f3439e12fc76046b409baea232fbbf935a2e960ef782361d712008ada0d57cff7cf5e8cecf6484a3037e73647f5dc58a51  exclude-unrelated-device-trees.patch"

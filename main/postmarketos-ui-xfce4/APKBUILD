@@ -1,0 +1,72 @@
+# Maintainer: Jakko <jahau@rocketmail.com>
+pkgname=postmarketos-ui-xfce4
+pkgver=0.4.0
+pkgrel=0
+pkgdesc="(X11) Lightweight desktop (stylus recommended)"
+url="https://gitlab.com/postmarketOS/xfce4-phone"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	elogind
+	lightdm
+	lightdm-openrc
+	mesa-egl
+	networkmanager
+	polkit-elogind
+	postmarketos-base-ui
+	xfce4
+	xorg-server
+	"
+_pmb_recommends="
+	faenza-icon-theme
+	gnome-keyring
+	greybird-themes
+	network-manager-applet
+	onboard
+	pavucontrol
+	pm-utils
+	postmarketos-artwork-icons
+	postmarketos-artwork-wallpapers
+	pulseaudio-utils
+	xfce4-battery-plugin
+	xfce4-pulseaudio-plugin
+	xfce4-screensaver
+	xfce4-terminal
+	xfce4-whiskermenu-plugin
+	"
+install="$pkgname.post-install $pkgname.pre-deinstall $pkgname.post-upgrade"
+source="
+	xfce4-phone-$pkgver.tar.gz::https://gitlab.com/postmarketOS/xfce4-phone/-/archive/$pkgver/xfce4-phone-$pkgver.tar.gz
+	10_onboard.gschema.override
+	64-lightdm-autologin.conf
+	enable-scrollbars.sh
+	onboard-autostart.desktop
+	"
+options="!check"
+builddir="$srcdir/xfce4-phone-$pkgver"
+
+package() {
+	install -d -m755 "$pkgdir"/etc/skel
+	cp -a "$builddir"/config "$pkgdir"/etc/skel/.config
+
+	install -Dm644 "$srcdir"/10_onboard.gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/10_onboard.gschema.override
+
+	install -Dm644 "$srcdir"/64-lightdm-autologin.conf \
+		"$pkgdir"/usr/share/lightdm/lightdm.conf.d/64-autologin.conf
+
+	install -Dm644 "$srcdir"/enable-scrollbars.sh \
+		"$pkgdir"/etc/profile.d/enable-scrollbars.sh
+
+	install -Dm644 "$srcdir"/onboard-autostart.desktop \
+		"$pkgdir"/etc/skel/.config/autostart/onboard-autostart.desktop
+}
+
+sha512sums="
+753d8c228a938255594ecc007d6071cb35e5c400d622990e0db9540c3297e17e73bdd088d5bee25ac749606700ca42a636243864523788b1cbe0dd77afa900be  xfce4-phone-0.4.0.tar.gz
+ffcc518ff58d37de302bd101e57bf983800e45899645d476045d0a74096704333a0b513f45e6a5485fdbd80ac1caebce14a760cab6fcc6d5dde0d766ade8b58b  10_onboard.gschema.override
+3841294daffdd3e0da5a7ba155ba8c21e9e5a2f2ba5b3b5ffa3ea6a16486625d3655d03f8c18740fcddfbca673c42a5289ec3b22720cfbbdd56fde8fdc3bf9b0  64-lightdm-autologin.conf
+262cdcf334cfa56872797c960cb8683b79c7b13b0a8179cd002e598576f0e9fe07057fd0fe724e87a6664db4b91b31a8c0cbf026ab137533b07675f838ae57bb  enable-scrollbars.sh
+85a7f157fc237959f2e1a411f494f52a97c683bc656ea3899c7636db3de39ce9cb25b88ff5408fe2c36fe871065830c8581e8bdee385fb1aa94709c189463966  onboard-autostart.desktop
+"

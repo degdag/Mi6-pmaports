@@ -1,0 +1,30 @@
+From 5dec8ebd767243288ef0fcb6dda03b689fdd2d82 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 19:47:36 +0200
+Subject: [PATCH 05/10] RX-51: Symbols: Bind volume keys as XF86 raise and
+ lower volume, third level for VT switch
+
+---
+ symbols/nokia_vndr/rx-51 | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index 1f66785..5b0dbd0 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -445,8 +445,10 @@ xkb_symbols "common_keys" {
+     // The only exception is an active call in portrait mode where we want to
+     // use the real meanings of the keys. This special case and management of
+     // +/- keys in general is handled in maemo-statusmenu-volume.
+-    key <FK07>	{ [	F8	] };
+-    key <FK08>	{ [	F7	] };
++    //
++    // Maemo wants KF07 as F8 and FK08 as F7. We don't care about that.
++    key <FK07>	{ type= "PC_FN_LEVEL2", [	XF86AudioLowerVolume,	XF86Switch_VT_1	] };
++    key <FK08>	{ type= "PC_FN_LEVEL2", [	XF86AudioRaiseVolume,	XF86Switch_VT_2	] };
+ 
+     key <FK09>	{ [	F9	] };
+     key <FK10>	{ [	F10	] };
+-- 
+1.8.1.4
+

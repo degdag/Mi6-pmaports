@@ -1,0 +1,26 @@
+From 9f80731e228ae136b1bd9b117c665a542f4b3dc1 Mon Sep 17 00:00:00 2001
+From: Shilin Victor <chrono.monochrome@gmail.com>
+Date: Fri, 19 Mar 2021 19:10:37 +0300
+Subject: [PATCH 07/10] power_supply: max77693: change the supply type to
+ POWER_SUPPLY_TYPE_MAINS
+
+---
+ drivers/power/supply/max77693_charger.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/power/supply/max77693_charger.c b/drivers/power/supply/max77693_charger.c
+index b19490cb4a8f..c33f0d77b1cc 100644
+--- a/drivers/power/supply/max77693_charger.c
++++ b/drivers/power/supply/max77693_charger.c
+@@ -277,7 +277,7 @@ static int max77693_charger_get_property(struct power_supply *psy,
+ 
+ static const struct power_supply_desc max77693_charger_desc = {
+ 	.name		= MAX77693_CHARGER_NAME,
+-	.type		= POWER_SUPPLY_TYPE_BATTERY,
++	.type		= POWER_SUPPLY_TYPE_MAINS,
+ 	.properties	= max77693_charger_props,
+ 	.num_properties	= ARRAY_SIZE(max77693_charger_props),
+ 	.get_property	= max77693_charger_get_property,
+-- 
+2.33.0
+

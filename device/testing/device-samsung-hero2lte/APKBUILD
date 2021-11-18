@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-hero2lte
+pkgdesc="Samsung Galaxy S7 edge"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-hero2lte mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Non-free firmware for Wi-Fi on the Samsung Galaxy S7 (edge)"
+	depends="firmware-samsung-hero"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+2a5b6de6952209a7091a4e1145baa7c40c3c215227bf07626df5ab2d153d27ce74aed4d9a7aeede56ccdeda309f739bdfeffb3f049e0c31cd6a8437403cfceed  deviceinfo
+5a7be3cb8835ffb3783fcd4539de04f7f006c726ac9aea35cdca9e90b2877dc36cf4e314851bf9078f4b2dac061b7265866792d92a79f5232c56a0e17f7910b1  initfs-hook.sh
+"

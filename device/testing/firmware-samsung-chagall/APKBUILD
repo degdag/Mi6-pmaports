@@ -1,0 +1,27 @@
+pkgname=firmware-samsung-chagall
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Samsung tablets based on exynos5420"
+url="https://github.com/TheMuppets/proprietary_vendor_samsung"
+arch="armv7"
+license="proprietary"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+
+# Source
+_commit="06294e9dd7dd1a7edd3ae1e03634c8bae1358ff7"
+_url="https://github.com/TheMuppets/proprietary_vendor_samsung/raw/$_commit"
+_chagallwifi_wifi_files="bcmdhd_sta.bin nvram_net.txt_4354_a1"
+
+for _i in $_chagallwifi_wifi_files; do
+	source="$source $pkgname-$_commit-$_i::$_url/chagallwifi/proprietary/etc/wifi/$_i";
+done
+
+package() {
+	install -Dm644 "$srcdir/$pkgname-$_commit-bcmdhd_sta.bin" \
+		"$pkgdir"/lib/firmware/postmarketos/bcmdhd_sta.bin_4354_a1
+	install -Dm644 "$srcdir/$pkgname-$_commit-nvram_net.txt_4354_a1" \
+		"$pkgdir"/lib/firmware/postmarketos/nvram_net.txt_4354_a1
+}
+
+sha512sums="1666a13ee4eed31b9c320acd0f48d770a4343fe37da02527e191c5d50f083b20c902c4519f10c256c173315a5315cbe2c7f605e4b7fda1e327243e3fe4a782b6  firmware-samsung-chagall-06294e9dd7dd1a7edd3ae1e03634c8bae1358ff7-bcmdhd_sta.bin
+25b603bee8759c93b82efbb99d4cddbb3d7e4ad8604515891b7c38cbd6ba09ce386bdea6d4b81b720d3a0e7534299824fcb5c8861b38d0f70aeb5c7eaa439dad  firmware-samsung-chagall-06294e9dd7dd1a7edd3ae1e03634c8bae1358ff7-nvram_net.txt_4354_a1"

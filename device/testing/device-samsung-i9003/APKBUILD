@@ -1,0 +1,28 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i9003
+pkgver=1
+pkgrel=28
+pkgdesc="Samsung Galaxy SL"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base linux-samsung-i9003 libsamsung-ipc mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo
+	90-android-touch-dev.rules
+	"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+sha512sums="
+094d2430af285c390398400787a31bb6cc9ff7aecf292dfc7ac8d77516ef8acddebcb2441cb3f7c2c08d4fae41536fc7a733df17f9b74e1d78226e209426400f  deviceinfo
+079336f0a62fe45e839dcaa56479736fb67125ef5adf9bf73fc513c696d5a9fe14cfc9912f4aeb989476aa23bcd1befca25f0163c827691eea7eec1c7b97f303  90-android-touch-dev.rules
+"

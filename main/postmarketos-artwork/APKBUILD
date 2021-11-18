@@ -1,0 +1,69 @@
+# Maintainer: Olgierd "moondeck" Nowakowski <olgierd@novakovsky.eu>
+pkgname=postmarketos-artwork
+pkgver=2
+pkgrel=0
+pkgdesc="Meta package for the postmarketOS artwork"
+url="https://postmarketos.org/"
+arch="noarch"
+license="CC-BY-SA-4.0"
+_hash="03553d4ab273d83c40a75e0355e3d93044897411"
+source="postmarketos-artwork-$_hash.tar.gz::https://gitlab.com/postmarketOS/artwork/-/archive/$_hash/artwork-$_hash.tar.gz"
+subpackages="
+	$pkgname-wallpapers
+	$pkgname-wallpapers-extra:wallpapers_extra
+	$pkgname-icons
+	$pkgname-sounds
+	"
+options="!check"
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+wallpapers() {
+	pkgdesc="Wallpapers for postmarketOS"
+	mkdir -p "$subpkgdir"/usr/share/wallpapers/
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/pmos-grass-square.jpg \
+		"$subpkgdir"/usr/share/wallpapers/postmarketos.jpg
+}
+
+wallpapers_extra() {
+	pkgdesc="Additional Wallpapers for postmarketOS"
+	mkdir -p "$subpkgdir"/usr/share/wallpapers/
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/extra/* \
+		"$subpkgdir"/usr/share/wallpapers/
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/postmarketos.jpg \
+		"$subpkgdir"/usr/share/wallpapers/postmarketos-light.jpg
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/logo_dark.jpg \
+		"$subpkgdir"/usr/share/wallpapers/logo_dark.jpg
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/pmos-grass-800x480.jpg \
+		"$subpkgdir"/usr/share/wallpapers/pmos-grass-800x480.jpg
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/pmos-grass.jpg \
+		"$subpkgdir"/usr/share/wallpapers/pmos-grass.jpg
+	install -Dm644 "$srcdir"/artwork-$_hash/wallpapers/logo/pmos.jpg \
+		"$subpkgdir"/usr/share/wallpapers/pmos.jpg
+}
+
+icons() {
+	pkgdesc="Icons for postmarketOS"
+	mkdir -p "$subpkgdir"/usr/share/icons/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/logo/logo.png \
+		"$subpkgdir"/usr/share/icons/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/logo/logo.svg \
+		"$subpkgdir"/usr/share/icons/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/logo/logo-phone.svg \
+		"$subpkgdir"/usr/share/icons/postmarketOS/
+}
+
+sounds() {
+	pkgdesc="Sounds for postmarketOS"
+	mkdir -p "$subpkgdir"/usr/share/sounds/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/tones/battery_low.mid \
+		"$subpkgdir"/usr/share/sounds/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/tones/no_signal.mid \
+		"$subpkgdir"/usr/share/sounds/postmarketOS/
+	install -Dm644 "$srcdir"/artwork-$_hash/tones/startup.mid \
+		"$subpkgdir"/usr/share/sounds/postmarketOS/
+}
+
+sha512sums="2a9dc5738de6f79d81253da45755bb97065468a04a3123d2ab68bdc4c4080569f568dcccc9ededecb58681233432ff4ef7dca97fa2cd8df71f805894c00883f0  postmarketos-artwork-03553d4ab273d83c40a75e0355e3d93044897411.tar.gz"

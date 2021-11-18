@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-i8150
+pkgdesc="Samsung Galaxy W"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-i8150
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+400c5e9f7cd9e0716827015947076228ba0ee1f19a0dd9d69c26b614f5f9705934a6462f8e6f8e3041447124cbc100ec439c894e86c910252f3620a69928b5a6  deviceinfo
+"

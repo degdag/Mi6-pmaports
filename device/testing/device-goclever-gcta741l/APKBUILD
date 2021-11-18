@@ -1,0 +1,62 @@
+# Maintainer: Jacek Pruciak <pmos@juniorjpdj.pl>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-goclever-gcta741l
+pkgdesc="GoClever Orion 70L"
+pkgver=0.2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-allwinner
+	mesa-egl
+	mesa-dri-gallium
+	postmarketos-base
+	u-boot-tools
+	u-boot-goclever-gcta741l
+"
+makedepends="devicepkg-dev linux-postmarketos-allwinner"
+source="
+	deviceinfo
+	u-boot-script.cmd
+"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+
+	mkimage \
+		-A arm \
+		-O linux \
+		-T script \
+		-C none \
+		-a 0 \
+		-e 0 \
+		-n postmarketos \
+		-d "$srcdir"/u-boot-script.cmd \
+		"$srcdir"/boot.scr
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# U-Boot boot script
+	install -Dm644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/boot.scr
+
+	# Device Tree - temporary workaround: copy from kernel package
+	install -Dm644 /usr/share/dtb/sun6i-a31s-goclever-gcta741l.dtb \
+		"$pkgdir"/boot/dtbs-postmarketos-allwinner/sun6i-a31s-goclever-gcta741l.dtb
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware (rtl8188eu)"
+	depends="linux-firmware-rtlwifi"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+92cf26f6ce8bb04815b87e23ef0f3a631a4b477672cea13ac42b8f90fb45186ba88ef962b39b0ca984db74947439d2e68569d59c842628ca9a4e351c13fd2710  deviceinfo
+6cfb7a8a996468441779207a24b6f346bc13b248758822f2a0cc78c296f68c97d1a7dd96bf226a039fb5936d93ff2659c25396466e97fb7e94ddf0ee4d11be67  u-boot-script.cmd
+"

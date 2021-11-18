@@ -1,0 +1,133 @@
+# Maintainer: Clayton Craft <clayton@craftyguy.net>
+pkgname=postmarketos-base-ui
+pkgver=4
+pkgrel=1
+pkgdesc="Meta package for minimal postmarketOS UI base"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	chrony
+	dbus
+	haveged
+	nftables
+	postmarketos-base
+	shadow
+	ttf-dejavu
+	util-linux
+	wpa_supplicant
+	wireless-regdb
+	"
+subpackages="
+	$pkgname-elogind
+	$pkgname-tinydm
+	$pkgname-x11
+	$pkgname-pulseaudio
+	$pkgname-bluez-obexd:_obexd
+	$pkgname-networkmanager
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+replaces="
+	chrony
+	wpa_supplicant-openrc
+	postmarketos-base
+	"
+replaces_priority=100  # leave plenty for alpine
+
+_source644="
+	etc/NetworkManager/conf.d/hostname-mode.conf
+	etc/chrony/chrony.conf
+	etc/conf.d/tinydm
+	etc/conf.d/wpa_supplicant
+	etc/elogind/logind.conf
+	etc/pulse/daemon.conf.d/90-postmarketos.conf
+	etc/pulse/postmarketos.pa
+	etc/skel/.profile
+	etc/sleep-inhibitor.conf
+	"
+_source755="
+	etc/tinydm.d/env-wayland.d/50-firefox-wayland.sh
+	"
+
+# Avoid filename based checksum conflicts by including the whole path.
+flatpath() {
+	local i
+	for i in $@; do
+		echo "rootfs-$i" | sed s./.-.g
+	done
+}
+source="$(flatpath $_source644 $_source755)"
+
+package() {
+	local i
+	for i in $_source644; do
+		install -Dm644 "$srcdir/$(flatpath "$i")" "$pkgdir/$i"
+	done
+	for i in $_source755; do
+		install -Dm755 "$srcdir/$(flatpath "$i")" "$pkgdir/$i"
+	done
+}
+
+x11() {
+	install_if="$pkgname=$pkgver-r$pkgrel xorg-server"
+	depends="
+		libinput
+		xf86-input-libinput
+		xf86-video-fbdev"
+	provides="postmarketos-base-x11=$pkgver-r$pkgrel"
+	mkdir "$subpkgdir"
+}
+
+elogind() {
+	install_if="$pkgname=$pkgver-r$pkgrel elogind"
+	depends="sleep-inhibitor"
+	install="$subpkgname.pre-upgrade $subpkgname.post-install"
+	replaces="
+		elogind
+		sleep-inhibitor
+		"
+	provides="postmarketos-base-elogind=$pkgver-r$pkgrel"
+
+	amove etc/elogind/logind.conf
+	amove etc/sleep-inhibitor.conf
+}
+
+tinydm() {
+	install_if="$pkgname=$pkgver-r$pkgrel tinydm-openrc"
+	replaces="tinydm-openrc"
+	provides="postmarketos-base-tinydm=$pkgver-r$pkgrel"
+	amove etc/conf.d/tinydm
+	amove etc/tinydm.d/env-wayland.d/50-firefox-wayland.sh
+}
+
+pulseaudio() {
+	install_if="$pkgname=$pkgver-r$pkgrel pulseaudio"
+	provides="postmarketos-base-pulseaudio=$pkgver-r$pkgrel"
+	amove etc/pulse/postmarketos.pa
+	amove etc/pulse/daemon.conf.d/90-postmarketos.conf
+}
+
+_obexd() {
+	install_if="$pkgname=$pkgver-r$pkgrel bluez-obexd"
+	replaces="bluez-obexd"
+	depends="obex-capabilities"
+	mkdir -p "$subpkgdir"
+}
+
+networkmanager() {
+	install_if="$pkgname=$pkgver-r$pkgrel networkmanager"
+	amove etc/NetworkManager/conf.d/hostname-mode.conf
+}
+
+sha512sums="
+3c9ae7415f4891bee8595166ed6a42cb577a837f741c6b5409d193558626348b41516888a01d0c4895282c5f4e9a1ff838c19712888750b2ef68429bb4b42ee3  rootfs-etc-NetworkManager-conf.d-hostname-mode.conf
+e5d049db1d82c510bab9246208b51b8ec2711d008d67792fc10d4c0b65ed4dece7b5ae3c3dd28a8539d177b6849c1f921cb9fef3d2c7bee0355451f7b4757ec6  rootfs-etc-chrony-chrony.conf
+44e4283c6f77de83915977dd3bc2d8e2d96b3ed6cc68d3cc156304359ae649b5a8b0bac843e517ec6faa2066dd43ba85e313899b1eda04862f864fb9eb508aa0  rootfs-etc-conf.d-tinydm
+fe0651904c1f40ffa67d83daca190af199f63247e53642a59a1e1147cd06776fcf20b7b2fcc5373783d50b8bd6ce8d1354c8e5f4d582d319727b9ceefd1e8e16  rootfs-etc-conf.d-wpa_supplicant
+8d2c54fe3ca62c62f8337fb6be28479d0e02ea63f32abae81907f2768631e65c9e17485f8bc0854a013377f729b06dd1873e2b75f86f657ece866d00aecbbdb4  rootfs-etc-elogind-logind.conf
+4afe8c5b70f4ca85f9348eb0df12e3152b76203a1a138daa5777f22b751ea431d3ee4113189d8606078f87a99c230b184bc73d53222e6e00581e46224bf5d39f  rootfs-etc-pulse-daemon.conf.d-90-postmarketos.conf
+315598b67889b1f25f82b8269ed36af4fcee018a4edf2926ba966ab08e0a42e36676896d0a5636001b1eb7f16211dcf518123230049556dec9d03006e003a584  rootfs-etc-pulse-postmarketos.pa
+90b30cbea660ef6cd4c0461b6935de0cd63a84a1a40edb24348a83044c97935b974bd8bafda9cd558e92d3eb69e22c5ccf55483b80f839e24f0eb57ae2df6fe3  rootfs-etc-skel-.profile
+6b9c7bb73213187eb9ca8a94109b2b816f50c1158c90fec2e92b373864280d67741589e5bfbab8810945f031d2f4b535aad78a72e46e52ea50be5b85324da381  rootfs-etc-sleep-inhibitor.conf
+d1ddd43489e6016e3ffd716027ed2bae4a2ab5f213118bdbcb96750e267ab7c0367cd0e0e386300aa5550352653144f5caeddd790621fe0879f83ca1995bb65c  rootfs-etc-tinydm.d-env-wayland.d-50-firefox-wayland.sh
+"

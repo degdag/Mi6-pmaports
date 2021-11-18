@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-huawei-sturgeon
+pkgdesc="Huawei Watch"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-huawei-sturgeon
+	mesa-dri-swrast
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+35ee89b4f810aeb24a51695607ce8402e683c2a99e1ccc2cbf5f96e2d6628c007371d582b8a780f185f66d3f987c5b6d20eb29d575967678e4c40837559903c1  deviceinfo
+"

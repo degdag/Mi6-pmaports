@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-xiaomi-cancro
+pkgdesc="Mi 3"
+pkgver=0.1
+pkgrel=7
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-xiaomi-cancro mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+4919d57c3e4a90af8f3dbd375f797932d6b3e4d155252bdd7b113cdd742ea9592c4197096358d41397daa966a8c0f407dd1554847ef41e5c3225806b34de2c80  deviceinfo
+"

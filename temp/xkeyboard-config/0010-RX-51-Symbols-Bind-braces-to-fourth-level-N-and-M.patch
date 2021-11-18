@@ -1,0 +1,34 @@
+From 28d7293375839bff1368f42093043ffa10afac5e Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Mon, 25 Feb 2013 15:51:14 +0200
+Subject: [PATCH 10/10] RX-51: Symbols: Bind braces to fourth level N and M
+
+In a perfect world, we could easily get ({[]}) from the same H and J keys,
+parentheses being in third level, braces in fourth, and brackets accessible
+with Multi key, double press.  However, there is a hardware limitation in N900
+which renders fourth level J (applies to few other keys too) useless. So, as a
+next best solution, we map braces to fourth level N and M, as they are
+physically under the keys that produce parentheses and brackets. This should
+be somewhat logical placement and also easy to remember and use.
+---
+ symbols/nokia_vndr/rx-51 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index aaa653a..fa76bbe 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -412,8 +412,8 @@ xkb_symbols "english_base" {
+     key <AB03>	{ [	c,		C,		EuroSign,	asciitilde	] };
+     key <AB04>	{ [	v,		V,		slash,		less		] };
+     key <AB05>	{ [	b,		B,		backslash,	greater		] };
+-    key <AB06>	{ [	n,		N,		quotedbl,	quotedbl	] };
+-    key <AB07>	{ [	m,		M,		apostrophe,	apostrophe	] };
++    key <AB06>	{ [	n,		N,		quotedbl,	braceleft	] };
++    key <AB07>	{ [	m,		M,		apostrophe,	braceright	] };
+     key <SPCE>	{ [	space,		space,		at,		at		] };
+ };
+ 
+-- 
+1.8.1.4
+

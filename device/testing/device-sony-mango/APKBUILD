@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-mango
+pkgdesc="Xperia Mini Pro"
+pkgver=1
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-sony-mango mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo fb.modes directfbrc"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	install -Dm644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/directfbrc \
+		"$pkgdir"/etc/directfbrc
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+1229d1aff6100c00f76857c79baa24651875de7ba25a9b429d8d3f1990cc6fa3e2a3b0501db098cd80b3c97572f9e283bdcd51a93a5dd6288055bc453770bc07  deviceinfo
+246889c74e09d2aeeaea62313f101727f07f9972fb15252cbf1d2e3c07aa850a85a25cc291407d8e560edb49e8bfbdb04eb09c412ed4c366f0b4bbcfbdcbcbb9  fb.modes
+e2b9a9e88b21ca408d761e8aba16e81df333e55bc57deac9c7a8988dd6dea63b0d809face6b406e0fa2b067487b07cd312d623f349e43ec88616a629ff684c3e  directfbrc
+"

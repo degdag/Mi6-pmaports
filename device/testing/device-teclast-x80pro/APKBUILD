@@ -1,0 +1,33 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# See wiki: <https://wiki.postmarketos.org/wiki/Teclast_X80_Pro_(teclast-x80pro)> for installation information
+# This package is also likely to work for most Intel based, EFI booting tablets (and laptops).
+pkgname=device-teclast-x80pro
+pkgdesc="Teclast X80Pro"
+pkgver=1.0
+pkgrel=11
+url="https://postmarketos.org"
+license="MIT"
+arch="x86_64"
+options="!check !archcheck"
+depends="postmarketos-base linux-teclast-x80pro"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="linux-firmware"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+1b67360553997896734680b14e42ca89c4d0af3b4a46415afba1a43f3e618a43f1a7b8c408c25ca108417a036dcc04d684328293c4c316e722b5d24a350f5f58  deviceinfo
+"

@@ -1,0 +1,165 @@
+# Kernel config based on: arch/arm64/configs/defconfig
+# APKBUILD based on linux-postmarketos-mainline
+# See: https://gitlab.com/postmarketOS/pmaports/issues/153
+
+_flavor=google-crosshatch-mainline
+_config="config-$_flavor.$CARCH"
+
+pkgname=linux-$_flavor
+
+pkgver=5.3_rc5
+_pkgver=${pkgver/_/-}
+_kernver=${pkgver%_rc*}
+_mainver=${_kernver%.*}
+_patchlevel=${_kernver/$_mainver./}
+_basever=$_mainver.$((_patchlevel-1))
+pkgrel=3
+
+arch="aarch64"
+pkgdesc="Google Pixel 3 XL kernel fork, close to mainline"
+url="https://kernel.org/"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev openssl-dev file bison flex"
+options="!strip !check !tracedeps pmb:cross-native"
+
+_repository="linux"
+_commit="9c9b87cec239101274451cc9c086da60108f9fda"
+
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/Pixel3Dev/$_repository/archive/$_commit.tar.gz
+	config-$_flavor.aarch64
+	linux4.17-gcc10-extern_YYLOC_global_declaration.patch
+"
+
+subpackages="$pkgname-dev"
+
+license="GPL2"
+_abi_release=$_pkgver
+_carch=$CARCH
+case "$_carch" in
+aarch64*) _carch="arm64" ;;
+arm*) _carch="arm" ;;
+ppc*) _carch="powerpc" ;;
+s390*) _carch="s390" ;;
+esac
+
+builddir="$srcdir/linux-$_commit"
+
+prepare() {
+	local _patch_failed=
+	# first apply patches in specified order
+	for i in $source; do
+		case $i in
+		*.patch|*.patch::*)
+			_patch=${i%::*}
+			msg "Applying $_patch..."
+			if ! patch -s -p1 -N -i "$srcdir"/$_patch; then
+				echo $_patch >>failed
+				_patch_failed=1
+			fi
+			;;
+		esac
+	done
+
+	if ! [ -z "$_patch_failed" ]; then
+		error "The following patches failed:"
+		cat failed
+		return 1
+	fi
+
+	mkdir -p "$srcdir"/build
+	cp -v "$srcdir"/$_config "$srcdir"/build/.config
+	make -C "$builddir" O="$srcdir"/build ARCH="$_carch" \
+		olddefconfig
+}
+
+build() {
+	cd "$srcdir"/build
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor" \
+		CFLAGS_MODULE=-fno-pic
+}
+
+package() {
+	cd "$srcdir/build/arch/$_carch/boot"
+
+	if [ "$CARCH" == "aarch64" ]; then
+		install -Dm644 "$srcdir/build/arch/$_carch/boot/Image.gz" \
+			"$pkgdir/boot/vmlinuz"
+	else
+		install -Dm644 "$srcdir/build/arch/$_carch/boot/"*zImage \
+			"$pkgdir/boot/vmlinuz"
+	fi
+
+	install -D "$srcdir/build/include/config/kernel.release" \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
+	cd "$srcdir"/build
+
+	local _install
+	case "$CARCH" in
+	aarch64*|arm*)	_install="modules_install dtbs_install" ;;
+	*)		_install="modules_install" ;;
+	esac
+
+	make -j1 $_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+
+dev() {
+	# copy the only the parts that we really need for build 3rd party
+	# kernel modules and install those as /usr/src/linux-headers,
+	# similar to what ubuntu does
+	#
+	# this way you don't need to install the 300-400 kernel sources to
+	# build a tiny kernel module
+	#
+	pkgdesc="Headers and script for third party modules for postmarketos kernel"
+	depends="gmp-dev bash perl"
+	local dir="$subpkgdir"/usr/src/linux-headers-$_abi_release
+
+	# first we import config, run prepare to set up for building
+	# external modules, and create the scripts
+	mkdir -p "$dir"
+	cp "$srcdir"/$_config "$dir"/.config
+	make -j1 -C "$builddir" O="$dir" ARCH="$_carch" \
+		olddefconfig prepare modules_prepare scripts
+
+	# needed for 3rd party modules
+	# https://bugzilla.kernel.org/show_bug.cgi?id=11143
+	case "$CARCH" in
+	ppc*) (cd "$dir" && make arch/powerpc/lib/crtsavres.o);;
+	esac
+
+	# remove the stuff that points to real sources. we want 3rd party
+	# modules to believe this is the sources
+	rm "$dir"/Makefile "$dir"/source
+
+	# copy the needed stuff from real sources
+	#
+	# this is taken from ubuntu kernel build script
+	# http://kernel.ubuntu.com/git/ubuntu/ubuntu-zesty.git/tree/debian/rules.d/3-binary-indep.mk
+
+	cd "$builddir"
+	find . -path './include/*' -prune \
+		-o -path './scripts/*' -prune -o -type f \
+		\( -name 'Makefile*' -o -name 'Kconfig*' -o -name 'Kbuild*' -o \
+		   -name '*.sh' -o -name '*.pl' -o -name '*.lds' \) \
+		-print | cpio -pdm "$dir"
+	cp -a scripts include "$dir"
+	find $(find arch -name include -type d -print) -type f \
+		| cpio -pdm "$dir"
+
+	install -Dm644 "$srcdir"/build/Module.symvers \
+		"$dir"/Module.symvers
+
+	mkdir -p "$subpkgdir"/lib/modules/$_abi_release
+	ln -sf /usr/src/linux-headers-$_abi_release \
+		"$subpkgdir"/lib/modules/$_abi_release/build
+}
+sha512sums="1ce235689d7ce0b40be203cb16c1bdfe9bc7b2c5e793a942afc5ea4f3268a0a15b684d9c4017a87916d989d8592a96a4223976c95bf7fcca603e71d2f20fee86  linux-google-crosshatch-mainline-9c9b87cec239101274451cc9c086da60108f9fda.tar.gz
+63f7e39aaba78f144ad65b8257e559049cbb827d015c1a9002e5f12a24ae4126fc8dee6256ba56ba557d6f51d8522cf19460c2fcb7879c39a399ebe94c3ca551  config-google-crosshatch-mainline.aarch64
+27827877040007fc1c4c719f7e2e19e5c272d44972415cfc53feba0313d87e4074f8204bdb13cbc5fe21ea61bf595314b68f10c081e7b7bac3c888b60f008acf  linux4.17-gcc10-extern_YYLOC_global_declaration.patch"

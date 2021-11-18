@@ -1,0 +1,25 @@
+From bff024edca5024d3bb713e996d52c8078188f1c1 Mon Sep 17 00:00:00 2001
+From: Wiktor Tkaczynski <wiktor.tkaczynski@gmail.com>
+Date: Fri, 7 Aug 2020 18:05:17 +0200
+Subject: [PATCH 4/8] use relative include for kgsl_device
+
+---
+ drivers/gpu/msm/kgsl_events.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/gpu/msm/kgsl_events.c b/drivers/gpu/msm/kgsl_events.c
+index 759a9660..2effdc34 100644
+--- a/drivers/gpu/msm/kgsl_events.c
++++ b/drivers/gpu/msm/kgsl_events.c
+@@ -15,7 +15,7 @@
+ #include <linux/list.h>
+ #include <linux/workqueue.h>
+ #include <linux/debugfs.h>
+-#include <kgsl_device.h>
++#include "kgsl_device.h"
+ 
+ #include "kgsl_debugfs.h"
+ #include "kgsl_trace.h"
+-- 
+2.25.1
+

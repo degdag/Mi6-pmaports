@@ -1,0 +1,33 @@
+# Maintainer: Théo Friberg <fsmnarmosta@posteo.net>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-nevisp
+pkgdesc="Samsung Galaxy Fame GT-S6810P"
+pkgver=0.2
+pkgrel=4
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-nevisp mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	modules-load.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Firmware for wifi."
+	depends="firmware-samsung-nevisp"
+	mkdir "$subpkgdir"
+}
+sha512sums="
+99753e32e50d071a91df6dfb6b1fe890c1d0e716e80a3fb556aec5e30e338f674153dff11263961a8da425890749d0af1773aeb84a6f9e27f732a2545d7aff4b  deviceinfo
+0aa06f2147be0ce89fb1ae418abff809ffa8de677afce4e3b29926ccea66f776065d2bb95675a8692230e40e57ec2ce657d9b3f79be56f1db35f4a724a3484f9  modules-load.conf
+"

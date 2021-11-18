@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+
+pkgname=device-oneplus-cheeseburger
+pkgdesc="OnePlus 5"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-oneplus-msm8998 mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+65b911c8142adbfc868cc19f174e66e2d1b3052f7bee4cfd6e49a21ada342c6ec43b00282070eb92ec1cc7575efc3897a4ca9a92fbd463286f5117e6ce2c3ab9  deviceinfo
+"

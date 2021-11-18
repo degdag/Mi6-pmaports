@@ -1,0 +1,60 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Dylan Van Assche <me@dylanvanassche.be>
+
+pkgname=device-odroid-hc2
+pkgdesc="ODROID HC2"
+pkgver=0.4
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="linux-odroid-hc2
+	 postmarketos-base
+	 u-boot-odroid
+	 u-boot-tools
+	"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware $pkgname-tools"
+_commit="42ac93dcfbbb8a08c2bdc02e19f96eb35a81891a"
+source="deviceinfo uboot-script.cmd install-rootfs-hdd.sh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+	mkimage \
+		-A arm \
+		-O linux \
+		-T script \
+		-C none \
+		-a 0 \
+		-e 0 \
+		-n postmarketos \
+		-d "$srcdir"/uboot-script.cmd \
+		"$srcdir"/boot.scr
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/boot.scr
+}
+
+nonfree_firmware() {
+	pkgdesc="U-Boot and Realtek firmware, required for a bootable system"
+	depends="firmware-odroid-hc2 linux-firmware-rtl_nic"
+	mkdir "$subpkgdir"
+}
+
+tools() {
+	pkgdesc="ODROID HC2 tools"
+	depends="rsync e2fsprogs-extra"
+	mkdir "$subpkgdir"
+	install -Dm744 "$srcdir"/install-rootfs-hdd.sh \
+		"$pkgdir"/usr/bin/install-rootfs-hdd
+}
+
+sha512sums="
+d02702884d47c2c6b98f1ec194fc3a11b2c6559d416c112d41ddecfbbd84f0706adfc72e13e9943f130e548d987aa7d151f4f416443d15b7dff2375d4d067144  deviceinfo
+06239b979ad78cadc1bc764b8c6a2ce57c7f2a44456ba918e83ea7ae2846c983ec6cb8eea708540e7c4f3abe2a1ff942b8c8ae5e6d68dbc65a8f5c34942af49e  uboot-script.cmd
+8273be5a8c5a7b9a27ae91a1581ca2d247d0fb45e24e25e46ba8272955d7fce31c62562c3fae402f6a66918c9c61d838de692cca11eea3cdfde6a91f478f2955  install-rootfs-hdd.sh
+"

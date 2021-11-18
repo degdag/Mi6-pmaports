@@ -1,0 +1,21 @@
+# Maintainer: rahmanshaber <rahmanshaber@yahoo.com>
+pkgname=qt5ct
+pkgver=0.41
+pkgrel=0
+pkgdesc="Qt5 Configuration Tool"
+arch="all"
+url="http://qt5ct.sourceforge.net"
+license="BSD-2-Clause"
+makedepends="qt5-qtbase-dev qt5-qttools-dev qt5-qtsvg-dev"
+source="http://downloads.sourceforge.net/project/qt5ct/qt5ct-$pkgver.tar.bz2"
+options="!check" # No test suite
+
+build() {
+	qmake-qt5 qt5ct.pro
+	make
+}
+
+package() {
+	INSTALL_ROOT="$pkgdir" make install
+}
+sha512sums="a94f9996dc2198d3c8c9af8610912d12b915b8c547a49c36f7bc083b6f237b318d7903e91fb6fcfe06996a319c361104c1923e6d0c49446b6fb66a1e44fae009  qt5ct-0.41.tar.bz2"

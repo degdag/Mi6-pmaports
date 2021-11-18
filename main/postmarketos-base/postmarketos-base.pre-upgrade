@@ -1,0 +1,9 @@
+#!/bin/sh
+
+postmarketos-mvcfg-pre-upgrade \
+	postmarketos-base \
+	/etc/conf.d/syslog \
+	/etc/fstab \
+	/etc/issue \
+	/etc/motd \
+	/etc/sudoers

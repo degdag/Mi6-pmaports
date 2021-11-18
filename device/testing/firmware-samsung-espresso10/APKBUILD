@@ -1,0 +1,30 @@
+pkgname=firmware-samsung-espresso10
+pkgver=1
+pkgrel=1
+pkgdesc="Samsung Galaxy Tab 2 Firmware"
+url="https://github.com/TheMuppets/proprietary_vendor_samsung"
+arch="armv7"
+license="proprietary"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+
+# Source
+_commit="89fe5020dbaf2920dece954ce86aa2edf3389852"
+_url="https://github.com/TheMuppets/proprietary_vendor_samsung/raw/$_commit/espresso-common/proprietary/system/etc/wifi"
+_files="bcmdhd_apsta.bin
+	bcmdhd_p2p.bin
+	bcmdhd_sta.bin
+	nvram_net.txt"
+for _i in $_files; do
+	source="$source $pkgname-$_commit-$_i::$_url/$_i";
+done
+
+package() {
+	for _i in $_files; do
+		install -Dm644 "$srcdir/$pkgname-$_commit-$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/"$_i"
+	done
+}
+sha512sums="a4c740f11cdc7123adeed80c616c35bbdce42c8e71cbb7cfb447f8c4537a45cf0fb0419a86d02a834ae518a6674b9cd1e9de05e0b4ec8c7e6e5c40fbd32d1a41  firmware-samsung-espresso10-89fe5020dbaf2920dece954ce86aa2edf3389852-bcmdhd_apsta.bin
+4a18896521a735082e2e8bd51ea137be2cfabce32dfad384132f7fdca001852878439de0bd8b793dc751651592b7b78799c393d18a5cb66a36d5038dd8d4fbeb  firmware-samsung-espresso10-89fe5020dbaf2920dece954ce86aa2edf3389852-bcmdhd_p2p.bin
+bd2729c2cbc3c52e1abc5c6e0f4ba32b3b77711bc73c76aece591f8de642da69f0edb8620e422e102e0eaced8c9d76870ac63dfc7113e318ad8aa2633a32b10f  firmware-samsung-espresso10-89fe5020dbaf2920dece954ce86aa2edf3389852-bcmdhd_sta.bin
+24c0eab68996c9f80453cf01c8059ec6672175668a13ebd91abcd33bf56afd94c7564d0f6e6d2b87d3a44171ca3dce895ffd13b61d29ae583b76635998e4042f  firmware-samsung-espresso10-89fe5020dbaf2920dece954ce86aa2edf3389852-nvram_net.txt"

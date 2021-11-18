@@ -1,0 +1,63 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-tablet-x64uefi
+pkgdesc="Various tablets with atom CPU"
+pkgver=0.3
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="x86_64"
+# pmb:strict: avoid grub-related install error during build with pmbootstrap
+options="!check !archcheck pmb:strict"
+depends="postmarketos-base linux-lts mesa-dri-swrast"
+makedepends="devicepkg-dev grub grub-efi"
+source="
+	deviceinfo
+	grub.cfg
+	grub_early.cfg
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+
+	grub-mkimage \
+		--config="$srcdir/grub_early.cfg" \
+		--prefix="" \
+		--output="bootx64.efi" \
+		--format="x86_64-efi" \
+		--compression="xz" \
+		\
+		all_video \
+		cat \
+		configfile \
+		disk \
+		echo \
+		efi_gop \
+		fat \
+		gzio \
+		help \
+		iso9660 \
+		linux \
+		ls \
+		normal \
+		part_gpt \
+		part_msdos \
+		search \
+		search_label \
+		test \
+		true
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/grub.cfg \
+		"$pkgdir"/boot/grub/grub.cfg
+	install -Dm644 "$srcdir"/bootx64.efi \
+		"$pkgdir"/boot/EFI/Boot/bootx64.efi
+}
+
+sha512sums="
+b246103f5ac80af0501579420bfe647f914ae555d25c6559589f60606aa78383409ebd148f5e9c73ddec7a247f04969a9ace7d17c76723845bee68acb20d532f  deviceinfo
+e15beaf385a350a7c36be249cf9495e4622f7888c8def6ac47359ebd2ef2c994f954abec8ccb16b402269f949e6f6016d41711e6596f46ba3dad240f84ba163f  grub.cfg
+0f9357d4eea089628fbceb1e3e96d21a3f4329aeb6743158a6f877f967ef274506404eba949d5f01b7e1adea149f9a3aef992a5e8cd4181f93ab00909b1c5ecd  grub_early.cfg
+"

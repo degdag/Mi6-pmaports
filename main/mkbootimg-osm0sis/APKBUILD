@@ -1,0 +1,28 @@
+pkgname=mkbootimg-osm0sis
+pkgver=2021.04.27
+pkgrel=0
+pkgdesc="Android bootimg tools (maintained fork of the C version, see #441)"
+url="https://github.com/osm0sis/mkbootimg"
+arch="all"
+license="Apache-2.0"
+provides="mkbootimg=$pkgver unpackbootimg=$pkgver"
+replaces="mkbootimg"
+source="https://github.com/osm0sis/mkbootimg/archive/$pkgver/mkbootimg-$pkgver.tar.gz"
+options="!check"
+builddir="$srcdir/mkbootimg-$pkgver"
+
+prepare() {
+	default_prepare
+	sed s/-Werror/-W/g -i Makefile
+}
+
+build() {
+	make -j1
+}
+
+package() {
+	install -Dm755 mkbootimg "$pkgdir"/usr/bin/mkbootimg-osm0sis
+	install -Dm755 unpackbootimg "$pkgdir"/usr/bin/unpackbootimg
+}
+
+sha512sums="1d9f2566c9ca7bc40165738bde517fe7c8d4ef8ff713b523f2d11948560bbef73a6705bf198403fe541bc6e2488e6ff9867fa97c590f8361572a2ee44fdb70bf  mkbootimg-2021.04.27.tar.gz"

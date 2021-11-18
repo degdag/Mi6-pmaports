@@ -1,0 +1,67 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=device-asus-me176c
+pkgdesc="ASUS MeMO Pad 7 (ME176C(X))"
+pkgver=3
+pkgrel=2
+_commit=3155254999ac36c3051a2118c415de25a072c0f6
+url="https://postmarketos.org"
+license="MIT"
+arch="x86_64"
+options="!check !archcheck"
+depends="
+	$pkgname-factory
+	alsa-ucm-conf
+	firmware-asus-me176c-acpi
+	intel-ucode
+	linux-asus-me176c
+	mesa-dri-classic
+	mesa-vulkan-intel
+	postmarketos-base
+	"
+makedepends="devicepkg-dev meson eudev-dev"
+source="https://github.com/me176c-dev/linux-me176c/archive/$_commit.tar.gz
+	deviceinfo
+	rootston.ini
+	"
+subpackages="$pkgname-factory $pkgname-nonfree-firmware:nonfree_firmware $pkgname-phosh"
+builddir="$srcdir/linux-me176c-$_commit"
+
+build() {
+	devicepkg_build $startdir $pkgname
+
+	cd factory
+	abuild-meson . output \
+		-Dsystemd=false \
+		-Dopenrc=true
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+factory() {
+	pkgdesc="WiFi/BT MAC address loader"
+	depends="bluez-btmgmt"
+	cd "$builddir"/factory
+	DESTDIR="$subpkgdir" meson install -C output
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi, Bluetooth and Sound firmware"
+	depends="linux-firmware-intel firmware-asus-me176c"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+75243e3d0bc9a352465683ec8cf8b83566e4131bb7fae0f388267a62bdbf4691c955ed034b30df550f921b771080688123ae8db144b72f786bf1677ef1d83f57  3155254999ac36c3051a2118c415de25a072c0f6.tar.gz
+8dfeb1d928aa3ac94e9015d4b98713ec4d56eab68a7aee8cb7ce6a877b3d015670800bae456190ae57bcb35047738de5559460f2f7b785987f1394b605119ae5  deviceinfo
+a60d1785f0163d4a4eb63ea5e3017631aab7dd6683baad6a74b09809d33888d581ca8b14526c19d18234dcf727d1fdb4ff0489ed4bd5523905d0e4da7d93bc56  rootston.ini
+"

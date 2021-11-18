@@ -1,0 +1,30 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+pkgname=powersupply
+pkgver=0.5.0
+pkgrel=0
+pkgdesc="GTK3 tool for displaying battery and power info"
+url="https://gitlab.com/MartijnBraam/powersupply"
+arch="noarch"
+license="MIT"
+depends="python3 py3-gobject3 py3-setuptools gtk+3.0 libhandy1"
+makedepends="py3-setuptools"
+source="
+	$pkgname-$pkgver.tar.gz::https://gitlab.com/MartijnBraam/powersupply/-/archive/$pkgver/powersupply-$pkgver.tar.gz
+"
+options="!check"
+
+build() {
+	python3 setup.py build
+}
+
+package() {
+	python3 setup.py install --prefix=/usr --root="$pkgdir"
+	install -Dm644 "$builddir"/data/nl.brixit.powersupply.desktop \
+		"$pkgdir"/usr/share/applications/nl.brixit.powersupply.desktop
+	install -Dm644 "$builddir"/data/nl.brixit.powersupply.svg \
+		"$pkgdir"/usr/share/icons/hicolor/scalable/apps/nl.brixit.powersupply.svg
+
+}
+sha512sums="
+f521b9e5b034b216dbaf33befb2ccdd319c72f5a36085d67ae529860ace41de7ffba40581129ab41b27d16cf1a037a8128c9847ced93d335a0b9becd00fb8287  powersupply-0.5.0.tar.gz
+"

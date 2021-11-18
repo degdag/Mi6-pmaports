@@ -1,0 +1,34 @@
+pkgname=firmware-pine64-pinebookpro
+pkgver=2
+pkgrel=0
+pkgdesc="Firmware files for Pinebook Pro (pine64-pinebookpro)"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+
+# source
+_commit="937f0d52d27d7712da6a008d35fd7c2819e2b077"
+_repo="pinebook-firmware"
+_btcommit="a30bf312b268eab42d38fab0cc3ed3177895ff5d"
+_btrepo="ap6256-firmware"
+_wifirepo="firmware-nonfree"
+_wificommit="f713a6054746bc61ece1c8696dce91a7b7e22dd9"
+source="
+	https://gitlab.manjaro.org/tsys/pinebook-firmware/-/archive/$_commit/pinebook-firmware-$_commit.tar.gz
+	https://gitlab.manjaro.org/manjaro-arm/packages/community/ap6256-firmware/-/archive/$_btcommit/ap6256-firmware-$_btcommit.tar.gz
+	https://github.com/RPi-Distro/firmware-nonfree/archive/$_wificommit.tar.gz
+"
+
+package() {
+	install -d "$pkgdir/lib/firmware/postmarketos/brcm"
+	cp -rv "$srcdir/$_repo-$_commit/rockchip" "$pkgdir/lib/firmware/postmarketos/"
+	cp -v "$srcdir/$_btrepo-$_btcommit/BCM4345C5.hcd" "$pkgdir/lib/firmware/postmarketos/brcm/BCM4345C5.hcd"
+	cp -v "$srcdir/$_wifirepo-$_wificommit"/brcm/brcmfmac4345* "$pkgdir/lib/firmware/postmarketos/brcm"
+	ln -s brcmfmac43456-sdio.txt "$pkgdir"/lib/firmware/postmarketos/brcm/brcmfmac43456-sdio.pine64,pinebook-pro.txt
+}
+sha512sums="
+83bcd2751830ec6ab702473508494e70ad076c276afe17d899aadabaa4c0c7e80f5d757f23974f78ca25a8db65b42364d77ed06e0d56d17ec8c0b45dd97d13c3  pinebook-firmware-937f0d52d27d7712da6a008d35fd7c2819e2b077.tar.gz
+4a6c72562898d90c62f66b0654028481646d9b39ef279bccdbe5cb0efd3fafeabab54c5da75e4cbee47061f8c70689a49949e6a24067cde07fc601688466f1e5  ap6256-firmware-a30bf312b268eab42d38fab0cc3ed3177895ff5d.tar.gz
+ba87ea63c5f7930f82afad4c370744cee05d832f9144024eb55a974e8864147f7c75b2d91863c2d1474fdb4097b6b785f51a3b8c7d9f943c43713e84ddd47692  f713a6054746bc61ece1c8696dce91a7b7e22dd9.tar.gz
+"

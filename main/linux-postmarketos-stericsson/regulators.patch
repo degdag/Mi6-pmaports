@@ -1,0 +1,44 @@
+From 08eb3117ef1d2eb9f634920bc671125284d80e7b Mon Sep 17 00:00:00 2001
+From: Linus Walleij <linus.walleij@linaro.org>
+Date: Fri, 4 Jun 2021 00:00:04 +0200
+Subject: ARM: dts: ux500: Skomer regulator fixes
+
+AUX2 has slightly wrong voltage and AUX5 doesn't need to be
+always on.
+
+Signed-off-by: Linus Walleij <linus.walleij@linaro.org>
+---
+ arch/arm/boot/dts/ste-ux500-samsung-skomer.dts | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/arch/arm/boot/dts/ste-ux500-samsung-skomer.dts b/arch/arm/boot/dts/ste-ux500-samsung-skomer.dts
+index feee836c6c56c..368abbd9b10b7 100644
+--- a/arch/arm/boot/dts/ste-ux500-samsung-skomer.dts
++++ b/arch/arm/boot/dts/ste-ux500-samsung-skomer.dts
+@@ -307,10 +307,10 @@
+ 					};
+ 
+ 					ab8500_ldo_aux2 {
+-						/* Supplies the Cypress TMA140 touchscreen only with 3.3V */
++						/* Supplies the Cypress TMA140 touchscreen only with 3.0V */
+ 						regulator-name = "AUX2";
+-						regulator-min-microvolt = <3300000>;
+-						regulator-max-microvolt = <3300000>;
++						regulator-min-microvolt = <3000000>;
++						regulator-max-microvolt = <3000000>;
+ 					};
+ 
+ 					ab8500_ldo_aux3 {
+@@ -329,9 +329,9 @@
+ 
+ 					ab8500_ldo_aux5 {
+ 						regulator-name = "AUX5";
++						/* Intended for 1V8 for touchscreen but actually left unused */
+ 						regulator-min-microvolt = <1050000>;
+ 						regulator-max-microvolt = <2790000>;
+-						regulator-always-on;
+ 					};
+ 
+ 					ab8500_ldo_aux6 {
+-- 
+cgit 1.2.3-1.el7

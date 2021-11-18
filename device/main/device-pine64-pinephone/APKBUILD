@@ -1,0 +1,173 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+# Co-Maintainer: Luca Weiss <luca@z3ntu.xyz>
+# Co-Maintainer: Bart Ribbers <bribbers@disroot.org>
+# Co-Maintainer: Clayton Craft <clayton@craftyguy.net>
+# Co-Maintainer: Dylan Van Assche <me@dylanvanassche.be>
+pkgname=device-pine64-pinephone
+pkgver=0.35
+pkgrel=2
+pkgdesc="PINE64 PinePhone"
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-shelli
+	$pkgname-plasma-mobile:plasma_mobile
+	$pkgname-upower
+	"
+depends="
+	alsa-ucm-conf
+	atinout
+	eg25-manager
+	eg25-manager-openrc
+	gpsd
+	iw
+	linux-postmarketos-allwinner>=5.14
+	mesa-dri-gallium
+	mesa-egl
+	postmarketos-base
+	u-boot-pinephone>=2021.01_git20201228-r2
+	u-boot-tools
+	"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install $pkgname.post-upgrade $pkgname.pre-upgrade"
+source="
+	00_alsa_pinephone_dshare.conf
+	10-pinephone-proximity.rules
+	60-flashlight.rules
+	70-wifi-pm.rules
+	90-modem-eg25.rules
+	deviceinfo
+	gpsd_device-hook.sh
+	gpsd_pinephone.initd
+	hwtest.ini
+	kirigami-lowpower.sh
+	modemmanager.conf
+	setup-modem.sh
+	uboot-script.cmd
+	ucm/HiFi.conf
+	ucm/PinePhone.conf
+	ucm/VoiceCall.conf
+	UPower.conf
+	pulse-pinephone.conf
+	"
+# workaround to purge the -elogind subpackage that was previously
+# created/installed
+provides="$pkgname-elogind=$pkgver-r$pkgrel"
+
+build() {
+	devicepkg_build $startdir $pkgname
+	mkimage \
+		-A arm \
+		-O linux \
+		-T script \
+		-C none \
+		-a 0 \
+		-e 0 \
+		-n postmarketos \
+		-d "$srcdir"/uboot-script.cmd \
+		"$srcdir"/boot.scr
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/boot.scr
+
+	# Make /boot/allwinner/sun50i-a64-pine64-pinephone*.dtb resolve to
+	# /boot/sun50i-a64-pine64-pinephone*.dtb. This is because the device tree
+	# names in u-boot include the vendor and the one in postmarketOS doesn't.
+	ln -s .. "$pkgdir"/boot/allwinner
+
+	install -Dm644 "$srcdir"/hwtest.ini \
+		"$pkgdir"/usr/share/hwtest.ini
+
+	# GPS
+	install -Dm755 "$srcdir"/gpsd_pinephone.initd \
+		"$pkgdir"/etc/init.d/gpsd_pinephone
+	install -Dm755 "$srcdir"/gpsd_device-hook.sh \
+		"$pkgdir"/etc/gpsd/device-hook
+	install -D -m644 "$srcdir"/10-pinephone-proximity.rules \
+		"$pkgdir"/usr/lib/udev/rules.d/10-pinephone-proximity.rules
+
+	# Alsa usecase manager config
+	install -Dm644 "$srcdir"/PinePhone.conf \
+		"$pkgdir"/usr/share/alsa/ucm2/simple-card/PinePhone.conf
+	install -Dm644 "$srcdir"/HiFi.conf \
+		"$pkgdir"/usr/share/alsa/ucm2/PinePhone/HiFi.conf
+	install -Dm644 "$srcdir"/VoiceCall.conf \
+		"$pkgdir"/usr/share/alsa/ucm2/PinePhone/VoiceCall.conf
+
+	# Pulseaudio config
+	install -Dm644 "$srcdir"/pulse-pinephone.conf \
+		"$pkgdir"/etc/pulse/daemon.conf.d/89-pinephone.conf
+
+	# Modem
+	install -Dm755 "$srcdir"/setup-modem.sh \
+		"$pkgdir"/usr/bin/pinephone_setup-modem
+	install -Dm644 "$srcdir"/90-modem-eg25.rules -t \
+		"$pkgdir"/usr/lib/udev/rules.d/
+	install -Dm644 "$srcdir"/modemmanager.conf \
+		"$pkgdir"/etc/conf.d/modemmanager
+
+	# Wifi / PM
+	install -Dm644 "$srcdir"/70-wifi-pm.rules -t \
+		"$pkgdir"/usr/lib/udev/rules.d/
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi, Bluetooth and Autofocus firmware"
+	depends="
+		linux-firmware-rtlwifi
+		linux-firmware-rtl_bt
+		firmware-pine64-rtl8723bt
+		firmware-pine64-ov5640
+		"
+	mkdir "$subpkgdir"
+}
+
+plasma_mobile() {
+	install_if="$pkgname=$pkgver-r$pkgrel kirigami2"
+	install -Dm644 "$srcdir"/60-flashlight.rules -t "$subpkgdir"/usr/lib/udev/rules.d/
+	install -Dm644 "$srcdir"/kirigami-lowpower.sh "$subpkgdir"/etc/profile.d/kirigami-lowpower.sh
+}
+
+upower() {
+	install_if="$pkgname=$pkgver-r$pkgrel upower"
+	replaces="upower"
+
+	# Shutdown when PMIC reports critical battery level
+	install -Dm644 "$srcdir"/UPower.conf \
+		"$subpkgdir"/etc/UPower/UPower.conf
+}
+
+shelli() {
+	install_if="$pkgname=$pkgver-r$pkgrel shelli"
+
+	# Alsa default audio must be stereo
+	install -Dm644 "$srcdir"/00_alsa_pinephone_dshare.conf \
+		"$subpkgdir"/etc/alsa/conf.d/00_alsa_pinephone_dshare.conf
+}
+sha512sums="
+5736444fd38ab4351d148ae96c479085f469bd1e51a692fb1827f8ac921a584389f7696985e1fba21c2deac88709910531f4ece282f45ff54e590c2b54b84ba3  00_alsa_pinephone_dshare.conf
+b53cc6f2531854cc9c1e4c334185a20551d64c8675ee8a8eaa03b99d80808fad421a0f6e99e5be212a974d88c85f461a71ba59ac59c29f298c82f211e3be1ef4  10-pinephone-proximity.rules
+9170da7ac869254644f2fc8d914102f2c16e917dbeb53e33b96c76936711d0540f55fa5c2526d73d5fe244500bc2728bc9d629e2524cf52c573d11e833aee666  60-flashlight.rules
+8b6fa7b12c15f439c561901f3ffe24a1ef2a0c343401c0a79281060854ab29e08a1fb5e7adae8684b12aa9f535ed99e2dad993dce9724822cb0fbf2497dd86e5  70-wifi-pm.rules
+7dc2b7c20b4a2b15f597a6417bd01797643dad84a3683b0dee648e030fb6326e9d020307643fdcdf1bb43fc44af9975697e417003bd359610bae2d8ce614fc00  90-modem-eg25.rules
+24f7167d47664d9b9a85d044a731f5ef90e73f2d0f92b8164d19d79b090192cac902d38b3604c1f99d24e1fb1b91bd15c4340dad5cb37cfcc9f037871ad2d501  deviceinfo
+ccbc83b84b5028bc2c8e526759004ce71b50b2675ecffee98f5676c70a3332197a231ff9d2fd46444dd3c0a637ec08ce6125b18240fe6bfc13f624a15192e648  gpsd_device-hook.sh
+1017fc3f325227da58c77abdc59e9735288d91a7ccc63ec784fe0241c523786b617a11ce8045dab2a74ca12a7dd70aaa334af91836418db1e96a3266fecaa4fd  gpsd_pinephone.initd
+3dd6d612c381cb0002049d1974d8fb5aa5a53a1eb4d6bcbf62eb2ad52cfdc45f0f6ad24a699716d3513b0371aa1316f25dc72afc10d7176cc3b99d0965c3f030  hwtest.ini
+6bc22b369b2d9058b702ac7a7862abaefaf8179b43491868bdb008d181b59104f1ded89db1da51a810e1ccdc803a579b924a438674283a65afc3a9c4d2894caf  kirigami-lowpower.sh
+c5006c38828eb519917d57756f7831c4552feffef2d4922a384073f6a551535f615ad397d784e313818e0b943e1f6212bcca0aff9ce37da60b29547b1631f24b  modemmanager.conf
+420ee1d7522d4d56c2909580fd6ba7580483ca5455b13eb6d22e700063ce0c1a5c6d2f5b161dfce0d777636fe9a712aa82f38a0585f2feabea3785b02bae7515  setup-modem.sh
+e9d923b48dbb929d333c178181339a1369be34397df49298cff2aca9b1e4f7f6ddff8391424c378d2bbd7a495021abc3a06af011eb3240a06650195ab18469b2  uboot-script.cmd
+f963898fa2ce66bc830e56feeec6ffc9888834e14cc1591d72908ef45ad82532bc3ef5fb32413e07b6722749c9d03e7cf92f06f1fcb859c38b9297cf58e5cedd  HiFi.conf
+4b0c51ab169aebe8177c5c43eba41afa90370098a5a54e710d17e97ec1651869a20cb5d780a6132028c864916609e3b4f4a13158835310d0441bdb4915872372  PinePhone.conf
+e093f71c37370927468de35a987150a3db3e1cc1c76c144bf58918a09c688c3da84303b5533241e691a6aa0758589e2a6498b1097974117782e909f0bbc6bf71  VoiceCall.conf
+ed0e03f7e1c0348c06be9a7922414469245604ce813bbf0c8910ef211cb993bbb0d0d4615c9c961d50712415f85d6b73e0cf02780ac784666aac56e4889341e4  UPower.conf
+9c472065b19141dd4c7555869b955de2e679b36e597f9fa3bdac18d0e9460986b0e2fffe1e04751301305f1b6474c1375803afb7d6212eeae91b4905d0bf8ff8  pulse-pinephone.conf
+"

@@ -1,0 +1,27 @@
+From 56f8d74966442ba3f28f6d389186d1e2fe6767bb Mon Sep 17 00:00:00 2001
+From: Daniele Debernardi <drebrez@gmail.com>
+Date: Wed, 21 Aug 2019 22:55:57 +0000
+Subject: [PATCH] RX-51: Symbols: Bind square brackets
+
+---
+ symbols/nokia_vndr/rx-51 | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index ddb87da..21bbedb 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -409,8 +409,8 @@ xkb_symbols "english_base" {
+     key <AC02>	{ [	s,		S,		plus,		plus		] };
+     key <AC03>	{ [	d,		D,		numbersign,	percent		] };
+     key <AC04>	{ [	f,		F,		minus,		asciitilde	] };
+-    key <AC05>	{ [	g,		G,		underscore,	underscore	] };
+-    key <AC06>	{ [	h,		H,		parenleft,	parenleft	] };
++    key <AC05>	{ [	g,		G,		underscore,	bracketleft	] };
++    key <AC06>	{ [	h,		H,		parenleft,	bracketright	] };
+     key <AC07>	{ [	j,		J,		parenright,	parenright	] };
+     key <AC08>	{ [	k,		K,		ampersand,	ampersand	] };
+     key <AC09>	{ [	l,		L,		exclam,		bar		] };
+-- 
+2.23.0
+

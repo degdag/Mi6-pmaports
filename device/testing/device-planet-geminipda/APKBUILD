@@ -1,0 +1,34 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-planet-geminipda
+pkgdesc="Gemini PDA"
+pkgver=0.2
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-planet-geminipda mkbootimg"
+makedepends="devicepkg-dev"
+source="deviceinfo
+	10-geminipda-loopback-device.sh
+	20-fbdev.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/10-geminipda-loopback-device.sh \
+		"$pkgdir"/etc/postmarketos-mkinitfs/hooks/10-geminipda-loopback-device.sh
+
+	install -Dm644 "$srcdir"/20-fbdev.conf \
+		"$pkgdir"/etc/X11/xorg.conf.d/20-fbdev.conf
+}
+
+sha512sums="
+96d880b5d84ab58ad00237ebee6b36c298ac0a7ffee9ce03103e999ea892e491cb740edcdcd48a9e2dd3efb956f33b016a6a410ab6a6efd78b6fc283f3422d84  deviceinfo
+a8b6623a0a8bea1ab3e28582f203426e42aed477be9ca1d6147d090f9f9d080a69c262a47f9dd5cd8ce99a9bf64912d902dc881f97967873466ebe73d9bba587  10-geminipda-loopback-device.sh
+07bda3435dffec7f8e8e158266cb619fb41c6b04a49a605e76fa88bc33be3cb27fdc54c8664be0738bab2c7a8054ce3d7563036323bf04762dcf735064ac10a2  20-fbdev.conf
+"

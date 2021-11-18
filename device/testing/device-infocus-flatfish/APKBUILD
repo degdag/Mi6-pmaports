@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-infocus-flatfish
+pkgdesc="InFocus New Tab F1"
+pkgver=0.1
+pkgrel=9
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-infocus-flatfish mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	fb.modes
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+}
+
+sha512sums="
+1cca0cfd2f47991bcb71729a3ccefd80ee65249323428761d56f9ec3f97f0b27c285de46e970733b869813cd8366b7436f3431448b188f00bde86c9caacdb1ea  deviceinfo
+2961df06a303e28139f67ae8abc99d0ddc48d2aa4c1d67a51e924493a27b46fff7e6072ddfd4273bdfa6b489598cbfda65400c3afdfaf16fce7fc407d19284f0  fb.modes
+"

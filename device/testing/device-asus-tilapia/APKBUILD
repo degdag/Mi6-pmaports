@@ -1,0 +1,44 @@
+# Maintainer: David Heidelberg <david@ixit.cz>
+pkgname=device-asus-tilapia
+pkgdesc="Google Nexus 7 2012 (tilapia)"
+pkgver=5
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="alsa-ucm-conf linux-postmarketos-grate postmarketos-base mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-phosh
+	     $pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	pointercal
+	rootston.ini"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/pointercal \
+	                "$pkgdir"/etc/pointercal
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Google Nexus 7 (2012) WiFi & BT firmware"
+	depends="firmware-asus-grouper firmware-aosp-broadcom-wlan-mainline"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+73b689f6aadb77c577aa4d59c048126a7bce0679e76140003cdd80319e6c8190d2e8e3d20adfd1e8707e476c53ababf4f1be9824f9f017c3749e4e2d58282be6  deviceinfo
+1f9d77df433c7199a9f07d6fd1d90cdf1ab40021bf1970be9400e5f32155d92f7fa338162a0ca95d441d1701eff0f5e0cbb64a0555de48740a62e8ff59fe11e5  pointercal
+6ec993e278d2a73c72fb96f001716ded63543d99183847d22d172cd81ac410791c79370ecf391d0c24822c975d91b84dc1db296e1b28dbf66d5c227bff8d4011  rootston.ini
+"

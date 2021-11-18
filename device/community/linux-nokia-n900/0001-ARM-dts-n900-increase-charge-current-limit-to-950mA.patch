@@ -1,0 +1,23 @@
+From fbc4ce7a84e59215914a8981afe918002b191493 Mon Sep 17 00:00:00 2001
+From: Arthur Demchenkov <spinal.by@gmail.com>
+Date: Fri, 21 Dec 2018 09:23:57 +0300
+Subject: [PATCH] ARM: dts: n900: increase charge current limit to 950mA
+
+That was default in Maemo Fremantle
+---
+ arch/arm/boot/dts/omap3-n900.dts | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/arch/arm/boot/dts/omap3-n900.dts b/arch/arm/boot/dts/omap3-n900.dts
+index de7a31ae72207..7028a7cb2849e 100644
+--- a/arch/arm/boot/dts/omap3-n900.dts
++++ b/arch/arm/boot/dts/omap3-n900.dts
+@@ -700,7 +700,7 @@
+ 		ti,current-limit = <100>;
+ 		ti,weak-battery-voltage = <3400>;
+ 		ti,battery-regulation-voltage = <4200>;
+-		ti,charge-current = <650>;
++		ti,charge-current = <950>;
+ 		ti,termination-current = <100>;
+ 		ti,resistor-sense = <68>;
+ 

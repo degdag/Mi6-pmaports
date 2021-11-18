@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-a5xelte
+pkgdesc="Samsung Galaxy A5 (2016)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-samsung-a5xelte
+	mesa-dri-gallium
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+8772182b891d9b361297ca924f8b90342bddb27eb08a5a83d0aa3c5a2372ca0361b68309afffbf9cd976c8806ef1bc5cfd47f02774ab9a6fb2a191a29c566a46  deviceinfo
+"

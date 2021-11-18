@@ -1,0 +1,23 @@
+# Maintainer: Alexey Min <alexey.min@gmail.com>
+pkgname=avbtool
+pkgver=10.0.0_p29
+pkgrel=0
+_commit="119251268c594d115a1eff31b3ec32108b88b593"
+pkgdesc="Tools and libraries for working with Android Verified Boot 2.0"
+arch="noarch"
+url="https://android.googlesource.com/platform/external/avb/"
+license="MIT"
+depends="python3"
+source="
+	$pkgname-$_commit.tar.gz::https://source.codeaurora.org/quic/la/platform/external/avb/snapshot/$_commit.tar.gz
+	0001-Convert-to-python3.patch
+	"
+options="!check" # No tests available
+builddir="$srcdir/$_commit"
+
+package() {
+	install -Dm755 "$builddir/avbtool" "$pkgdir/usr/bin/avbtool"
+}
+
+sha512sums="9304cf577a2646dff3750707a83984f17fa476a380e7068fc042f1f4c43ac44cd42d307beadabccc224f35e176d2afcccd5ac74d0adf26cbfdda953aa4f42454  avbtool-119251268c594d115a1eff31b3ec32108b88b593.tar.gz
+d07a83a728f7a42f6351ebd7532fcf6fe6aca93a8b6be9b64ba1f0aef54c8f15a18f6e8836f8ae10a94d47f3dfac67f4b3fa1cc8d1cb2afcb667584b4baca3fe  0001-Convert-to-python3.patch"

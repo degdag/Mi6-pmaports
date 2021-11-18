@@ -1,0 +1,76 @@
+# Maintainer: Antoine Fontaine <antoine.fontaine@epfl.ch>
+
+# Preferably we would build our own Android images, but this requires a large amount of storage and hardware:
+# 20G of "sources", that include prebuilt glibc binaries (clang, bison, protobuf!) and may require multilib.
+# So we use pre-built images by Anbox for now.
+
+pkgname=anbox-image
+pkgver=7.1.2_p39
+_pkgver="${pkgver/p/r}"
+pkgrel=5
+pkgdesc="Android image for running in Anbox"
+url="https://anbox.io"
+arch="x86_64 armv7 aarch64"
+makedepends="squashfs-tools"
+license="GPL-3.0-only"
+_fdroidver=1013000
+_fdroid="org.fdroid.fdroid_$_fdroidver.apk"
+_fdroidprivver=2110
+_fdroidpriv="org.fdroid.fdroid.privileged_$_fdroidprivver.apk"
+source="
+	http://anbox.postmarketos.org/android-$_pkgver-anbox_x86_64-userdebug.img
+	http://anbox.postmarketos.org/android-$_pkgver-anbox_arm64-userdebug.img
+	http://anbox.postmarketos.org/android-$_pkgver.1-anbox_armv7a_neon-userdebug.img
+	https://f-droid.org/repo/$_fdroid
+	https://f-droid.org/repo/$_fdroidpriv
+"
+builddir="$srcdir/squashfs"
+options="!check !archcheck !tracedeps pmb:cross-native"
+
+case "$CARCH" in
+	aarch64) _imgarch=arm64;;
+	armv7)   _imgarch=armv7a_neon;;
+	x86_64)  _imgarch=x86_64;;
+esac
+
+prepare() {
+	cd "$srcdir"
+
+	mkdir -p ./squashfs
+	msg "Decompressing the image"
+	unsquashfs -f -d ./squashfs android-*-anbox_$_imgarch-userdebug.img
+
+	cd ./squashfs
+
+	# apply patches
+	default_prepare
+
+	# remove su, it's broken and less apps will refuse to start
+	rm -v system/xbin/su
+
+	msg "Installing FDroid"
+	mkdir system/app/FDroid
+	mkdir system/priv-app/FDroid
+	# install -Dm 0644 doesn't work as it copies the symlink, hence cp
+	cp -L "$srcdir"/$_fdroid system/app/FDroid/$_fdroid
+	cp -L "$srcdir"/$_fdroidpriv system/priv-app/FDroid/$_fdroidpriv
+	chmod 0644 system/app/FDroid/$_fdroid
+	chmod 0644 system/priv-app/FDroid/$_fdroidpriv
+}
+
+package() {
+	msg "Rebuilding the image"
+	mksquashfs "$srcdir"/squashfs "$srcdir"/android.img -comp xz -no-xattrs
+
+	# install anbox image with minimal permissions
+	install -Dm600 "$srcdir/android.img" \
+		"$pkgdir"/usr/share/anbox/android.img
+}
+
+sha512sums="
+174476153fc5f0f204a8044f32d010e7a22303c7961265976df424c53322969b590d58716a57a2f6b508a90ad645f9bede85e94b85a18790b40cc9b843c66adc  android-7.1.2_r39-anbox_x86_64-userdebug.img
+240d931c68378f80eafa670a19083c5dd11c02f216bec5de955bee3a04063c15830b603a062c83427aa7ad6f4da5425f411147f93815fa67c86cdc850b68a2a1  android-7.1.2_r39-anbox_arm64-userdebug.img
+c0de307cdea7ddc19d5990998cb3f59dac59912a08dacb0d92be09c31bf8f2312d1e02fa8321b950151995120fa9401052b8e97dde620c1739a8314a4470e47d  android-7.1.2_r39.1-anbox_armv7a_neon-userdebug.img
+b6a3048b7a340c752a3500c2d6ec3cb6565043c2c75461c9e9ec0361d0e62f492c7434ae25c4353c293c28be113bd88211e3089f84886cb7124cf0147587e0af  org.fdroid.fdroid_1013000.apk
+3c34eb04c96ebee2a1baa06bcf4ebf16915a1fd69143502639998caf34beb744458823705a65617c3bc4e134e5c9fc7fbca4196e1430d7b4d701748fbc29b9dc  org.fdroid.fdroid.privileged_2110.apk
+"

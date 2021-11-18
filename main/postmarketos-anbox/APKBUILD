@@ -1,0 +1,15 @@
+# Maintainer: Antoine Fontaine <antoine.fontaine@epfl.ch>
+pkgname=postmarketos-anbox
+pkgver=0
+pkgrel=1
+pkgdesc="Android in a box: postmarketos metapackage"
+arch="x86_64 armv7 aarch64"
+url="https://wiki.postmarketos.org/wiki/Anbox"
+license="GPL-3.0-or-later"
+options="!check"
+install="$pkgname.post-install"
+depends="anbox anbox-image postmarketos-config-nftables-anbox"
+
+package() {
+	mkdir -p "$pkgdir"
+}

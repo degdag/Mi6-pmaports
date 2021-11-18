@@ -1,0 +1,58 @@
+# Maintainer: Uclydde <julianbraha@gmail.com>
+# Reference: <https://postmarketos.org/vendorkernel>
+
+pkgname=linux-motorola-ali
+pkgver=3.18.140
+pkgrel=4
+pkgdesc="Motorola Moto G6 kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="motorola-ali"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev openssl-dev"
+
+# Source
+_repository="kernel-msm"
+_commit="974646412f6e865f6847a7c6b72528f3a14bdb56"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/Uclydde/$_repository/archive/$_commit.tar.gz
+	$_config
+	04_fix_stmvl53l0_headers.patch
+	fix_focaltech_recursive_dependency.patch
+	fix_mdp_ctrl_off.patch
+	fix_fb.patch
+	fix_fb_h.patch
+	fix_mdss_overlay.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="9ce6156aa8fd62ba1dff15413b526a870f45368d72774690f43229de82935acc52fcc58467e9bb72cca889ce03f6978ef1be454fd671c0fe845341c09d51d648  linux-motorola-ali-974646412f6e865f6847a7c6b72528f3a14bdb56.tar.gz
+af7ebc73c1d99a2fc6b47f6a9710f5016f59c997841148b99f19159b9f7628947176dca37c60a4d13df9329241cefad0dcec88f5620b66bb55bc2e496975012b  config-motorola-ali.armv7
+1a128e1483459144726458175314c58528e6b1f1a85e5f4230fa0461b0c3dd650037567f672c220a95618f9df023a82a35f010e8e8b784e349806516c1daaf7e  04_fix_stmvl53l0_headers.patch
+e2cf5b20831c05881780b7db1f40135ca7c8e0d2a4f7a8afa4eee16c7eae1711f2f02f72266309d52cb4437e9580ed58472e768c266f1283994ab1098861e9fc  fix_focaltech_recursive_dependency.patch
+3ccfaf591befba3b67d24134a516352173767cac0479d3011f077866e02a792f3581e50d05110375a8f84876213823d37d3791c4cb82f19f212bc4bee57934c8  fix_mdp_ctrl_off.patch
+cb7edd7bf9642400276ccb1ddf38cc4ed6fd934c0f0fbc43839903dfd9a3d433121d7624f53be309a10e1703024079d25b369016ccadc870dfd31d988dc22b77  fix_fb.patch
+3532faa75cbdbe034082420491abbf61c4a0a744b5d5c676ee9e1de971655dfac77129932baf78ad45ff0f01c3fa139253d1a3ff8461671536a9aebc5d16586a  fix_fb_h.patch
+eb183307dd0b79407c0b6c92cdc9898d2834a8309938e1af14708e94a375c1c68b5f63c0096bae7e29f28d9191dd73c33d0bbf0686fb722daa37bcabc92dea3f  fix_mdss_overlay.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch"

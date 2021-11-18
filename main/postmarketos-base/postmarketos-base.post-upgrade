@@ -1,0 +1,5 @@
+#!/bin/sh
+# WARNING: do not symlink this file to postmarketos-base.post-install!
+# Otherwise it will enable services, as listed in that file. And we don't want
+# this to happen during upgrade, especially not automatically enabling the sshd
+# service! (build.postmarketos.org#85)

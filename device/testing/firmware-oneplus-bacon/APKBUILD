@@ -1,0 +1,21 @@
+pkgname=firmware-oneplus-bacon
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for OnePlus One (bacon)"
+url="https://gitlab.com/Kanedias/oneplus-firmware-files"
+arch="armv7"
+license="proprietary"
+depends="mtools"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+_commit="421e8adbea3b690651ed1e7b9f0ae73047039e7a"
+source="$url/-/archive/$_commit/oneplus-firmware-files-$_commit.tar.gz"
+builddir="$srcdir/oneplus-firmware-files-$_commit"
+
+package() {
+	cd bacon/firmware
+	for _i in wcnss.* wlan/prima/WCNSS*; do
+		install -Dm644 $_i "$pkgdir/lib/firmware/postmarketos/$_i"
+	done
+}
+
+sha512sums="87432e8f8869e7b8c3397fa1c24a5b8ac29c710beddabe56a728012b68d5cfc90c9fc12f496aa6e23d395d52beb4ad2c395b9aebf8876c6c4315e0c75c8e7648  oneplus-firmware-files-$_commit.tar.gz"

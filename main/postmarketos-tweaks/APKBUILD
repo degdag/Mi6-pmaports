@@ -1,0 +1,39 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+pkgname=postmarketos-tweaks
+pkgver=0.8.1
+pkgrel=0
+pkgdesc="Tweak tool for phone UIs"
+url="https://gitlab.com/postmarketOS/postmarketos-tweaks"
+arch="noarch"
+license="GPL-3.0-or-later"
+subpackages="$pkgname-phosh:phosh $pkgname-pinephone:pinephone"
+depends="python3 py3-gobject3 py3-yaml gtk+3.0 libhandy1"
+makedepends="py3-setuptools glib-dev libhandy1-dev meson"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="$pkgname-$pkgver.tar.gz::https://gitlab.com/postmarketOS/postmarketos-tweaks/-/archive/$pkgver/postmarketos-tweaks-$pkgver.tar.gz"
+options="!check" # There's no testsuite
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel phosh"
+
+	amove usr/share/postmarketos-tweaks/phosh.yml
+}
+
+pinephone() {
+	install_if="$pkgname=$pkgver-r$pkgrel device-pine64-pinephone"
+
+	amove usr/share/postmarketos-tweaks/pinephone.yml
+}
+
+sha512sums="
+97753c33da1cdc8c149a2c5f76aa4c0c5d714e6f7523fda37e153b2b94590c663f4f0207d0593deec767f949e1eb4fd3092e188f7ed647327c0350d7a880ccc3  postmarketos-tweaks-0.8.1.tar.gz
+"

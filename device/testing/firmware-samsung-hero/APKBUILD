@@ -1,0 +1,24 @@
+pkgname=firmware-samsung-hero
+pkgver=1
+pkgrel=1
+pkgdesc="Firmware for the Samsung hero devices (herolte, hero2lte)"
+url="https://github.com/TheMuppets/proprietary_vendor_samsung"
+arch="noarch"
+license="proprietary"
+options="!check !archcheck !strip !spdx !tracedeps pmb:cross-native"
+
+# Source
+_commit="22da2c3359151e0bbddaaa9804d4bf8de072051d"
+source="$pkgname-$_commit-bcmdhd_sta.bin_c0::https://github.com/TheMuppets/proprietary_vendor_samsung/raw/$_commit/hero-common/proprietary/etc/wifi/bcmdhd_sta.bin_c0
+	$pkgname-$_commit-nvram_net.txt_c0::https://raw.githubusercontent.com/TheMuppets/proprietary_vendor_samsung/$_commit/hero-common/proprietary/etc/wifi/nvram_net.txt_c0"
+
+package() {
+	# Wifi
+	install -Dm644 "$srcdir/$pkgname-$_commit-bcmdhd_sta.bin_c0" \
+		"$pkgdir"/lib/firmware/postmarketos/bcmdhd_sta.bin_c0
+	install -Dm644 "$srcdir/$pkgname-$_commit-nvram_net.txt_c0" \
+		"$pkgdir"/lib/firmware/postmarketos/nvram_net.txt_c0
+}
+
+sha512sums="fa27c828b6732f49f8463a6ab15c4ceb5af0aa3f40ab55b4aed46c07de641d79fbc0e2bc44ed2c6e5803dc80ffe061d60403dfe14a8b4558e8c52d0570d8ecf0  firmware-samsung-hero-22da2c3359151e0bbddaaa9804d4bf8de072051d-bcmdhd_sta.bin_c0
+b7ee2028f641c65ec187b23d0b8d9aa0921edfb950c8f0b274de95e23a2d28d9aeaedfd868bce4d0a30a0c9798adb1ccdb2c8a39da6df7784ecbd9e9a8cd27dd  firmware-samsung-hero-22da2c3359151e0bbddaaa9804d4bf8de072051d-nvram_net.txt_c0"

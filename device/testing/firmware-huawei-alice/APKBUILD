@@ -1,0 +1,28 @@
+pkgname=firmware-huawei-alice
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Huawei P8 Lite"
+url="https://git.sr.ht/~bo41/firmware-huawei-alice"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+install="$pkgname.post-install"
+# Sources
+_commit="6aa2ebaa11caaccbe29f2764c24a54d2bc4a77bd"
+source="$pkgname-$_commit.tar.gz::$url/archive/$_commit.tar.gz alice-wlan"
+
+_fwdir="/lib/firmware/postmarketos"
+builddir="$srcdir/$pkgname-$_commit"
+
+package() {
+	pkgdesc="Huawei Alice WiFi firmware"
+	# WiFi
+	install -Dm644 * -t "$pkgdir/$_fwdir"
+
+	install -Dm755 "$srcdir"/alice-wlan "$pkgdir"/etc/init.d/alice-wlan
+}
+
+sha512sums="
+76e5b925021e892a53961f7d638d1562862e22759aef4de84ad7a5f1a2018595030bd063da9fc7b430d3ddc44eed1f724a1a35e943cd1289ed6e696303851623  firmware-huawei-alice-6aa2ebaa11caaccbe29f2764c24a54d2bc4a77bd.tar.gz
+6215df9b73f10ca4ee5cb678c34b2fb668c78a3ce46439b4c1b9d7d339a4216cc7bc0a8a74e0c5057fa5416a07b83de5b453bbdfd2a2dc95bdff53282c0d7c55  alice-wlan
+"

@@ -1,0 +1,73 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Asriel Dreemurr <asriel.danctnix@gmail.com>
+# Co-Maintainer: Danct12 <danct12@disroot.org>
+pkgname=device-xiaomi-santoni
+pkgdesc="Xiaomi Redmi 4X"
+pkgver=0.7
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-xiaomi-santoni mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	misc/100-charging.rules
+	misc/charging.sh
+	misc/discharging.sh
+	ucm/90-device-xiaomi-santoni-audio.rules
+	ucm/HiFi
+	ucm/msm8920-sku7-snd-card.conf
+	deviceinfo
+	directfbrc
+	fb.modes"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/directfbrc "$pkgdir"/etc/directfbrc
+
+	install -Dm755 "$srcdir"/charging.sh "$pkgdir"/usr/lib/device-xiaomi-santoni/charging.sh
+	install -Dm755 "$srcdir"/discharging.sh "$pkgdir"/usr/lib/device-xiaomi-santoni/discharging.sh
+	install -Dm644 "$srcdir"/100-charging.rules \
+		"$pkgdir"/etc/udev/rules.d/100-charging.rules
+
+	# Disable v4l udev rules (video4linux), because without the camera
+	#         firmware blobs this makes udev helper hang (#1033)
+	mkdir -p "$pkgdir"/etc/udev/rules.d
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+
+}
+
+nonfree_firmware() {
+	pkgdesc="Wi-Fi, ADSP Firmware (DON'T INSTALL IF USE **LIBHYBRIS**)"
+	depends="firmware-xiaomi-santoni wcnss-wlan adsp-audio pulseaudio pulseaudio-alsa alsa-plugins-pulse alsa-utils"
+	install="$pkgname-nonfree-firmware.post-install"
+	mkdir "$subpkgdir"
+
+	# Install UCM files for santoni
+	install -Dm644 "$srcdir"/HiFi \
+		"$subpkgdir"/usr/share/alsa/ucm2/msm8920-sku7-snd-card/HiFi
+	install -Dm644 "$srcdir"/msm8920-sku7-snd-card.conf \
+		"$subpkgdir"/usr/share/alsa/ucm2/msm8920-sku7-snd-card/msm8920-sku7-snd-card.conf
+	install -Dm644 "$srcdir"/90-device-xiaomi-santoni-audio.rules \
+		"$subpkgdir"/etc/udev/rules.d/90-device-xiaomi-santoni-audio.rules
+}
+
+sha512sums="
+7b1b138372cb173be38e820a1c386c3d30930d6753303478ae08c1362de3099d81c26eb2b833c5a0b340a82d821bd53309058ecb9b62e00c7ff323b632af2346  100-charging.rules
+c4853babd5cd6371297e5e5d64364c064d540cd4beaba06d79b1001fe5c78fe3ee8bc5f6f4ba3e383743a09263028abc55f41bad45240b1c505e27ed087725c9  charging.sh
+6012be4184af6c4f12f9b20a6f2d377ebd72b9b334df4fbb921ed9d8da865633631f77d19b02748ebee70442e2f3ffcb6af511ee5deaa40635bc53730c301076  discharging.sh
+dc4bf7871307e659f220aebc3c9f7d74b861f46e1f3df1be37d724af984e46d91e553dbd36c2bd4482aa17dbe4d76d28dabe214952638f00830907466b110146  90-device-xiaomi-santoni-audio.rules
+3452fe367e7b199d610fb3d8e9113b35e04071afc7585080edb6fe584ecc29591d8f3ab53ed4583c1ccea5882aa51050d6e56a5db7ef88f6c9af648ba1ef88af  HiFi
+7c702cf159699cea761ce7cb1ca21b79c59ceb3cdf1e410b537c4aa3a5aaa3be171b4c5555a713ac7a0e0f6dc389680cd5368a7783d14025fdc14d5f27fb922b  msm8920-sku7-snd-card.conf
+99aa6dc66e501bc42fb7843c85a28f49afceabd105d12c729817b3d96775b97565da38ebdc2817fbff1341f38e29284adc45f02264ab52857cb549f09abf9d45  deviceinfo
+3db3ec596e159be926ea2b5b2496c18e9bc7be24a64a232a56c89a0c9ee710aa2efb2b6fa9fc08efa34759e8242e6c629d08a4ce688ec8aa125830717c191515  directfbrc
+b634d13cac1f10535a31c142c7391986ab402ae9910d8093989920f4c2dbd63722ee8595f11962bffd9d314e2835a1ead955a91355856f044911ddcf1e428427  fb.modes
+"

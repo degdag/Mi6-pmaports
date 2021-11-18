@@ -1,0 +1,56 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-oneplus-bacon
+pkgver=1
+pkgrel=27
+pkgdesc="OnePlus One"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base mkbootimg"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-weston
+"
+source="deviceinfo 90-android-touch-dev.rules weston.ini"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-oneplus-bacon mesa-dri-swrast msm-fb-refresher"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline kernel"
+	depends="linux-postmarketos-qcom-msm8974 mesa-dri-gallium"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU, Wi-Fi firmware"
+	depends="firmware-qcom-adreno-a330 firmware-oneplus-bacon"
+	mkdir "$subpkgdir"
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+sha512sums="3e6a523a1f551943f1938603ba2f5d8e8a56fe92aa71967f8919de3fb727831032651f20f2d4ed9512389f5cbaca71c5d4d2ed1ce8ac519516a23e7932a2b991  deviceinfo
+65e9ee7352b1dc39d99ea411eb0ed9c56f9975230907db5add3a1b4146cdf6f227c934052dab38a1937ed67d67585f28fb7410f10a1bec9dd5e4eb69d7253515  90-android-touch-dev.rules
+86a0c08720225e4532f797ad69307dfff66867e4a35de1aacceefc48f19721caf93f9a17a268e58f1f5a7e947f157d6984676837c2b5b835b0caf6ee9821bb5a  weston.ini"

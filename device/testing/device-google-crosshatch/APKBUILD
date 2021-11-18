@@ -1,0 +1,40 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-google-crosshatch
+pkgdesc="Google Pixel 3 XL"
+pkgver=0.1
+pkgrel=9
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+kernel_downstream() {
+	pkgdesc="LineageOS downstream kernel (recommended)"
+	depends="linux-google-crosshatch"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline; DO NOT USE: doesn't work (only USB networking is supported)"
+	depends="linux-google-crosshatch-mainline firmware-google-crosshatch-mainline-dtbo"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+sha512sums="
+2a24ae9840959bf5fc39f15f2a4129690fd193450874193f8c312f4e26ee76b69d62baba1826824c566253288d9af91c79d6744e09f35fbc74cf6fc8bd63803f  deviceinfo
+"

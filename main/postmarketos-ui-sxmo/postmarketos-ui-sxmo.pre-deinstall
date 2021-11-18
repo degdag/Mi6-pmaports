@@ -1,0 +1,6 @@
+#!/bin/sh
+
+rc-update del sxmo-setpermissions default
+rc-update del modemmanager default
+rc-update del tinydm default
+rc-update del networkmanager default

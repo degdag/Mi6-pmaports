@@ -1,0 +1,44 @@
+From ba7dad392328029479155a17fce3a092a9324461 Mon Sep 17 00:00:00 2001
+From: Denny Harijanto <denny@nusantara-cloud.com>
+Date: Sun, 3 Feb 2019 11:37:56 +0700
+Subject: [PATCH 2/5] Revert "Update TF101"
+
+This caused Android USB Networking to fail.
+
+This reverts commit cd2d67ade1f139664969465c86cb8136bd764e08.
+---
+ drivers/usb/gadget/u_ether.h | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/drivers/usb/gadget/u_ether.h b/drivers/usb/gadget/u_ether.h
+index a1ab45dbe08..46772413f0d 100644
+--- a/drivers/usb/gadget/u_ether.h
++++ b/drivers/usb/gadget/u_ether.h
+@@ -111,18 +111,18 @@ int eem_bind_config(struct usb_configuration *c);
+ 
+ #ifdef USB_ETH_RNDIS
+ 
+-int rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN]/*,
+-				u32 vendorID, const char *manufacturer*/);
++int rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
++				u32 vendorID, const char *manufacturer);
+ 
+ #else
+ 
+ static inline int
+-rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN]/*,
+-				u32 vendorID, const char *manufacturer*/)
++rndis_bind_config(struct usb_configuration *c, u8 ethaddr[ETH_ALEN],
++				u32 vendorID, const char *manufacturer)
+ {
+ 	return 0;
+ }
+ 
+ #endif
+ 
+-#endif /* __U_ETHER_H */
+\ No newline at end of file
++#endif /* __U_ETHER_H */
+-- 
+2.19.1
+

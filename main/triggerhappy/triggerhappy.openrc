@@ -1,0 +1,23 @@
+#!/sbin/openrc-run
+
+command="/usr/sbin/thd"
+command_args="--triggers /etc/triggerhappy/triggers.d/ --socket /run/thd.socket --deviceglob /dev/input/event* --pidfile=/run/triggerhappy.pid --daemon"
+pidfile="/run/triggerhappy.pid"
+
+name="Triggerhappy"
+description="Triggerhappy hotkey daemon"
+
+
+start() {
+	ebegin "Starting triggerhappy hotkey daemon"
+	start-stop-daemon --start --exec "$command"\
+		--pidfile "$pidfile" \
+		-- $command_args
+	eend $?
+}
+
+stop() {
+	ebegin "Stopping triggerhappy hotkey daemon"
+	start-stop-daemon --stop --pidfile "$pidfile"
+	eend $?
+}

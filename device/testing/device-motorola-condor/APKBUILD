@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-condor
+pkgdesc="Motorola Moto E (1st gen)"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-condor mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh 90-android-touch-dev.rules"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+			"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+
+}
+
+sha512sums="
+f16f3498fcd54e0022d71daa6f291b661a95e3c9b6b47c2effb177fe85f21beb6f8995f59d0c1954b3602116b6c991077503b69f44ad9eb3a1550ff8dfabbbdb  deviceinfo
+a009171a9f95ad15f28b22549f8618711b42fabbad473e416b905c60131265a02ab7eb33c4e57f2201b859152a603c77c3c9bec955ab3998cd385858f076c8ec  initfs-hook.sh
+568d407c3e96b45d740af8617f0e389d36a7091dceccae8f77288fdc45fb7a5ed418c28f31d7fe5a51d92337a40b2dd741b1b18ad02e3fbae91f9a2035d62c95  90-android-touch-dev.rules
+"

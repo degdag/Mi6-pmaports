@@ -1,0 +1,31 @@
+# Maintainer: Dolphin von Chips <DoIphinChips@protonmail.com>
+pkgname=pd-mapper
+pkgver=0_git20201110
+pkgrel=1
+_commit="d7fe25fa6eff2e62cf264544adee9e8ca830dc78"
+pkgdesc="Qualcomm PD mapper"
+url="https://github.com/andersson/pd-mapper"
+arch="all"
+license="BSD-3-Clause"
+makedepends="qrtr-dev"
+source="https://github.com/andersson/pd-mapper/archive/$_commit/pd-mapper-$_commit.tar.gz
+	pd-mapper.initd
+	"
+subpackages="$pkgname-doc $pkgname-openrc"
+builddir="$srcdir/pd-mapper-$_commit"
+options="!check" # No test suite
+
+build() {
+	make prefix="/usr"
+}
+
+package() {
+	make prefix="/usr" DESTDIR="$pkgdir" install
+	rm -r "$pkgdir"/usr/lib/systemd
+
+	install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+	install -Dm755 "$srcdir"/pd-mapper.initd "$pkgdir"/etc/init.d/pd-mapper
+}
+
+sha512sums="291556d6b42749161d57d4087871c88b9341c5ccc99ef3bc850528ee10e1d60695103ad89b5e9914c26d66ea741957e365afee84d0bd2b9b3691f30ee093f37d  pd-mapper-d7fe25fa6eff2e62cf264544adee9e8ca830dc78.tar.gz
+67aaec50737782c68e2e639b9dfb5b4803850b50c4260983975ac466b4b59d775e57542eccac1af5fffddeed8403f7b991194544c96b7c4aba7b0c1a666eb262  pd-mapper.initd"

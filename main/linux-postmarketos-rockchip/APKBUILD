@@ -1,0 +1,110 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+
+# This is seperate from linux-edge so we can control the release cycle better.
+# If this kernel is updated and fails to boot it's quite hard to recover the
+# rk3399 devices due to the boot order. This kernel also has a kconfig that has
+# more modules built-in that are required for successfully booting on these
+# devices.
+
+# It's important that CONFIG_ROCKCHIP_CDN_DP is _disabled_ because it causes
+# boot failure
+
+pkgname=linux-postmarketos-rockchip
+pkgver=5.14.9
+pkgrel=0
+pkgdesc="Mainline kernel for rockchip devices"
+arch="aarch64 armv7"
+_flavor="${pkgname#linux-}"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-zram
+	"
+makedepends="
+	bison
+	devicepkg-dev
+	findutils
+	flex
+	installkernel
+	openssl-dev
+	perl
+	rsync
+	gzip
+	xz
+	gmp-dev
+	mpc1-dev
+	mpfr-dev
+	"
+
+case "$CARCH" in
+	aarch64*) _carch="arm64" ;;
+	arm*) _carch="arm" ;;
+esac
+
+# Source
+_config="config-$_flavor.$CARCH"
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.0};;
+	*.*)	_kernver=$pkgver;;
+esac
+
+source="
+	https://cdn.kernel.org/pub/linux/kernel/v${_kernver%%.*}.x/linux-$_kernver.tar.xz
+	0001-phy-rockchip-typec-Set-extcon-capabilities.patch
+	0003-arm64-dts-rockchip-add-typec-extcon-hack.patch
+	0004-arm64-dts-rockchip-setup-USB-type-c-port-as-dual-data-role.patch
+	0010-usb-typec-add-extcon-to-tcpm.patch
+	0007-block-partitions-efi-Add-support-for-IGNOREME-GPT-si.patch
+	0011-stmmac-revert-stmmac-fix.patch
+	config-$_flavor.aarch64
+	config-$_flavor.armv7
+"
+builddir="$srcdir/linux-$_kernver"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor"
+
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	make -j1 modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/boot/dtbs-$_flavor"
+
+	# not all armv7 devices (google-veyon-jerry) support booting gzipped kernels yet
+	if [ $_carch = arm64 ]; then
+		gzip -v "$pkgdir"/boot/vmlinuz
+		mv "$pkgdir"/boot/vmlinuz.gz "$pkgdir"/boot/vmlinuz
+	else
+		mv "$pkgdir"/boot/vmlinuz "$pkgdir"/boot/vmlinuz
+	fi
+}
+
+
+sha512sums="
+987ae9ceba83ba12e5e1962118831dbc47eaf26848cfd83b93db58f004dbc3c8d10d62a33cf449abddcfe996023dc705207c43a22aae665461eff9d7365bbc00  linux-5.14.9.tar.xz
+10949558a6e3316ea57497f377fd120d6704f3b81725317556e49d10b570a40edb06643b06738116abbe3096be485761d436f1a0d1861bd34fc18ea45068b6b0  0001-phy-rockchip-typec-Set-extcon-capabilities.patch
+b7291eecfddc7ebe9393eea864e0ee28960e8cc2f87dfc42d09426b5619f46ded97c38fb8bf26f4eea1f26bfe21396094505b3efb8676691f8751e2ffabe50ec  0003-arm64-dts-rockchip-add-typec-extcon-hack.patch
+427b81472de2a473344269b2da06ac338af42e68620a281a9cb8543e545e6ed7f719acaf68c688e518b65d2132e0c66676ba5e30376ec980fd6eeaea05c2a8be  0004-arm64-dts-rockchip-setup-USB-type-c-port-as-dual-data-role.patch
+e5cc0852506ea1e73213672f0c3f9144c08156f6d5e8af841bf3f7bffc0e89028507aac4718353eee20edd9069e3f81665caa5ca25e416f25e7e0da10451b67e  0010-usb-typec-add-extcon-to-tcpm.patch
+000ddb9f10545b1231e2b78049d3fda7aed8e931c0c992f84cfe2783dd964443d137e5695775956c5db0fac30d00795adc34453acfb772155163297cc1227b8c  0007-block-partitions-efi-Add-support-for-IGNOREME-GPT-si.patch
+75a738070a42b03b248fd805f60ac506b3d22c775dc0b0365d7f9c15c28349d0e16dde9af301021d56d720d341075335e63a38be0ade89178346518c7b02de53  0011-stmmac-revert-stmmac-fix.patch
+e2e0aac0b0f3dacdbc31b2de0955301c6724fffbb6cbf5a57dc68dbb66ed4b687bff6dc9f957f64046e6c1bec27a76687e6816804fb0bb15e9900dc2790388b8  config-postmarketos-rockchip.aarch64
+62a05ed0d8f040981454216939b044cc48deb4aa566e952b6bca2881b21e28f7f68e9a5d399ec5a5ec545ac3898757cdf139b1f1554841d73bf8a841ae407e6f  config-postmarketos-rockchip.armv7
+"

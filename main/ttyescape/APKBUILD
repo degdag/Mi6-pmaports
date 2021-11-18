@@ -1,0 +1,33 @@
+# Maintainer: Caleb Connolly <caleb@connolly.tech>
+pkgname=ttyescape
+pkgver=0.1
+pkgrel=0
+pkgdesc="Daemon to allow users to escape to a tty"
+url="https://postmarketos.org"
+arch="all"
+license="GPL-3.0-or-later"
+depends="triggerhappy fbkeyboard terminus-font kbd"
+install="$pkgname.post-install"
+source="
+	togglevt.sh
+	ttyescape-triggerhappy.conf
+	etc-conf-d-ttyescape.conf
+"
+options="!check"
+
+package() {
+	install -Dm755 "$srcdir"/togglevt.sh \
+		"$pkgdir"/usr/bin/togglevt.sh
+
+	install -Dm755 "$srcdir"/ttyescape-triggerhappy.conf \
+		"$pkgdir"/etc/triggerhappy/triggers.d/ttyescape.conf
+
+	install -Dm755 "$srcdir"/etc-conf-d-ttyescape.conf \
+		"$pkgdir"/etc/conf.d/ttyescape.conf
+}
+
+sha512sums="
+5a56740678073c72c1952e36742fb0786f932e718835c39502ab51f9731426e2b8479de38d4c44c35bc84a895b74ea0dc7bd39fd9eb89b603973ed6e43abb377  togglevt.sh
+f8bf3273cf87392ab2092a005417bc58cb3ae6ad25b9118b76c68481d9d8fc7d964a9d16fc7645f6f9ff0676dccd381be3b846464b2e60a6452b8c883bffb6f1  ttyescape-triggerhappy.conf
+5429c7029e6db292cccbd4d5fdb4eb07cbbe050fe886784ebb1f88d790de35c06714c2ad38d366d88ed78a09d4d20e0826541f8f578885384ff6b033ac606af8  etc-conf-d-ttyescape.conf
+"

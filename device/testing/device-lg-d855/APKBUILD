@@ -1,0 +1,27 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-d855
+pkgver=1
+pkgrel=24
+pkgdesc="LG G3 International"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base linux-lg-d855 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo 90-android-touch-dev.rules"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+sha512sums="
+4f5be566aea896eb8ddf73a3d7b050444d7ebef0c1760005605d54300e0605c5f3040770b4a1ed56f348f02d5dadb032b7ed6257367fc8dd4ba1da71f6edce9c  deviceinfo
+ee25f3d0377f027d108593eb7953b8db49d7f05a5c36a0c8ca7e7849d15e3c217bc1ac97d77a66e28d2db4b81c0f50b905639911276da40321d2b6cca7f797df  90-android-touch-dev.rules
+"

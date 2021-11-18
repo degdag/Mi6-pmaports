@@ -1,0 +1,52 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-leeco-s2
+pkgdesc="LeEco Le 2"
+pkgver=0.2
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-leeco-s2 mkbootimg mdss-fb-init-hack mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="
+	deviceinfo
+	fb.modes
+	directfbrc
+	ucm/msm8976-skun-snd-card.conf
+	ucm/HiFi
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/directfbrc \
+		"$pkgdir"/etc/directfbrc
+
+	# Alsa usecase manager config
+	install -D -m644 "$srcdir"/msm8976-skun-snd-card.conf \
+		"$pkgdir"/usr/share/alsa/ucm2/msm8976-skun-snd-card/msm8976-skun-snd-card.conf
+	install -D -m644 "$srcdir"/HiFi \
+		"$pkgdir"/usr/share/alsa/ucm2/msm8976-skun-snd-card/HiFi
+
+}
+
+nonfree_firmware() {
+	pkgdesc="wlan, audio firmware"
+	depends="firmware-leeco-s2-wcnss firmware-leeco-s2-adsp"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+340ea95aec01802b20ccdb3a17ca708859653a37f9e43553797bbfe9325b5b8cefb12b2bf9fbe191babda31a3513648564d942fc3a40ccaa5da58346a425dda5  deviceinfo
+ea23de7628945badcff9d4adbe09b671a50c76da6410b8ab0abdaea8529a6cdcc85524c2c785e284e226b2e247589b7c56afdd89c0778ad711e58cf4086b3a21  fb.modes
+eea461b4c2e46351e606039b0fd489c5cf5fc3af71cd09a8aa3f327930ab9c8381908c8079e2cf1d1aba81e70d24b1aaf5e39b32a83596a32ce0c93de04202e9  directfbrc
+72fd18d6fea98a081de1681bf39e4fb228c73e8390064a4d4ecde100ef53fce00142342bcbced3b17c4ad2d6976a9676538cc844e2e158739f6ef0d58be9960b  msm8976-skun-snd-card.conf
+7ac4d3fb2a12b3b0945dbf494edc90f01bea1ce1bfc1a55d2e862df4b1b916ddc43b3afe4b77351d109d4a0a6cf7d65695885a44930831c409a85512cc602471  HiFi
+"

@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-montana
+pkgdesc="Motorola Moto G5s"
+pkgver=0.3
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-montana mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-motorola-montana-wcnss wcnss-wlan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+2d0dede26ec9495480cc8fe1684fbe3ae07af6b490f6ef54dfc93f99da34466475591601f065b9410c0a89865b5510115ed7cb44c022209c6e2d73d8db8a4f9e  deviceinfo
+97acac2557914cc234d75dd9869338e0eac13196649a661c59caa52b8953c4170a2fa2fbc9ee5518935c325d779b45d6c179c71474366b1200a4bd1e5172a882  initfs-hook.sh
+"

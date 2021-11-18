@@ -1,0 +1,26 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell
+# scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Microsoft Surface RT"
+deviceinfo_manufacturer="Microsoft"
+deviceinfo_codename="microsoft-surface-rt"
+deviceinfo_year="2012"
+deviceinfo_dtb="tegra30-microsoft-surface-rt-efi"
+deviceinfo_modules_initfs="nls-cp437 nls-iso8859-1 vfat surface-rt-ec hid-generic i2c-hotplug-gpio i2c-hid-of lvds-codec panel-lvds"
+deviceinfo_arch="armv7"
+
+# Device related
+deviceinfo_chassis="tablet"
+deviceinfo_keyboard="true"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="1366"
+deviceinfo_screen_height="768"
+deviceinfo_dev_internal_storage="/dev/mmcblk0"
+deviceinfo_dev_internal_storage_repartition="true"
+
+# Bootloader related
+deviceinfo_flash_method="none"
+deviceinfo_generate_bootimg="false"
+deviceinfo_boot_filesystem="fat32"

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Exec=dbus-run-session /usr/bin/asteroid-launcher-wrapper
+TryExec=/usr/bin/asteroid-launcher
+Name=AsteroidOS UI
+Comment=Smartwatch UI from AsteroidOS
+Type=Application

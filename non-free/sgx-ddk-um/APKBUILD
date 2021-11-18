@@ -1,0 +1,81 @@
+# Maintainer: Jonathan Bakker <xc-racer2@live.ca>
+pkgname=sgx-ddk-um
+pkgver=1.17.494857
+_commit=551665bf9c321bc3e7721416e6ebbc9f65c18155
+pkgrel=0
+pkgdesc="(WARNING: runs as root) Proprietary userspace libraries for PowerVR SGX GPUs"
+url="https://git.ti.com/cgit/graphics/omap5-sgx-ddk-um-linux"
+arch="armhf armv7 aarch64"
+license="proprietary"
+options="!check !strip" # no test suite available
+depends="libc6-compat"
+subpackages="
+	$pkgname-s5pv210:s5pv210
+	$pkgname-ti335x:soc
+	$pkgname-ti343x:soc
+	$pkgname-ti437x:soc
+	$pkgname-ti443x:soc
+	$pkgname-ti654x:soc
+	$pkgname-openrc
+	"
+
+source="
+	https://git.ti.com/cgit/graphics/omap5-sgx-ddk-um-linux/snapshot/omap5-sgx-ddk-um-linux-$_commit.tar.gz
+	pvrsrvinit.c
+	sgx-ddk-um.initd
+	"
+builddir="$srcdir/omap5-sgx-ddk-um-linux-$_commit"
+
+copy_soc_files() {
+	local soc_libs=$1
+	local soc_name=$2
+	local soc_path="$subpkgdir/usr/lib"
+	cd $builddir
+	mkdir -p $soc_path
+
+	cp -a targetfs/$soc_libs/lib/libglslcompiler.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libGLESv1_PVR_MESA.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libGLESv2_PVR_MESA.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libpvr2d.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libdbm.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libsrv_um.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libpvr_dri_support.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libPVRScopeServices.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libsrv_init.so* $soc_path/
+	cp -a targetfs/$soc_libs/lib/libusc.so* $soc_path/
+}
+
+build() {
+	gcc -o "$builddir"/pvrsrvinit "$srcdir"/pvrsrvinit.c -ldl
+}
+
+package() {
+	install -dm755 "$pkgdir"/bin
+	install -Dm755 "$builddir"/pvrsrvinit "$pkgdir"/bin/pvrsrvinit
+	install -Dm755 "$srcdir"/sgx-ddk-um.initd "$pkgdir"/etc/init.d/sgx-ddk-um
+}
+
+s5pv210() {
+	provides=sgx-ddk-um-soc=1.17.494857
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	depends=sgx-ddk-um
+
+	copy_soc_files ti443x s5pv210
+}
+
+openrc() {
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	default_openrc
+}
+
+soc() {
+	local n=${subpkgname##sgx-ddk-um-}
+	provides=sgx-ddk-um-soc=1.17.494857
+	depends=sgx-ddk-um-openrc
+
+	copy_soc_files $n $n
+}
+
+sha512sums="49e5d381d7e045dbbf71290eab440a49befd91794368d334a23238229fc7d3fc98f2492a62bf4b6eb71229c7238baf8842038a96c5cff4fdfef60ba7e8f9540d  omap5-sgx-ddk-um-linux-551665bf9c321bc3e7721416e6ebbc9f65c18155.tar.gz
+94b09f7c1d6df33f15bb4e88e145630f4218ceb9cda7fec0e1307eca9b5b9522ad5bf1d9d51a44b0325ec5e74a93fd8ba23e082236d2690eeb3e84cb92f7fa1a  pvrsrvinit.c
+4e3fc0bba02953cf00fd3b094c96bd794ef7668d2f188ada9be92856e7802d310ad43e8cdb9e8c9e6d94732eaf7e94c0ad723b5d55847bc28fa66e1e89eff39a  sgx-ddk-um.initd"

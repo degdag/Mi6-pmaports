@@ -1,0 +1,31 @@
+# Unmaintained: Downstream port, only for testing. Use mainline port (bq-paella)!
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-bq-paella-downstream
+pkgdesc="BQ Aquaris X5 (Downstream)"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-bq-paella-downstream mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi/BT/Modem firmware"
+	depends="msm-firmware-loader firmware-bq-picmt-wcnss-nv
+		 wcnss-wlan msm-modem-downstream"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="e872f7f78d9add160fc962dc6053a490edce1cda8c306e47b9e90098640af5e83556e138242abfc76757cd913bf4c56d9c3857533fcdb780a1578e641ecf015e  deviceinfo"

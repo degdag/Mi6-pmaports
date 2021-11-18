@@ -1,0 +1,40 @@
+# Maintainer: ky0ko <ky0ko@disroot.org>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-def
+pkgdesc="Motorola Moto One Hyper"
+pkgver=0.1
+pkgrel=3
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+subpackages="$pkgname-weston $pkgname-nonfree-firmware:nonfree_firmware"
+depends="postmarketos-base linux-motorola-def mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo weston.ini"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Nonfree firmware metapackage for Motorola One Hyper"
+	depends="firmware-motorola-def"
+	mkdir "$subpkgdir"
+}
+
+
+sha512sums="
+0b133cd1fc0c3b77766771652c4a11f146c6d8cbc4a75a15675bf53640249096887a4a412a88a43ccee858366a08302e8810b146628cec8d39d137fe3859b0b0  deviceinfo
+809cac74c2ea02e21359c7f37f90a0efdf90ea1d23082acff6786e6dbaa1c2b5616a4d36de751ac6c73cfa727362bc23df95b0c78bf4dd1d3441ac182372358a  weston.ini
+"

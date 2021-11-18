@@ -1,0 +1,22 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=postmarketos-mvcfg
+pkgver=1
+pkgrel=0
+pkgdesc="Move configs from legacy packaging"
+url="https://postmarketos.org/mvcfg"
+arch="noarch"
+license="GPL-3.0-or-later"
+options="!check !tracedeps pmb:cross-native"
+source="
+	postmarketos-mvcfg-pre-upgrade.sh
+	postmarketos-mvcfg-package.sh
+	"
+
+package() {
+	for script in pre-upgrade package; do
+		install -Dm755 "postmarketos-mvcfg-$script.sh" \
+			"$pkgdir/usr/bin/postmarketos-mvcfg-$script"
+	done
+}
+sha512sums="58affac657b588a8a1f3370aa649cbc4077206cc237a6180b9533e85108394eedbb10e4b71bb8aecafdbdfc0de820b116b8baa9a6c3fe44272da06a9a5d11d52  postmarketos-mvcfg-pre-upgrade.sh
+82ae4ccc8de87acf1c40e8c6bfb9bd1d0e7eff11055e231000304000dec87de04dc988125aad8a60a8266a21b90da2e14c9605d29b0748ad3cbf5a92dd00910a  postmarketos-mvcfg-package.sh"

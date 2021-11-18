@@ -1,0 +1,36 @@
+pkgname=firmware-samsung-kminilte
+pkgver=1
+pkgrel=0
+pkgdesc="Samsung Galaxy S5 Mini firmware"
+url="https://github.com/cm-3470/android_vendor_samsung_kminilte"
+arch="armv7"
+license="proprietary"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+install="$pkgname.post-install"
+
+_repository="android_vendor_samsung_kminilte"
+_commit="996b9e165baf687c1dcc0b95e83f3208ee711f89"
+
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/cm-3470/$_repository/archive/$_commit.tar.gz
+"
+
+# The installed location of these files must match CONFIG_BCMDHD_FW_PATH
+# and CONFIG_BCMDHD_NVRAM_PATH respectively.
+# Note that "_b2" is appended to the firmware path (in drivers/net/wireless/bcmdhd/dhd_sdio.c),
+# so CONFIG_BCMDHD_FW_PATH must end in ".bin", not ".bin_b2"
+_files="
+	proprietary/etc/wifi/bcmdhd_sta.bin_b2
+	proprietary/etc/wifi/nvram_net.txt
+"
+
+package() {
+	mkdir -p "$pkgdir"
+	cd "$srcdir/$_repository-$_commit"
+	for _f in $_files; do
+		_filename=$(basename $_f)
+		install -Dm644 $_f "$pkgdir"/lib/firmware/postmarketos/$_filename
+	done
+}
+
+sha512sums="84732c5470f917395bdb291a82b0dce613ea0559e2a869d245ef367be8ec7d2dcc8c7db1f63a4ddd7e4e46d7e24105bd3f3104c0603d2f742567c0df205d7672  firmware-samsung-kminilte-996b9e165baf687c1dcc0b95e83f3208ee711f89.tar.gz"

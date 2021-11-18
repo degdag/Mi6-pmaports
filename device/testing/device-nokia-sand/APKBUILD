@@ -1,0 +1,23 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-nokia-sand
+pkgdesc="Lumia 620"
+pkgver=0.1
+pkgrel=3
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-nokia-sand mkbootimg mdss-fb-init-hack mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+sha512sums="
+9bcfd4e9f96e0fac9d8175bf10c85ee3a42f84c6c9506bbb8eef9335aebd8564244da745dd25f74e9490d5d2172ecaaae8fc3f745090cf3a64cd169ceeb2e8db  deviceinfo
+"

@@ -1,0 +1,28 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-gts210velte
+pkgdesc="Samsung Galaxy Tab S2 9.7 LTE (SM-T819)"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-gts210velte mkbootimg mesa-dri-swrast mdss-fb-init-hack"
+makedepends="devicepkg-dev"
+source="deviceinfo 90-sec_touchscreen.rules"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-sec_touchscreen.rules \
+		"$pkgdir"/etc/udev/rules.d/90-sec_touchscreen.rules
+}
+
+
+sha512sums="
+c14cc795aee7533909812cf720a01472f13a6e78438a3ada55bc6848a0ede1b516ec4299c8d363d60caa0a4bc4fd8c4c390e27627e563d40393716fdc44c178c  deviceinfo
+0d23fae6de9b04a36f395068278b8a9054c33e435b24de943da1e55a0ee2d88ee932a3fd2f660596377b14474483edecb8357684f9b7bc2c53979c7f863fae52  90-sec_touchscreen.rules
+"

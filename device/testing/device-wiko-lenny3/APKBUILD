@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-wiko-lenny3
+pkgdesc="Lenny 3"
+pkgver=0.1
+pkgrel=10
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-wiko-lenny3 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+b145f2ea93bd416cf407b7d86dbbfccec1804a8f4a96dfc00400c45f34b7c9f76391cd74353d3bbbcadd9886d5527698085ab4746c939d51cb212ef0e168f848  deviceinfo
+"

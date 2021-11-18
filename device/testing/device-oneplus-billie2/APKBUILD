@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-oneplus-billie2
+pkgdesc="OnePlus Nord N100"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-oneplus-billie2 mkbootimg"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+8191ef906d5e4a184df99713521bed97c4281c2c98b1d73bbbe215d79364aaf7704c071e96938fa6940570a74f2f839a633613ed76dcec9eed7d30291626ac7d  deviceinfo
+"

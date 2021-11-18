@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-acer-swing
+pkgdesc="Acer CloudMobile S500"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-acer-swing mkbootimg mesa-dri-gallium msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo initfs-hook.sh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+1f7c650c3daf85701853aafc699d9f6d23cede297e48ba447506d0ba6d04a0ce32b94a023a21345c96d02405974ab80731f8268053e33c6d1748701702c64e1c  deviceinfo
+4ae9838efeb7ebf8d6cb0ecc346517f4c1f180fc6c9a913217c71344abb4180ac216b352b02dcedbf5433d1c192df8619882c16fd73502d5c46c71a83d9ffed3  initfs-hook.sh
+"

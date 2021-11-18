@@ -1,0 +1,2 @@
+#!/bin/bash
+echo /sys/class/leds/lcd-backlight/max_brightness > /sys/class/leds/lcd-backlight/brightness

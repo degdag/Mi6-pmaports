@@ -1,0 +1,57 @@
+# Maintainer: David Heidelberg <david@ixit.cz>
+pkgname=libvdpau-tegra
+pkgver=0_git20210517
+pkgrel=0
+pkgdesc="VDPAU backend driver for NVIDIA Tegra 20/30 SoC's"
+url="https://github.com/grate-driver/libvdpau-tegra"
+arch="armhf armv7"
+license="GPL-2.0-or-later"
+depends="libdrm"
+makedepends="
+	autoconf
+	automake
+	bison
+	flex
+	gettext-dev
+	libdrm-dev
+	libtool
+	libvdpau-dev
+	libx11-dev
+	libxext-dev
+	libxfixes-dev
+	libxrandr-dev
+	libxv-dev
+	m4
+	pixman-dev
+	util-macros
+	xorgproto
+	"
+_commit="e005296de3eca35eff67abbbde01711f37950579"
+source="$pkgname-$_commit.tar.gz::https://github.com/grate-driver/libvdpau-tegra/archive/$_commit.tar.gz"
+
+builddir="$srcdir/$pkgname-$_commit"
+
+prepare() {
+	default_prepare
+
+	./autogen.sh \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr
+}
+
+build() {
+	make
+}
+
+check() {
+	make check
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="
+b20ee5ab93ac956d0db7b234fdb35785a6863d7dd97e493dbb83bc63bc70e933a35efa3cfc7a7f9bcdad367d5fee8aa817d72637a27273a1edb9be5d33889f93  libvdpau-tegra-e005296de3eca35eff67abbbde01711f37950579.tar.gz
+"

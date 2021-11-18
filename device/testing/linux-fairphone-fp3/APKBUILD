@@ -1,0 +1,73 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/lineageos_FP3_defconfig
+
+pkgname=linux-fairphone-fp3
+pkgver=4.9.218
+pkgrel=1
+pkgdesc="Fairphone 3 kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="fairphone-fp3"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	flex
+	openssl-dev
+	perl
+	dtc
+	dtbtool
+	gcc6
+"
+
+# building with newer gcc causes build errors
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_fairphone_FP3"
+_commit="cb219d777064c83121fbaf2aa119f842c258b3b2"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://gitlab.e.foundation/e/devices/$_repository/-/archive/$_commit/$_repository-$_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 . downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" DTC=dtc \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+
+	dtbTool -p scripts/dtc/ -o "$_outdir/arch/$_carch/boot/dt.img" \
+		"$_outdir/arch/$_carch/boot/"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS" \
+		INSTALL_MOD_PATH="$pkgdir" INSTALL_MOD_STRIP=1 modules_install
+
+	install -Dm644 "$_outdir/arch/$_carch/boot/dt.img" "$pkgdir/boot/dt.img"
+}
+
+sha512sums="
+c56a5f57155e5f68770e85d50530ff87d09c545fb8c774faae61ee4ea8147842430dab9fa20b277388ddae87e5dd6a4f6393cce2bb5fc80cfdd50514fc11c281  linux-fairphone-fp3-cb219d777064c83121fbaf2aa119f842c258b3b2.tar.gz
+23c69ac1aa04152ae7033506956bf4c64a521e8dff71e47241e27809ead80e33c522aa70a088b3c9cf390b2fa6dba858c81738958efc217dddc023412fe20167  config-fairphone-fp3.aarch64
+"

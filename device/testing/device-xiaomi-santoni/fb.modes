@@ -1,0 +1,8 @@
+mode "720x1280-60"
+        # D: 80.457 MHz, H: 78.725 kHz, V: 60.004 Hz
+        geometry 720 1280 720 1280 16
+        timings 12429 180 114 21 7 8 4
+        accel false
+        rgba 8/0,8/8,8/16,8/24
+endmode
+

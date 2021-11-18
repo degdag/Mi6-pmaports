@@ -1,0 +1,42 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-surnia
+pkgdesc="Motorola Moto E (2nd Gen)"
+pkgver=0.1
+pkgrel=8
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-surnia mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-nonfree-firmware-modem:nonfree_firmware_modem
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/Wi-Fi/Bluetooth/Video(/Modem) firmware"
+	depends="linux-firmware-qcom firmware-motorola-surnia-wcnss firmware-motorola-surnia-venus"
+	mkdir "$subpkgdir"
+}
+
+nonfree_firmware_modem() {
+	pkgdesc="Modem firmware"
+	depends="firmware-motorola-surnia-modem"
+	install_if="$pkgname-nonfree-firmware"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+76cf306abef564fdf06974352af8a725934f3eda4f8a7009c39cc3d1e73c285a7ed35f8dd485b191465f27378d9e8ebd0f8ab30d6bf93a8c90a58e52ac49ac5b  deviceinfo
+"

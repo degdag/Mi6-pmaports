@@ -1,0 +1,31 @@
+# Maintainer: Sireesh Kodali <scarface@disroot.org>
+pkgname=firmware-motorola-potter
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Motorola Moto G5 Plus"
+url="https://github.com/scarface-one/firmware-motorola-potter"
+arch="aarch64"
+depends="linux-firmware-qcom soc-qcom-msm8916-ucm"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps"
+_commit="cce83e64585c036facd4cef39f47bc23d18ba2e9"
+builddir="$srcdir/$pkgname-$_commit"
+
+source="$pkgname-$_commit.tar.gz::https://github.com/scarface-one/firmware-motorola-potter/archive/$_commit.tar.gz
+	moto-modem-rfs-setup.openrc
+	firmware.files
+	firmware-motorola-potter.post-install"
+
+package() {
+	install -Dm755 $srcdir/moto-modem-rfs-setup.openrc "$pkgdir"/etc/init.d/moto-modem-rfs-setup
+
+	while IFS="" read -r _i || [ -n "$_i" ]; do
+		[ ! -d $(dirname $_i) ] && mkdir -p $(dirname $_i)
+		echo $_i
+		install -Dm644 $_i "$pkgdir/$_i"
+	done < "$srcdir/firmware.files"
+}
+sha512sums="5a35ff1b567b672585f761eddbc772163f52b312c1e94410eff4b1d333852857a2f87769a45f47f7bcff373bdd5b062c3d16110e0211d85f83a7b4c6c78f6d3c  firmware-motorola-potter-cce83e64585c036facd4cef39f47bc23d18ba2e9.tar.gz
+d4fd0f3406c9f004e9cae7bc500c5713aab75f102f8e3ea1af820865f01eb03def01cd9ed3e8a184c7dfc22ab419628fad17957a3782885d96eb36e94461e842  moto-modem-rfs-setup.openrc
+dc7b179abb099ab61bc72e8941be38d3e94bd1a43b37617b34e1a63835bb8399ee79a87d556996dfbed032e40554ca48a2ff9e9817d80ed1415db3f369266b38  firmware.files
+784ac120a2231cfbee153fb8b2634af4ab5091eaa8fe207e66b47641d7531591ee3849e610bb66c7177822c86556f78d51c17ba8e4f3da2f946c4b8c5eaaf310  firmware-motorola-potter.post-install"

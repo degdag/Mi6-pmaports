@@ -1,0 +1,21 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Various tablets with atom CPU"
+deviceinfo_manufacturer="Various"
+deviceinfo_codename="tablet-x86uefi"
+deviceinfo_modules_initfs="jbd2 mbcache scsi_mod sd_mod sg libata sd ahci libahci usb_storage usb xhci_hcd ehci_hcd uas xhci_pci fat vfat nls_cp437 nls_utf8"
+deviceinfo_arch="x86_64"
+
+# Device related
+deviceinfo_gpu_accelerated="true"
+deviceinfo_chassis="tablet"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="true"
+deviceinfo_screen_width="800"
+deviceinfo_screen_height="600"
+
+# Bootloader related
+deviceinfo_flash_method="none"
+deviceinfo_boot_filesystem="fat16"

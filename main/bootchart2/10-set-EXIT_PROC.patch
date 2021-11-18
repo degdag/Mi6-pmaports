@@ -1,0 +1,52 @@
+diff --git a/bootchartd.conf b/bootchartd.conf
+index 7c45cb5..9599451 100644
+--- a/bootchartd.conf
++++ b/bootchartd.conf
+@@ -30,19 +30,4 @@ AUTO_RENDER_DIR="/var/log"
+ CUSTOM_POST_CMD=""
+ 
+ # The processes we have to wait for
+-EXIT_PROC="compiz \
+-        enlightenment \
+-        fluxbox \
+-        gnome-shell \
+-        gnome-terminal \
+-        icewm-session \
+-        kdm_greet \
+-        konsole \
+-        ldm \
+-        lightdm-gtk-greeter \
+-        metacity \
+-        mutter \
+-        openbox \
+-        sddm-helper \
+-        xfwm4 \
+-        xterm"
++EXIT_PROC="sshd"
+diff --git a/bootchartd.in b/bootchartd.in
+index 7979ef9..d1709eb 100755
+--- a/bootchartd.in
++++ b/bootchartd.in
+@@ -43,21 +43,7 @@ AUTO_RENDER_DIR="/var/log"
+ AUTO_RENDER_FORMAT="png"
+ 
+ # The processes we have to wait for
+-EXIT_PROC="compiz \
+-	enlightenment \
+-	fluxbox \
+-	gnome-shell \
+-	gnome-terminal \
+-	icewm-session \
+-	kdm_greet \
+-	konsole \
+-	ldm \
+-	lightdm-gtk-greeter \
+-	metacity \
+-	mutter \
+-	openbox \
+-	xfwm4 \
+-	xterm"
++EXIT_PROC="sshd"
+ 
+ # Read configuration.
+ CONFBASE="${PROGRAM_PREFIX}bootchartd${PROGRAM_SUFFIX}"

@@ -1,0 +1,51 @@
+pkgname=firmware-qcom-adreno-extra
+pkgver=2
+pkgrel=1
+pkgdesc="Extra Qualcomm Adreno GPU firmware from TheMuppets"
+url="https://github.com/TheMuppets/proprietary_vendor_sony"
+arch="armhf aarch64 armv7"
+license="proprietary"
+options="!check !archcheck !strip !spdx !tracedeps pmb:cross-native"
+replaces="firmware-adreno"
+
+# Sources
+_files1="a225_pm4.fw a225_pfp.fw a225p5_pm4.fw a330_pfp.fw a330_pm4.fw"
+_files2="a420_pfp.fw a420_pm4.fw"
+_commit="bf15795df1d1dcd61d37f6215c1eda47e669d54e"
+_url1="https://github.com/TheMuppets/proprietary_vendor_sony/raw/$_commit/shinano-common/proprietary/etc/firmware"
+_url2="https://github.com/TheMuppets/proprietary_vendor_sony/raw/$_commit/ivy/proprietary/etc/firmware"
+for _i in $_files1; do
+	source="$source $pkgname-$_commit-$_i::$_url1/$_i";
+done
+for _i in $_files2; do
+	source="$source $pkgname-$_commit-$_i::$_url2/$_i";
+done
+
+_gpus="a225 a330 a420"
+for gpu in $_gpus; do
+	subpackages="$subpackages firmware-qcom-adreno-$gpu:_gpu"
+done
+
+package() {
+	for _i in $_files1 $_files2; do
+		install -Dm644 "$srcdir/$pkgname-$_commit-$_i" \
+			"$pkgdir/lib/firmware/qcom/$_i"
+	done
+}
+
+_gpu() {
+	local gpu=${subpkgname##firmware-qcom-adreno-}
+	pkgdesc="$pkgdesc ($gpu)"
+
+	amove lib/firmware/qcom/$gpu*
+}
+
+sha512sums="
+b278ea24a84036f24f3fa583e63b2c1236312d8b163398d874367ffc91b4652ceb0b3ce5dd2097748dd2083ea1222c0f9413efcc5b72553da3ef753f5910f24a  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a225_pm4.fw
+d127fdca476233fca6e6e59e62bced8563663bac65de30a81eb1912f182cd27fdf8726085e65820c4c26c389daa1ffef9792a598c7b7568f277e781b5e775d5f  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a225_pfp.fw
+339a632a554a8c6e7fd1ff1465c3c985417f9e199e6934a5b149862245566f0c7171c924fc0a7a0d96bc6c5c5efd3c86dd0252d7064f7fee8ac502be8fc977f0  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a225p5_pm4.fw
+a642584990333d62ba6a985eeaddc6898c37a8e80aabb61121f93a90d5076861eb698422101e7b00706b7d3dfc00f9f358ea5e44a70fda7369931eb58b455931  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a330_pfp.fw
+999e3e0777b8dffc0e0d20b214c8217dab577a31753b6a29af2fae57293693196e992a905265e35a586a7978c04547aa8c88496dbe6f836b74ed39026eaa5f05  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a330_pm4.fw
+dc6c1ce867f31a3e04a299b380c5625a7acf55fbf93c3f1b7097fe5e518b1649996d902f528c0e45859bfb436044401ddeebb70266da58d4ef7eacab926702b9  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a420_pfp.fw
+7e7bc1fb80445de09b0eaaef0f49d1c817c91cbbcc031e0ee94e17a36945321c3ee2c8b1766e54e9de28de2f89e09ba3e4a2aee202aed2199afce879b3e343b8  firmware-qcom-adreno-extra-bf15795df1d1dcd61d37f6215c1eda47e669d54e-a420_pm4.fw
+"

@@ -1,0 +1,39 @@
+pkgname=firmware-xiaomi-tissot
+pkgver=1
+pkgrel=1
+_commit="98cc201f4cef4372298206bc910a6599a95cd258"
+pkgdesc="Firmware files for Xiaomi Mi A1"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+depends="wcnss-wlan"
+source="$pkgname-$_commit.tar.gz::https://gitlab.com/IonAgorria/postmarketos-vendor-xiaomi-tissot/-/archive/$_commit.tar.gz"
+options="!strip !check !archcheck !spdx !tracedeps pmb:cross-native"
+builddir="$srcdir/postmarketos-vendor-xiaomi-tissot-$_commit"
+
+_files="wcnss.b00 wcnss.b01 wcnss.b02 wcnss.b04 wcnss.b06
+	wcnss.b09 wcnss.b10 wcnss.b11 wcnss.b12 wcnss.mdt
+	adsp.b00 adsp.b01 adsp.b02 adsp.b03 adsp.b04
+	adsp.b05 adsp.b06 adsp.b07 adsp.b08 adsp.b09
+	adsp.b10 adsp.b11 adsp.b12 adsp.b13 adsp.mdt
+	qdsp6m.qdb
+	a506_zap.b00 a506_zap.b01 a506_zap.b02 a506_zap.mdt"
+_files_prima="WCNSS_wlan_dictionary.dat
+	WCNSS_qcom_cfg.ini
+	WCNSS_qcom_wlan_nv.bin"
+
+package() {
+	# /lib/firmware/postmarketos
+	for _i in $_files; do
+		install -D -m644 "$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/"$_i"
+	done
+
+	# /lib/firmware/postmarketos/wlan/prima
+	for _i in $_files_prima; do
+		install -D -m644 wlan/prima/"$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/wlan/prima/"$_i"
+	done
+}
+
+sha512sums="c459d6bf893ff62e6b4b96f4e4cafc3dcf7ac08bab99b8df577ad637b4714fb7fbfddf6cb1ab657bd59bc3c18715239a2117659b099fbd92e14b585f1400b179  firmware-xiaomi-tissot-98cc201f4cef4372298206bc910a6599a95cd258.tar.gz"

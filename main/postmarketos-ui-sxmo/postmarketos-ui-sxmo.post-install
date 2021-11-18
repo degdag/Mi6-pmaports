@@ -1,0 +1,10 @@
+#!/bin/sh
+
+tinydm-set-session -f -s /usr/share/xsessions/sxmo.desktop
+
+rc-update del xdm default # TODO remove when tinydm is on stable
+rc-update add sxmo-setpermissions default
+rc-update add modemmanager default
+rc-update add tinydm default
+rc-update add networkmanager default
+rc-update add polkit default

@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-d802
+pkgdesc="LG G2"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-lg-d802 mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+6865b4956e147c007cd62e6ff64857948c83c2c660a93215dfa22f35ef4432078f0976426ea103ca3cd4bcea3316371186ce09eec47f4a8fd486b0e8d07c5809  deviceinfo
+"

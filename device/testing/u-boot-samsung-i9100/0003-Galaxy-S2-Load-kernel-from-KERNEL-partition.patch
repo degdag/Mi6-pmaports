@@ -1,0 +1,29 @@
+From f755c330b4062a4c3fa057f68da2a141f6e431f1 Mon Sep 17 00:00:00 2001
+From: Paul Cercueil <paul@crapouillou.net>
+Date: Sun, 12 Apr 2020 15:52:20 +0200
+Subject: [PATCH 3/3] Galaxy S2: Load kernel from KERNEL partition
+
+Load the kernel at a +512K offset after the start of the KERNEL
+partition, the first 512 KiB being reserved for u-boot.
+
+Signed-off-by: Paul Cercueil <paul@crapouillou.net>
+---
+ include/configs/galaxys2.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/configs/galaxys2.h b/include/configs/galaxys2.h
+index 2d09c584a6..70938c615f 100644
+--- a/include/configs/galaxys2.h
++++ b/include/configs/galaxys2.h
+@@ -152,7 +152,7 @@
+ 			"setenv android_cmd ${android_cmd} bootmode=2; " \
+ 		"fi ;" \
+ 		"mmc dev 0; " \
+-		"mmc read ${loadaddr} 0x16000 0x4000; " \
++		"mmc read ${loadaddr} 0x12400 0x3c00; " \
+ 		"setenv bootargs ${android_cmd}; "\
+ 		"echo Command Line: ${bootargs}; " \
+ 		"bootm ${loadaddr}\0" \
+-- 
+2.25.1
+

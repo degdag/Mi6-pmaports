@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-suzuran
+pkgdesc="Sony Xperia Z5 Compact"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-sony-suzuran
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+2d3997c04beb36af6882be3f7936d285e2e30ef95bc4e34337be91b40976f7aba8251fc091cbd821876db2faadfbc3a0c49db1c3bd4ee01eb9a9c73aae79c826  deviceinfo
+"

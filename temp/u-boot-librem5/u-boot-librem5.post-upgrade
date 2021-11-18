@@ -1,0 +1,9 @@
+#!/bin/sh
+
+cat 1>&2 <<EOF
+*
+* A new version of u-boot was installed.
+* For instructions on installing this update to your device, see:
+* https://wiki.postmarketos.org/wiki/Purism_Librem5_(purism-librem5)#U-boot_Updates
+*
+EOF

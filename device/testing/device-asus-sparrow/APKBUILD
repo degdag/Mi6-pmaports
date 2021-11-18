@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-asus-sparrow
+pkgdesc="ASUS ZenWatch 2"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-asus-sparrow
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+71bfc59daed97ba63a17230e56ba72867fa63844789b3b20660fe452eaa1ad1ec437e805880e7966589cfc4a39dd0d0971a4d1dac53e60b2f16241d580efc8cb  deviceinfo
+"

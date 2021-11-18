@@ -1,0 +1,30 @@
+From 8675304fbfd15484c0ff9ecb7572596bf49449d2 Mon Sep 17 00:00:00 2001
+From: Clayton Craft <clayton@craftyguy.net>
+Date: Sun, 25 Apr 2021 18:57:45 -0700
+Subject: [PATCH] arm64: dts: imx8mq: disable SuperSpeed instances in park mode
+
+This seem to have solved the issue of the modem disappearing completely
+during a usb reset (though doesn't seem to do anything for the resets
+themselves).
+
+This change was suggested by Martin Kepplinger in
+https://source.puri.sm/Librem5/linux-next/-/issues/197#note_114221
+---
+ arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi b/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
+index 8b3d310f976d..8d346cfdfa07 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
+@@ -1706,6 +1706,7 @@ &usb_dwc3_1 {
+ 	status = "okay";
+ 	#address-cells = <1>;
+ 	#size-cells = <0>;
++	snps,parkmode-disable-ss-quirk;
+ 
+ 	/* Microchip USB2642 */
+ 	hub@1 {
+-- 
+2.31.1
+

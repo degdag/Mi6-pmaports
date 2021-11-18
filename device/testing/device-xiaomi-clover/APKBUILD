@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-xiaomi-clover
+pkgdesc="Xiaomi Mi Pad 4"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-postmarketos-qcom-sdm660 mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+08419372e39578e00965625cc5515ee75c6e092e0f88e9ba9e608bfed3e94baaa07a88aaa405ba4051525f69e8d7ad55c63acee056d53118732139c3d2f4441d  deviceinfo
+"

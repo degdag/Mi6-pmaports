@@ -1,0 +1,89 @@
+# Kernel config based on: arch/arm/configs/tf101-linux_defconfig
+
+pkgname=linux-asus-tf101
+pkgver=3.1.10
+pkgrel=8
+pkgdesc="Asus Eee Pad Transformer kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="asus-tf101"
+url="https://kernel.org"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	perl
+	sed
+	installkernel
+	bash
+	gmp-dev
+	bc
+	linux-headers
+	elfutils-dev
+	devicepkg-dev
+	xz
+	gcc6
+	"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="TF101-GNU-kernel"
+_commit="5ddd9654ec52599fbef71657ad2e03b3cdacee31"
+_config="config-$_flavor.$arch"
+source="$pkgname-$_commit.tar.gz::https://github.com/jmrohwer/$_repository/archive/$_commit.tar.gz
+	timeconst.pl-Eliminate-Perl-warning.patch
+	00-fix_return_address.patch
+	01-fix-alignment.patch
+	02-fix_static_vma_address.patch
+	04-Revert-Update-TF101.patch
+	05-Revert-Update-TF101.patch
+	06-Enable-USB-Networking.patch
+	07-Added-Parameters-to-Atmel-TouchScreen-Drivers.patch
+	$_config
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+
+	# the 'no-pic' flag is necessary to avoid the
+	# error 'Unknown symbol _GLOBAL_OFFSET_TABLE_ (err 0)' when loading the module
+	make ARCH="$_carch" CC="${CC:-gcc}"  CFLAGS_MODULE="-fno-pic" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS" modules
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	# Modules
+	unset LDFLAGS
+	make modules_install \
+		ARCH="$_carch" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-postmarketOS" \
+		INSTALL_MOD_PATH="$pkgdir" INSTALL_MOD_STRIP=1
+}
+
+sha512sums="44a2bccef4f5d9258aee8d7c8cdb2572f7136cf1a3487e6290457a21de28ecc4201951f5ea89d9392a44d0980f66a590cf23696209639b63dafefd4d39662902  linux-asus-tf101-5ddd9654ec52599fbef71657ad2e03b3cdacee31.tar.gz
+1fcfb5f06a2bfdcc55d53054ca80d1b989599a39a5379d057a0724fc405187d74da4309a650e70b9c79d39444e81923cfc5c9199ed8c0a77c83dcd7998446bb7  timeconst.pl-Eliminate-Perl-warning.patch
+ea1d3b5a234fa565e3c1a792de48f4fc4e6023d281d303c8e319c7ef28edc5739ab0e4dea0139a41f0a5c7d03e27921ccaa214fd0ac5c72245a094ce60128864  00-fix_return_address.patch
+cdddc37d3c173c931631037d7c337e45589420eba956231436b8d3b857b942db7fd33e4800d0badaa6f09d33a5373a9f0bf173748e8e72b237bd7d699e7fe4a8  01-fix-alignment.patch
+59231af0dee68fc424d1ad78f62c491ace795d4cc4af4c26e59b08da5c10cfc406dfc980305f851254bbfa7f03b1bc75f8072f4b4d0f06629ebdbb9ca5a6fea9  02-fix_static_vma_address.patch
+3644b617593740112732fdfda50814889e0d23bed1b53666138efa2eaae2c73568c8d60c4eda7a5d3a041eb81baaef5935421548791ee92f53868314f58f3242  04-Revert-Update-TF101.patch
+bc8d62c7bf3de7074b5526906716326dede61f7358278b0a88f33e8fa235dc5305e0fbb45e751817db2aec1fca9ea116962527a2d772fe3892e176a07a8635bd  05-Revert-Update-TF101.patch
+dca4c1d1e951e7d023ef65f312d853b61e89ec3c4c5c30f6a75086a4cd822f04cad4341fe1ad00dc7513d1cefc425f2d90da575cf86b3e5dd00971fbc6f0228a  06-Enable-USB-Networking.patch
+59d9c2b365123acd6eca7b78403a893d8d78867db182ddc1fda2c521e85bb86f871fcb32ecc3ae5248a2cbb93a644a9d665085defe07987ece70326323329953  07-Added-Parameters-to-Atmel-TouchScreen-Drivers.patch
+0d816ccf9ae3395edbce8c871a0f2d6111f05acbeb84f75e31c9137ed0fba553588b8b7ed37da220100d4d223ed76be299351ec82577ac2890a35a256dac65de  config-asus-tf101.armv7"

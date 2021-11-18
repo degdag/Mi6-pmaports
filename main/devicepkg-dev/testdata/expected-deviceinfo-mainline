@@ -1,0 +1,3 @@
+deviceinfo_name="Test"
+deviceinfo_kernel_cmdline="console=ttyMSM0,115200,n8 PMOS_NO_OUTPUT_REDIRECT"
+deviceinfo_bootimg_qcdt="false"

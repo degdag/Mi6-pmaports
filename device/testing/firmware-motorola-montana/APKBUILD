@@ -1,0 +1,38 @@
+pkgname=firmware-motorola-montana
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Motorola Moto G5s"
+url="https://gitlab.com/DolphinChips/firmware-motorola-montana"
+subpackages="$pkgname-modem $pkgname-adsp $pkgname-wcnss"
+arch="aarch64"
+license="proprietary"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+_commit="6d448297f0445b029ca450c092743aaba821e6ce"
+source="https://gitlab.com/DolphinChips/firmware-motorola-montana/-/archive/$_commit/firmware-motorola-montana-$_commit.tar.gz"
+builddir="$srcdir/$pkgname-$_commit"
+
+_fwdir="/lib/firmware/postmarketos"
+
+package() {
+	# parent package is empty
+	mkdir -p "$pkgdir"
+}
+
+modem() {
+	pkgdesc="Motorola Moto G5s modem firmware (doesn't work yet)"
+	install -Dm644 "$builddir"/mba.mbn -t "$subpkgdir/$_fwdir"
+	install -Dm644 "$builddir"/modem.* -t "$subpkgdir/$_fwdir"
+}
+
+adsp() {
+	pkgdesc="Motorola Moto G5s audio firmware (doesn't work yet)"
+	install -Dm644 "$builddir"/adsp.* -t "$subpkgdir/$_fwdir"
+}
+
+wcnss() {
+	pkgdesc="Motorola Moto G5s WiFi/BT firmware"
+	install -Dm644 "$builddir"/wcnss.* -t "$subpkgdir/$_fwdir"
+	install -Dm644 "$builddir"/wlan/prima/WCNSS_* -t "$subpkgdir/$_fwdir"/wlan/prima
+}
+
+sha512sums="934b56f7ddca76c606704952559981c9c9a812bba4561a552820de92b620f5cf3f1d0631df1507a4f3f1db8e1edc71dee643d6f5f7668d50b5b66eecb3b2213e  firmware-motorola-montana-6d448297f0445b029ca450c092743aaba821e6ce.tar.gz"

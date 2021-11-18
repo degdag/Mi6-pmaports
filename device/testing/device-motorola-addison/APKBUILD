@@ -1,0 +1,22 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-addison
+pkgdesc="Motorola Moto Z Play"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-addison mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="1c263920ff593e64f4711ebbd2a98e6f1abf5eb6149f53f79708ba15b018bbe09a56889e6b10261cedaa24709d9592f9080c995e60ae95b81dcb11109e9cd95f  deviceinfo"

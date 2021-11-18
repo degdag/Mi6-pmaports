@@ -1,0 +1,22 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-coreprimevelte
+pkgdesc="Samsung Galaxy Core Prime LTE"
+pkgver=0.1
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-coreprimevelte mkbootimg mesa-dri-gallium u-boot-tools pxa-mkbootimg"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="6b76c6177e76b216507295618257a214fc74e1e712b5a69bd15884196bec11de05e84e81d2c4528f621c157331c2d35ba0932979d27881c4c4b72904a6d76f36  deviceinfo"

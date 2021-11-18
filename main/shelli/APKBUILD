@@ -1,0 +1,24 @@
+# Maintainer: Craig Comstock <craig@unreasonablefarm.org>
+pkgname=shelli
+pkgver=0.6
+pkgrel=0
+pkgdesc="Plain console with touchscreen gesture support"
+url="https://gitlab.com/unrznbl/shelli"
+arch="all"
+license="GPL-3.0-only"
+makedepends="linux-headers"
+depends="gesture kbd kbd-misc python3 py3-gobject3 bash alsa-utils espeak"
+source="$pkgname-$pkgver.tar.gz::https://gitlab.com/unrznbl/shelli/-/archive/v$pkgver/shelli-v$pkgver.tar.gz"
+subpackages="$pkgname-openrc"
+options="!check" # No tests
+builddir="$srcdir/shelli-v$pkgver"
+
+build() {
+	make DESTDIR="$pkgdir" all
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+sha512sums="d71d8c872fb99cba555e40e2ef599ae34a78a532fe95653d297be86de6e4eb392619190eff16e3963dad8e828a0e8229e1e2a5caf7d915c5d82acd5ec2253f01  shelli-0.6.tar.gz"

@@ -1,0 +1,25 @@
+From 72a5f6b588fabed3aba18608fe72e484ea8abedb Mon Sep 17 00:00:00 2001
+From: Wiktor Tkaczynski <wiktor.tkaczynski@gmail.com>
+Date: Fri, 7 Aug 2020 18:05:16 +0200
+Subject: [PATCH 3/8] use relative include for u_ncm
+
+---
+ drivers/usb/gadget/configfs.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/drivers/usb/gadget/configfs.c b/drivers/usb/gadget/configfs.c
+index 14c18f3a..b7ecaeb5 100644
+--- a/drivers/usb/gadget/configfs.c
++++ b/drivers/usb/gadget/configfs.c
+@@ -15,7 +15,7 @@
+ #include <linux/usb/ch9.h>
+ 
+ #ifdef CONFIG_USB_F_NCM
+-#include <function/u_ncm.h>
++#include "function/u_ncm.h"
+ #endif
+ 
+ #ifdef CONFIG_USB_CONFIGFS_F_ACC
+-- 
+2.25.1
+

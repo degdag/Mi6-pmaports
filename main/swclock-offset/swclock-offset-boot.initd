@@ -1,0 +1,23 @@
+#!/sbin/openrc-run
+
+# To avoid time inconsistency at filesystems check, the system time
+# shall be set before "fsck".
+
+description="Setting the system time according to an offset file."
+
+depend()
+{
+	before fsck
+}
+
+start()
+{
+	ebegin "Setting system time"
+	/sbin/swclock-offset-boot
+	eend $?
+}
+
+stop()
+{
+	return 0
+}

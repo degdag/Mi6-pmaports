@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+
+name="MSM Firmware Loader"
+description="Load firmware that is located on dedicated partitions of qcom devices"
+
+depend() {
+	need sysfs devfs
+	before udev
+}
+
+start() {
+	ebegin "Starting msm-firmware-loader"
+	# This script must be executed before udev, block other services until it's done.
+	/usr/sbin/msm-firmware-loader.sh
+	eend $?
+}

@@ -1,0 +1,71 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-ouya-ouya
+pkgver=1
+pkgdesc="Ouya"
+pkgrel=20
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+options="!check !archcheck"
+depends="
+	libvdpau-tegra
+	mesa-dri-swrast
+	mkbootimg
+	postmarketos-base
+	"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-kernel-downstream:kernel_downstream
+	$pkgname-kernel-mainline:kernel_mainline
+	$pkgname-x11
+	"
+source="
+	deviceinfo
+	fb.modes
+	initfs-hook.sh
+	networkmanager.conf
+	"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+	install -D -m644 "$srcdir"/networkmanager.conf \
+		"$pkgdir"/etc/NetworkManager/conf.d/10-ouya.conf
+}
+
+nonfree_firmware() {
+	pkgdesc="bcm4330 wifi firmware"
+	depends="firmware-ouya-ouya"
+	mkdir "$subpkgdir"
+}
+
+kernel_downstream() {
+	pkgdesc="Downstream kernel"
+	depends="linux-ouya-ouya"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+kernel_mainline() {
+	pkgdesc="Close to mainline; work in progress"
+	depends="linux-ouya-ouya-mainline"
+	devicepkg_subpackage_kernel $startdir $pkgname $subpkgname
+}
+
+x11() {
+	install_if="$pkgname xorg-server"
+	depends="xf86-video-opentegra"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+2512e313f46e5a2d4adaca74580dfc7ac572a2b5674d9bd166ed6f90494eef16673b28c0ac248de07e32ad9f4b13ee2707b2b885e099cb38703ab74dda6aa932  deviceinfo
+bf442fac4dc0594e055ed7a7d8232b5c884e2e77543273e8c4f32b5fe3c199561c86d8a5f665e17406057ca7863fabb93e789fe5e168fcd89d2982e0046232ad  fb.modes
+d01ac1f451275b1a269aab3c8f7fe20b482c952d00c4457ea496b45780c052f8ef98a5ba22a4af009ca128858374c1d3fb97e458102b09f7c40f3d7a718326c1  initfs-hook.sh
+b0737a8fb7a60b2d24e4e124dbeb7044832a683a78887454d13d4078039338fb04579ce9066140733222409e7f53255bfde2c6725bd3848752a27e112717c28c  networkmanager.conf
+"

@@ -1,0 +1,66 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: <https://git.archlinux.org/svntogit/packages.git/plain/trunk/config?h=packages/linux>
+
+pkgname=linux-chuwi-hi10plus
+pkgver=5.1.7
+pkgrel=1
+pkgdesc="Chuwi Hi10 Plus stable kernel"
+arch="x86_64"
+_carch="x86"
+_flavor="chuwi-hi10plus"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev
+	     devicepkg-dev bison flex openssl-dev xz coreutils findutils"
+subpackages="$pkgname-dev"
+
+# Source
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$pkgver.tar.gz::https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$pkgver.tar.gz
+	$_config
+	input-silead-Add-MSSL0017-to-acpi_device_id.patch
+	platform-x86-touchscreen_dmi-Add-info-for-the-CHUWI-.patch
+	linux4.17-gcc10-extern_YYLOC_global_declaration.patch
+	0001-x86-boot-compressed-Don-t-declare-__force_order-in-k.patch
+"
+builddir="$srcdir/linux-$pkgver"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+
+	make -j1 modules_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+
+}
+
+dev() {
+	cd "$builddir"
+
+	# https://github.com/torvalds/linux/blob/master/Documentation/kbuild/headers_install.txt
+	make -j1 headers_install \
+		ARCH="$_carch" \
+		INSTALL_HDR_PATH="$subpkgdir"/usr
+}
+
+sha512sums="8d84560e22a6473653efa1dc229c8f8c4f95da8c2f61050583bb1285efa774c958fb13da1cf83a4f9c2cd2e73f2075569da346fa64399ccd058e793754da066a  linux-chuwi-hi10plus-5.1.7.tar.gz
+c591fbe7eef35cd62eed569782cdafb06a07d216d3657b007469502119426b3f52eccd268f02d5fd60e461bc96b262ca3f5f4b1ab9a7122d7af27d83db6cadc6  config-chuwi-hi10plus.x86_64
+cffb4b1dc204a15697aa26749df49b3f450de808cb630cf53d4718d933031a42789b79e94d39a9fe44a75e385f609c70aa8ccfb2e91e4fe473e0ee5245146c66  input-silead-Add-MSSL0017-to-acpi_device_id.patch
+b97509150d4061001e90e1a595723c479252647b5f94f50b7be0673d11556b28a90fa0afff9f0961a4512c3cbc8d4b02b827e75f75385cbb3ad63b378f3931e3  platform-x86-touchscreen_dmi-Add-info-for-the-CHUWI-.patch
+27827877040007fc1c4c719f7e2e19e5c272d44972415cfc53feba0313d87e4074f8204bdb13cbc5fe21ea61bf595314b68f10c081e7b7bac3c888b60f008acf  linux4.17-gcc10-extern_YYLOC_global_declaration.patch
+e049afcae29e24f9c63c926f18036250f9362e8ec713034631d983357685c3841e8bd9779417654a24a88f88d913a59a9043659eeb919c4ebb5d9a0689176494  0001-x86-boot-compressed-Don-t-declare-__force_order-in-k.patch"

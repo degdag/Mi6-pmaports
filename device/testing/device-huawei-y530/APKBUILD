@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-huawei-y530
+pkgdesc="Huawei Ascend Y530"
+pkgver=1
+pkgrel=18
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-huawei-y530 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-huawei-y530"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+e120fa3ca63f6657cff5015c32cea0aeecc4c539c5b21df7cde309fd8fdf228848934eb543cc64c9ab29fe583a098ec2902c60dde940f02dc2733490449e5584  deviceinfo
+"

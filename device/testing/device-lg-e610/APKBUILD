@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-e610
+pkgdesc="LG Optimus L5"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-lg-e610 mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+5f4efaa8627cbd3a142267f0d8d6086e1cc2532a9206194b52560418971435c6a1121e5b4fb6dd57e2906154f0a7ed22d3be457dbcfe284c5911b3cdee0ddd94  deviceinfo
+"

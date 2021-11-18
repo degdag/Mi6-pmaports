@@ -1,0 +1,66 @@
+# Maintainer: Caleb Connolly <caleb@connolly.tech>
+# Co-Maintainer: Joel Selvaraj <jo@jsfamily.in>
+# Stable Linux kernel with patches for SDM845 devices
+# Kernel config based on: arch/arm64/configs/defconfig and sdm845.config
+
+_flavor="postmarketos-qcom-sdm845"
+pkgname=linux-$_flavor
+pkgver=5.14.0_rc6
+pkgrel=1
+pkgdesc="Mainline Kernel fork for SDM845 devices"
+arch="aarch64"
+_carch="arm64"
+url="https://gitlab.com/sdm845-mainline/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-zram
+	pmb:kconfigcheck-anbox"
+makedepends="bison findutils flex installkernel openssl-dev perl"
+
+_repo="linux"
+_config="config-$_flavor.$arch"
+_commit="a620c228c986589ced2cd9369fbce10d219eb0df"
+
+# Source
+source="
+	$_repo-$_commit.tar.gz::https://gitlab.com/sdm845-mainline/$_repo/-/archive/$_commit/$_repo-$_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/$_repo-$_commit"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$arch" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+
+	install -Dm644 "$builddir/arch/$_carch/boot/Image.gz" \
+		"$pkgdir/boot/vmlinuz"
+
+	make modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot/ \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/usr/share/dtb
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+b5bfa1b9573e6d0c56312056264f86c3b8bd3ba6365c4a4705418136df20477dc6d83b83478d5537a241bf2fdc7e01201d22a8fc05aa526d2b998583f8218e27  linux-a620c228c986589ced2cd9369fbce10d219eb0df.tar.gz
+c2a5c4795171dd795e0ac63ee002459d619e0fc122e63f01c900962ee9a78dce899835c8916f72d2603d94dc98da8e3ed7424235aab557d4d92c016db3e9530d  config-postmarketos-qcom-sdm845.aarch64
+"

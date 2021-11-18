@@ -1,0 +1,89 @@
+From 408331eace24ef1ee4e830502b3355799122c984 Mon Sep 17 00:00:00 2001
+From: Danct12 <danct12@disroot.org>
+Date: Fri, 3 May 2019 01:19:24 +0700
+Subject: [PATCH] Disable substream runtime not found errors
+
+---
+ sound/soc/msm/qdsp6v2/msm-pcm-loopback-v2.c | 4 ++--
+ sound/soc/msm/qdsp6v2/msm-pcm-q6-noirq.c    | 4 ++--
+ sound/soc/msm/qdsp6v2/msm-pcm-q6-v2.c       | 6 +++---
+ 3 files changed, 7 insertions(+), 7 deletions(-)
+
+diff --git a/sound/soc/msm/qdsp6v2/msm-pcm-loopback-v2.c b/sound/soc/msm/qdsp6v2/msm-pcm-loopback-v2.c
+index 827d079d3968..eff8244065a9 100644
+--- a/sound/soc/msm/qdsp6v2/msm-pcm-loopback-v2.c
++++ b/sound/soc/msm/qdsp6v2/msm-pcm-loopback-v2.c
+@@ -490,7 +490,7 @@ static int msm_pcm_volume_ctl_put(struct snd_kcontrol *kcontrol,
+ 
+ 	pr_debug("%s: volume : 0x%x\n", __func__, volume);
+ 	if ((!substream) || (!substream->runtime)) {
+-		pr_err("%s substream or runtime not found\n", __func__);
++		//pr_err("%s substream or runtime not found\n", __func__);
+ 		rc = -ENODEV;
+ 		goto exit;
+ 	}
+@@ -516,7 +516,7 @@ static int msm_pcm_volume_ctl_get(struct snd_kcontrol *kcontrol,
+ 
+ 	pr_debug("%s\n", __func__);
+ 	if ((!substream) || (!substream->runtime)) {
+-		pr_err("%s substream or runtime not found\n", __func__);
++		//pr_err("%s substream or runtime not found\n", __func__);
+ 		rc = -ENODEV;
+ 		goto exit;
+ 	}
+diff --git a/sound/soc/msm/qdsp6v2/msm-pcm-q6-noirq.c b/sound/soc/msm/qdsp6v2/msm-pcm-q6-noirq.c
+index 289049c7fac2..a256bd1c7bf1 100644
+--- a/sound/soc/msm/qdsp6v2/msm-pcm-q6-noirq.c
++++ b/sound/soc/msm/qdsp6v2/msm-pcm-q6-noirq.c
+@@ -579,7 +579,7 @@ static int msm_pcm_volume_ctl_get(struct snd_kcontrol *kcontrol,
+ 		return -ENODEV;
+ 	}
+ 	if (!substream->runtime) {
+-		pr_err("%s substream runtime not found\n", __func__);
++		//pr_err("%s substream runtime not found\n", __func__);
+ 		return 0;
+ 	}
+ 	prtd = substream->runtime->private_data;
+@@ -604,7 +604,7 @@ static int msm_pcm_volume_ctl_put(struct snd_kcontrol *kcontrol,
+ 		return -ENODEV;
+ 	}
+ 	if (!substream->runtime) {
+-		pr_err("%s substream runtime not found\n", __func__);
++		//pr_err("%s substream runtime not found\n", __func__);
+ 		return 0;
+ 	}
+ 	prtd = substream->runtime->private_data;
+diff --git a/sound/soc/msm/qdsp6v2/msm-pcm-q6-v2.c b/sound/soc/msm/qdsp6v2/msm-pcm-q6-v2.c
+index e505f416ab2c..7f2fe3b55b98 100644
+--- a/sound/soc/msm/qdsp6v2/msm-pcm-q6-v2.c
++++ b/sound/soc/msm/qdsp6v2/msm-pcm-q6-v2.c
+@@ -1137,7 +1137,7 @@ static int msm_pcm_volume_ctl_get(struct snd_kcontrol *kcontrol,
+ 		return -ENODEV;
+ 	}
+ 	if (!substream->runtime) {
+-		pr_err("%s substream runtime not found\n", __func__);
++		//pr_err("%s substream runtime not found\n", __func__);
+ 		return 0;
+ 	}
+ 	prtd = substream->runtime->private_data;
+@@ -1162,7 +1162,7 @@ static int msm_pcm_volume_ctl_put(struct snd_kcontrol *kcontrol,
+ 		return -ENODEV;
+ 	}
+ 	if (!substream->runtime) {
+-		pr_err("%s substream runtime not found\n", __func__);
++		//pr_err("%s substream runtime not found\n", __func__);
+ 		return 0;
+ 	}
+ 	prtd = substream->runtime->private_data;
+@@ -1682,7 +1682,7 @@ static int msm_pcm_chmix_cfg_ctl_put(struct snd_kcontrol *kcontrol,
+ 		return -ENODEV;
+ 	}
+ 	if (!substream->runtime) {
+-		pr_err("%s substream runtime not found\n", __func__);
++		//pr_err("%s substream runtime not found\n", __func__);
+ 		ret = -EINVAL;
+ 		goto done;
+ 	}
+-- 
+2.21.0
+

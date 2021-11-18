@@ -1,0 +1,36 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-tokio-techbook
+pkgdesc="Tokio Techbook"
+pkgver=0.1
+pkgrel=3
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-tokio-techbook mesa-dri-swrast mkbootimg u-boot-tools"
+makedepends="devicepkg-dev"
+
+source="
+	deviceinfo
+	uboot-script.cmd
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+	# Creating uboot script
+	mkimage -A arm -O linux -T script -C none -a 0 -e 0 -n postmarketos -d "$srcdir/uboot-script.cmd" "$srcdir/boot.scr"
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# Copy newly generated file to correct path
+	mkdir -p "$pkgdir/boot/FirmwareInstall"
+	install -D -m644 "$srcdir"/boot.scr \
+		"$pkgdir"/boot/FirmwareInstall/autorun.1.wmt
+}
+
+sha512sums="
+a84189c9f2bbe5203466c565452dafd79f1a29a921be71946e80a17503bcf48119ba7bae0186fff7cb5058515ff5d1141a4a0f16b83d92097a3ce42ff317915c  deviceinfo
+e3b1a60107e0aa31c409d1f8d54eb10c67fd50135fb0b3091192f13089603631bce6889c2081089e206549f914bcf329a0441a605a8fb1713f9b54f1003554d9  uboot-script.cmd
+"

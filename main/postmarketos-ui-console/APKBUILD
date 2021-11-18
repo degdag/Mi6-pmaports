@@ -1,0 +1,20 @@
+# Maintainer: Clayton Craft <clayton@craftyguy.net>
+pkgname=postmarketos-ui-console
+pkgver=0.1
+pkgrel=1
+pkgdesc="Console environment, with no graphical/touch UI"
+url="https://postmarketos.org/"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	networkmanager
+	postmarketos-base-ui
+	wireless-tools
+	"
+options="!check" # No testsuite
+install="$pkgname.post-install $pkgname.post-upgrade"
+
+package() {
+	mkdir -p "$pkgdir"
+}

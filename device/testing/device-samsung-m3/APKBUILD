@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-m3
+pkgdesc="Samsung Galaxy S III LTE"
+pkgver=3
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-exynos4
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi firmware"
+	depends="firmware-samsung-m0-mainline"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+d2ed2eedd223854766121058273a3a90b1672dbb95d0072b56100c01196cbe5ee96049c3b646b9b2f60af1254743ef4c4006e6275f407d582ec012e7bd383f71  deviceinfo
+"

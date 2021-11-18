@@ -1,0 +1,26 @@
+# Maintainer: Hadi Charara <hadicharara@ymail.com>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-amazon-suez
+pkgdesc="Amazon Fire HD 10"
+pkgver=0.1
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-amazon-suez mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+7fabe51a6cc1b013ce9d6c8875f2c127dfd7dad827312aba2564af02fd321d5174d5fd7f7a0c92853e5b95e4cee88fff2a06bb2590de81c0424156baf9b9fcb8  deviceinfo
+"

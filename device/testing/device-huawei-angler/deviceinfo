@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/deviceinfo>
+# Please use double quotes only. You can source this file in shell scripts.
+
+deviceinfo_format_version="0"
+deviceinfo_name="Google Nexus 6P"
+deviceinfo_manufacturer="Huawei"
+deviceinfo_codename="huawei-angler"
+deviceinfo_year="2015"
+deviceinfo_chassis="handset"
+deviceinfo_keyboard="false"
+deviceinfo_external_storage="false"
+deviceinfo_flash_method="fastboot"
+deviceinfo_arch="aarch64"
+
+# Splash screen
+deviceinfo_screen_width="1440"
+deviceinfo_screen_height="2560"
+
+# Fastboot related
+deviceinfo_generate_bootimg="true"
+deviceinfo_flash_offset_base="0x00000000"
+deviceinfo_flash_offset_kernel="0x00008000"
+deviceinfo_flash_offset_ramdisk="0x02000000"
+# Angler doesn't have a second in the boot.img. This is a placeholder value for mkbootimg
+deviceinfo_flash_offset_second="0x00000000"
+deviceinfo_flash_offset_tags="0x01e00000"
+deviceinfo_flash_pagesize="4096"
+
+# Downstream kernel options
+deviceinfo_kernel_cmdline_downstream="androidboot.hardware=angler androidboot.console=ttyHSL0 msm_rtb.filter=0x37 ehci-hcd.park=3 lpm_levels.sleep_disabled=1 boot_cpus=0-3"
+
+# Mainline kernel options
+deviceinfo_append_dtb_mainline="true"
+deviceinfo_dtb_mainline="qcom/msm8994-angler-rev-101"
+deviceinfo_kernel_cmdline_mainline="console=tty0 console=ttyMSM0,115200,n8 debug ignore_loglevel PMOS_NO_OUTPUT_REDIRECT earlycon"

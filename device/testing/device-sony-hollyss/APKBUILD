@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-sony-hollyss
+pkgdesc="Sony Xperia M5"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-sony-hollyss mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+8e426b206dc14cd109222742fe2b9214fd2bb7011c020f95e0c20ac14994944fcc2968999179aaaa92ec19d54ccf40af05ceecc5976df93a92e6bd6a368078ac  deviceinfo
+"

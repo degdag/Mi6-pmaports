@@ -1,0 +1,47 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Caleb Connolly <caleb@connolly.tech>
+
+pkgname=device-oneplus-fajita
+pkgdesc="OnePlus 6T"
+pkgver=4
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-postmarketos-qcom-sdm845
+	mkbootimg
+	postmarketos-base
+	postmarketos-update-kernel
+	soc-qcom-sdm845
+	soc-qcom-sdm845-ucm
+"
+makedepends="devicepkg-dev"
+source="deviceinfo rootston.ini"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware $pkgname-phosh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Modem, WiFi and GPU Firmware, also needed for osk-sdl"
+	depends="firmware-oneplus-sdm845 firmware-oneplus-sdm845-initramfs"
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+sha512sums="
+cd8b94751890fd8891e5eafbc4f668a068885d184ad9b93366c882cfafa798e4bc77fa548532796a278b5acdf15dbf1110a1a581823567deaa00b90a72796959  deviceinfo
+9fef488a655fcbad4fb28c11d7d6cbe385096e766cd99ca59802f1dbc4e3c99dac0ff682549e02fac0b73f7e95db953f3a87c453d1b19b229785e4ffeec515ed  rootston.ini
+"

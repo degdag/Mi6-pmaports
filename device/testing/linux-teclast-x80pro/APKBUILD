@@ -1,0 +1,182 @@
+# Note that this is equivalent to postmarketos-stable with the kernel config from Arch Linux.
+# TODO: Merge the two packages so that the teclast-x80pro is on actual mainline/stable kernel.
+# The default QEMU kernel config is missing too many options to allow it to boot on a real x86_64 platform.
+_flavor=teclast-x80pro
+_hash="7b6fbfd899b4133e4f789843e5967beb139ec4d2"
+_config="config-$_flavor.$CARCH"
+
+pkgname=linux-$_flavor
+
+pkgver=4.14.73
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.*};;
+	*.*) _kernver=$pkgver;;
+esac
+pkgrel=6
+
+arch="x86_64"
+pkgdesc="Linux for pmOS supported chipsets (stable)"
+url="https://kernel.org/"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev openssl-dev"
+options="!strip !check !tracedeps pmb:cross-native"
+source="
+	https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$_kernver.tar.xz
+	config-$_flavor.x86_64
+	net-phy-micrel-Use-strlcpy-for-ethtool-get_strings.patch
+	x86-boot-compressed-Don-t-declare-__force_order-in-k.patch
+"
+
+if [ "${pkgver%.0}" = "$pkgver" ]; then
+	source="$source
+	https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/patch-$pkgver.xz"
+fi
+subpackages="$pkgname-dev"
+
+license="GPL2"
+_abi_release=$pkgver
+_carch=$CARCH
+case "$_carch" in
+aarch64*) _carch="arm64" ;;
+arm*) _carch="arm" ;;
+ppc*) _carch="powerpc" ;;
+s390*) _carch="s390" ;;
+esac
+
+ksrcdir="$srcdir/linux-$_kernver"
+
+prepare() {
+	local _patch_failed=
+	cd "$ksrcdir"
+	if [ "$_kernver" != "$pkgver" ]; then
+		msg "Applying patch-$pkgver.xz"
+		unxz -c < "$srcdir"/patch-$pkgver.xz | patch -p1 -N
+	fi
+
+	# first apply patches in specified order
+	for i in $source; do
+		case $i in
+		*.patch)
+			msg "Applying $i..."
+			if ! patch -s -p1 -N -i "$srcdir"/$i; then
+				echo $i >>failed
+				_patch_failed=1
+			fi
+			;;
+		esac
+	done
+
+	if ! [ -z "$_patch_failed" ]; then
+		error "The following patches failed:"
+		cat failed
+		return 1
+	fi
+
+	# Remove -Werror from all makefiles
+	local i
+	local makefiles="$(find . -type f -name Makefile)
+		$(find . -type f -name Kbuild)"
+	for i in $makefiles; do
+		sed -i 's/-Werror-/-W/g' "$i"
+		sed -i 's/-Werror//g' "$i"
+	done
+
+	mkdir -p "$srcdir"/build
+	cp -v "$srcdir"/$_config "$srcdir"/build/.config
+	make -C "$ksrcdir" O="$srcdir"/build ARCH="$_carch" \
+		olddefconfig
+}
+
+build() {
+	cd "$srcdir"/build
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS" \
+		CFLAGS_MODULE=-fno-pic
+}
+
+package() {
+	cd "$srcdir/build/arch/$_carch/boot"
+
+	if [ "$CARCH" == "aarch64" ]; then
+		install -Dm644 "$srcdir/build/arch/$_carch/boot/Image" \
+			"$pkgdir/boot/vmlinuz"
+	else
+		install -Dm644 "$srcdir/build/arch/$_carch/boot/"*zImage \
+			"$pkgdir/boot/vmlinuz"
+	fi
+
+	install -D "$srcdir/build/include/config/kernel.release" \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+
+	cd "$srcdir"/build
+
+	local _install
+	case "$CARCH" in
+	aarch64*|arm*)	_install="modules_install dtbs_install" ;;
+	*)		_install="modules_install" ;;
+	esac
+
+	make -j1 $_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+
+dev() {
+	# copy the only the parts that we really need for build 3rd party
+	# kernel modules and install those as /usr/src/linux-headers,
+	# similar to what ubuntu does
+	#
+	# this way you don't need to install the 300-400 kernel sources to
+	# build a tiny kernel module
+	#
+	pkgdesc="Headers and script for third party modules for postmarketos kernel"
+	depends="gmp-dev bash perl"
+	local dir="$subpkgdir"/usr/src/linux-headers-$_abi_release
+
+	# first we import config, run prepare to set up for building
+	# external modules, and create the scripts
+	mkdir -p "$dir"
+	cp "$srcdir"/$_config "$dir"/.config
+	make -j1 -C "$srcdir"/linux-$_kernver O="$dir" ARCH="$_carch" \
+		olddefconfig prepare modules_prepare scripts
+
+	# needed for 3rd party modules
+	# https://bugzilla.kernel.org/show_bug.cgi?id=11143
+	case "$CARCH" in
+	ppc*) (cd "$dir" && make arch/powerpc/lib/crtsavres.o);;
+	esac
+
+	# remove the stuff that points to real sources. we want 3rd party
+	# modules to believe this is the sources
+	rm "$dir"/Makefile "$dir"/source
+
+	# copy the needed stuff from real sources
+	#
+	# this is taken from ubuntu kernel build script
+	# http://kernel.ubuntu.com/git/ubuntu/ubuntu-zesty.git/tree/debian/rules.d/3-binary-indep.mk
+
+	cd "$srcdir"/linux-$_kernver
+	find . -path './include/*' -prune \
+		-o -path './scripts/*' -prune -o -type f \
+		\( -name 'Makefile*' -o -name 'Kconfig*' -o -name 'Kbuild*' -o \
+		   -name '*.sh' -o -name '*.pl' -o -name '*.lds' \) \
+		-print | cpio -pdm "$dir"
+	cp -a scripts include "$dir"
+	find $(find arch -name include -type d -print) -type f \
+		| cpio -pdm "$dir"
+
+	install -Dm644 "$srcdir"/build/Module.symvers \
+		"$dir"/Module.symvers
+
+	mkdir -p "$subpkgdir"/lib/modules/$_abi_release
+	ln -sf /usr/src/linux-headers-$_abi_release \
+		"$subpkgdir"/lib/modules/$_abi_release/build
+}
+
+sha512sums="77e43a02d766c3d73b7e25c4aafb2e931d6b16e870510c22cef0cdb05c3acb7952b8908ebad12b10ef982c6efbe286364b1544586e715cf38390e483927904d8  linux-4.14.tar.xz
+393ea8e7ad25063c1a610d3245e50ae32e9780788259bc56876cb1960ee0bd73f0e3ac4be5eb91ca109571c6a1a3ce6bb93a2fa5b0aaa50f3256cbeb01b3cac6  config-teclast-x80pro.x86_64
+b081e9bfb3eb3f024486de2952d4b0dc6c81facb31ddf4456b386fb5c043a3a11cefe1636dece5cf0ea655746ed35a79c8318cabba8661e39c580e6faed97ba7  net-phy-micrel-Use-strlcpy-for-ethtool-get_strings.patch
+2df069bdb782fffe57988da34ac51607d59ce728e9bfbf7a26e9845729ef0888a18f528103318693c602b251e103bd224c3aef8d703599ede81144dcb2599bca  x86-boot-compressed-Don-t-declare-__force_order-in-k.patch
+d509365295b6bb5ad55d8859a6cc7cae00ef7b7b34aef21167fcfc992accbf9ac1f4191446c911b55844b09ff0c7f83fd422aea71c2877521331b7b0e05a9205  patch-4.14.73.xz"

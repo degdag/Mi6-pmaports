@@ -1,0 +1,77 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/k400_defconfig
+
+pkgname=linux-wiko-lenny5
+pkgver=3.18.79
+pkgrel=0
+pkgdesc="Wiko Lenny 5 Kernel"
+arch="armv7"
+_carch="arm"
+_flavor="wiko-lenny5"
+url="https://wikomobile.com"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	flex
+	linux-headers
+	openssl
+	perl
+	gcc6
+	python2
+	libc6-compat
+"
+
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_download_url="http://www.wikogeek.com/index.php?tel="
+_download_id="73278a4a86960eeb576a8fd4c9ec6997"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_download_id.zip::$_download_url$_download_id
+	$_config
+	fix_dts_headers.patch
+	vdsomunge_upstream.patch
+	gcc8-fix-put-user.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+"
+
+builddir="$srcdir/kernel-3.18"
+
+# Workaround to extract the kernel-3.18.tar.gz archive file in the $srcdir
+_src_subpath="WK300_Jerry3-WK400_Lenny5_OpenSource/Jerry3-Lenny5-OpenSource/"
+_kernel_zip="$srcdir/$_src_subpath/kernel-3.18.tar.gz"
+_outdir="out"
+
+prepare() {
+	tar xzkf $_kernel_zip -C $srcdir
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="
+87e9c0d2b7d06f84fa4185eabd224036529bb033fdfab5ba48125534765a169dfd904476f8c25cf53565c6fa416d668a008ac8d1cd98af6d5e4956ff386d1b09  linux-wiko-lenny5-73278a4a86960eeb576a8fd4c9ec6997.zip
+efdb0d3ba7a6e0525bf278db628affd881d2e67f7cc454e8921daa42b9921d46764c2bd304bf533e00f7332f02c523ac7c2eaf6982808d8db9d10ca278573b34  config-wiko-lenny5.armv7
+2287abb30b410f5ba13ee6dc1bb603789f9eeda9eda4a982263354aa303501b37742d8f8758b92d1edc32622505ce05e6c545257534b8c65dc8093606195d825  fix_dts_headers.patch
+19a6c3445bfd8057e4fabe1709f3d2344f3a99fef49b44636c07a18ba8791fab1bcff77f93aadff887946ae6f83c9d86e1c28f9b88d03c6ba156704d430b4470  vdsomunge_upstream.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch
+"

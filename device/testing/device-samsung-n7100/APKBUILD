@@ -1,0 +1,27 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-n7100
+pkgver=1
+pkgrel=23
+pkgdesc="Samsung Galaxy Note II (GSM)"
+url="https://postmarketos.org"
+arch="armhf"
+license="MIT"
+depends="postmarketos-base linux-samsung-n7100 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo 90-android-touch-dev.rules"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+}
+
+sha512sums="
+64556a0e9ebd44b4ef154c1b850c5410422eeccff29a5796420f3c8796382d997fec2f4643e4d70a69355c6175f651f78a953e266cc4915efc9bac1b93be0642  deviceinfo
+089635daddd88eec35451bfe98dc3713035e3623c896dd21305b990ecf422e8fbb54e010cf347919bbb3a7385f639ab119280477fe0783df3228168d97d96fc6  90-android-touch-dev.rules
+"

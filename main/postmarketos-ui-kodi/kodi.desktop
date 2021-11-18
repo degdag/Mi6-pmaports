@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Kodi (Wayland)
+Comment=This session will start Kodi media center
+Exec=cage -- /usr/bin/kodi --windowing wayland --standalone
+TryExec=/usr/lib/kodi/kodi-wayland
+Type=Application

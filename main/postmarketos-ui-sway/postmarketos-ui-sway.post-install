@@ -1,0 +1,7 @@
+#!/bin/sh
+
+rc-update add tinydm default
+tinydm-set-session -s /usr/share/wayland-sessions/sway.desktop
+
+rc-update add networkmanager default
+exit 0

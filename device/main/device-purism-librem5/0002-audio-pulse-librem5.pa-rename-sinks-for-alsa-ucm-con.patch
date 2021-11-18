@@ -1,0 +1,42 @@
+From cd9a517ca3ad3c0f263a25f575452f125b715138 Mon Sep 17 00:00:00 2001
+From: Clayton Craft <clayton@craftyguy.net>
+Date: Tue, 22 Jun 2021 15:25:22 -0700
+Subject: [PATCH] audio/pulse/librem5.pa: rename sinks for alsa-ucm-conf 1.2.5
+
+---
+ default/audio/pulse/librem5.pa | 12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
+
+diff --git a/default/audio/pulse/librem5.pa b/default/audio/pulse/librem5.pa
+index 69cd5eb..aeb11c7 100644
+--- a/default/audio/pulse/librem5.pa
++++ b/default/audio/pulse/librem5.pa
+@@ -2,9 +2,9 @@
+ 
+ # devkit
+ .ifexists /sys/devices/platform/sound/308b0000.sai-sgtl5000
+-set-default-sink alsa_output.platform-sound.HiFi__hw_Devkit_0__sink
+-set-default-source alsa_input.platform-sound.HiFi__hw_Devkit_0__source
+-update-source-proplist alsa_input.platform-sound.HiFi__hw_Devkit_0__source filter.apply.echo-cancel.parameters="channels=1 use_master_format=yes aec_args=\"analog_gain_control=0 voice_detection=0 high_pass_filter=0 noise_suppression=0\""
++set-default-sink alsa_output.platform-sound.VoiceCall___ucm0001.hw_CARD_sgtl5000__sink
++set-default-source alsa_input.platform-sound.VoiceCall___ucm0001.hw_CARD_sgtl5000__source
++update-source-proplist alsa_input.platform-sound.VoiceCall___ucm0001.hw_CARD_sgtl5000__source filter.apply.echo-cancel.parameters="channels=1 use_master_format=yes aec_args=\"analog_gain_control=0 voice_detection=0 high_pass_filter=0 noise_suppression=0\""
+ .endif
+ 
+ # phone
+@@ -14,9 +14,9 @@ load-module module-alsa-card device_id="Modem" name="platform-sound-wwan" card_p
+ 
+ .ifexists /sys/devices/platform/sound/308b0000.sai-wm8962
+ set-card-profile alsa_card.platform-sound HiFi
+-set-default-sink alsa_output.platform-sound.HiFi__hw_L5_0__sink
+-set-default-source alsa_input.platform-sound.HiFi__hw_L5_0__source
+-update-source-proplist alsa_input.platform-sound.HiFi__hw_L5_0__source filter.apply.echo-cancel.parameters="channels=1 use_master_format=yes aec_args=\"analog_gain_control=0 voice_detection=0 high_pass_filter=0 noise_suppression=0\""
++set-default-sink alsa_output.platform-sound.HiFi___ucm0001.hw_L5_0__sink
++set-default-source alsa_input.platform-sound.HiFi___ucm0001.hw_L5_0__source
++update-source-proplist alsa_input.platform-sound.HiFi___ucm0001.hw_L5_0__source filter.apply.echo-cancel.parameters="channels=1 use_master_format=yes aec_args=\"analog_gain_control=0 voice_detection=0 high_pass_filter=0 noise_suppression=0\""
+ .endif
+ 
+ # cork/mute audio streams when on a phone call
+-- 
+2.32.0
+

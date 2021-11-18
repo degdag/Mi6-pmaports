@@ -1,0 +1,3 @@
+#!/bin/sh
+
+sed -i 's/sun50i-a64-dontbeevil"/sun50i-a64-dontbeevil-longts"/' /etc/deviceinfo

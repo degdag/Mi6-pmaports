@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+depend() {
+    need net
+}
+
+start() {
+    ebegin "Starting waked"
+    start-stop-daemon --background --start --exec /usr/bin/waked
+    eend $?
+}
+
+stop() {
+    ebegin "Stopping waked"
+    start-stop-daemon --stop --exec /usr/bin/waked
+    eend $?
+}

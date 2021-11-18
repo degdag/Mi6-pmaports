@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-k3gxx
+pkgdesc="Samsung Galaxy S5 (International 3G)"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-k3gxx
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	msm-fb-refresher
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+ad52bcc820936c49af0a4ebea05370d2c36dc355f61fe1f9025f452422faae4543f4c30d9340b8ec10407739e26dcba12b13746d706ec6e68d5d2854612a363e  deviceinfo
+"

@@ -1,0 +1,29 @@
+#!/sbin/openrc-run
+
+# A dedicated shutdown service is used to write the offset file instead
+# of using the stop function of the swclock-offset service at boot. This
+# approach is more fail-safe on different installation/deinstallation
+# situations.
+#
+# Because the shutdown services are performed late within the shutdown
+# runlevel, dependencies are needed to execute the script before
+# processes are killed and filesystems are remounted read-only.
+
+description="Writing the offset between system time and RTC to a file."
+
+depend()
+{
+	before killprocs mount-ro
+}
+
+start()
+{
+	ebegin "Saving swclock-offset"
+	/sbin/swclock-offset-shutdown
+	eend $?
+}
+
+stop()
+{
+	return 0
+}

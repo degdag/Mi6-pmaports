@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# We make sure that tsched has not mentioned anywhere in the default PulseAudio config
+if [ "$(grep -c tsched /etc/pulse/default.pa)" -lt "1" ]; then 
+	sed -i 's/load-module module-udev-detect/load-module module-udev-detect tsched=0/g' /etc/pulse/default.pa
+fi
+
+exit 0

@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+
+name="oFono"
+description="oFono mobile telephony daemon"
+
+# libsmdpkt_wrapper.so may not be present (on devices that don't need it)
+export LD_PRELOAD=/usr/lib/preload/libsmdpkt_wrapper.so
+
+command="/usr/sbin/ofonod"
+command_args="${OFONOD_OPTS}"
+command_args_foreground="-n"
+
+depend() {
+	need dbus
+}

@@ -1,0 +1,74 @@
+# Maintainer: Alexey Minnekhanov <alexeymin@postmarketos.org>
+pkgname=lk2nd
+pkgver=0.10.0
+pkgrel=2
+pkgdesc="Secondary little kernel (lk) bootloader for several Qualcomm devices"
+arch="armv7 aarch64"
+url="https://github.com/msm8916-mainline/lk2nd"
+license="MIT AND GPL-2.0-only"
+makedepends="dtc dtc-dev gcc-arm-none-eabi python3 py3-libfdt"
+source="$pkgname-$pkgver.tar.gz::https://github.com/msm8916-mainline/lk2nd/archive/refs/tags/$pkgver.tar.gz"
+options="!check !archcheck !tracedeps !strip pmb:cross-native"
+# This APKBUILD builds bare metal executable; options are very specific!
+# * there are no tests (how do you even test the bootloader?);
+# * binaries are "arch-independent"; aarch64 build also produces armv7 binary,
+#   because ARM CPUs boot in 32-bit mode;
+# * there are no depends for bootloader, it's a kernel and OS in one binary;
+# * stripping of unused sections is done in lk2nd's own ld script.
+
+subpackages="
+	$pkgname-msm8916
+	$pkgname-msm8916-appended:msm8916_appended
+	$pkgname-msm8974
+	$pkgname-msm8226-appended:msm8226_appended
+"
+
+build() {
+	# This builds baremetal executable; distro-specific compiler flags
+	#   and optimizations can't be set by build system.
+	unset CFLAGS
+	unset CXXFLAGS
+	unset CPPFLAGS
+	unset LDFLAGS
+	unset CROSS_COMPILE
+	unset CC
+	unset CXX
+
+	# ccache and crossdirect "gcc"s are in PATH, get rid of them too,
+	#    redefine PATH to be bare minimum
+	unset PATH
+	export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+
+	make LK2ND_VERSION="$pkgver-r$pkgrel-postmarketos" TOOLCHAIN_PREFIX=arm-none-eabi- msm8916-secondary
+	make LK2ND_VERSION="$pkgver-r$pkgrel-postmarketos" TOOLCHAIN_PREFIX=arm-none-eabi- msm8974-secondary
+	make LK2ND_VERSION="$pkgver-r$pkgrel-postmarketos" TOOLCHAIN_PREFIX=arm-none-eabi- msm8226-secondary
+}
+
+package() {
+	# main package is empty
+	mkdir -p "$pkgdir"
+}
+
+msm8916() {
+	install -Dm644 "$builddir"/build-msm8916-secondary/lk2nd.img -t \
+		"$subpkgdir"/boot
+}
+
+msm8916_appended() {
+	install -Dm644 "$builddir"/build-msm8916-secondary/lk2nd-appended-dtb.img \
+		"$subpkgdir"/boot/lk2nd.img
+}
+
+msm8974() {
+	install -Dm644 "$builddir"/build-msm8974-secondary/lk2nd.img -t \
+		"$subpkgdir"/boot
+}
+
+msm8226_appended() {
+	install -Dm644 "$builddir"/build-msm8226-secondary/lk2nd-appended-dtb.img \
+		"$subpkgdir"/boot/lk2nd.img
+}
+
+sha512sums="
+d4c880b4cb9563a8b99aefe4bace1efaec13975fa89af2756dbba656363bd9ef83140b22fb28ad29d299eb8fe715c2f6adb829bfc7c3c4894ab6976b85a72123  lk2nd-0.10.0.tar.gz
+"

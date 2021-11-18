@@ -1,0 +1,2 @@
+%wheel ALL = NOPASSWD: /usr/sbin/pm-suspend
+

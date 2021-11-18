@@ -1,0 +1,51 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-lenok
+pkgver=1
+pkgrel=19
+pkgdesc="LG G Watch R"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="
+	linux-lg-lenok
+	mesa-dri-swrast
+	mkbootimg
+	postmarketos-base
+	"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-asteroid"
+source="
+	90-android-touch-dev.rules
+	deviceinfo
+	fb_fix.sh
+	initfs-hook.sh
+	machine.conf
+	"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 -t "$pkgdir"/etc/udev/rules.d \
+		"$srcdir"/90-android-touch-dev.rules
+	install -Dm644 -t "$pkgdir"/etc/profile.d \
+		"$srcdir"/fb_fix.sh
+}
+
+asteroid() {
+	install_if="$pkgname=$pkgver-r$pkgrel asteroid-launcher"
+
+	install -Dm644 -t "$subpkgdir"/etc/asteroid \
+		"$srcdir"/machine.conf
+}
+
+sha512sums="
+a36ba9017df3b4be233783096c303abafa873dcdf50f6357b82f3c5526fd161a1914dafe143377cb5982955108b987890638b51911d0dd339172554e39a82d9f  90-android-touch-dev.rules
+ba7181b27f4aad3e2d9d1d7dab7cb55956c6b67eed72060bef6c485c92f60a6c02d04fa113c0e6c6b5f077f52572bb02ecd670e3175d7e83c9b6bd76b424e2b7  deviceinfo
+1e72e40935d21f194cf3183fad33e8f5baeacf1458568af61f8ef7cc54c3370e63072de3d414e2ba8feddeee8f012a0d9a40ce23bbb5a47173fd92b9794846c8  fb_fix.sh
+d29105805adcd79d4f73c2f2c4483a2c627dc7b70acb77f43d085742ef930407c9b1423f7020c34f38e8a09f40cadd991b9acae23e936c90d6a4c0900250da22  initfs-hook.sh
+81cf2c20d2efa0f71f18116efeda11ae4f18fee96ba998dc4d6a36205626dce496cb36711af5c4e3215578b174942e721290cfcff8db6fb1c998b90b7345244d  machine.conf
+"

@@ -1,0 +1,45 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+pkgname=postmarketos-hidden-desktop-entries
+pkgver=2.1
+pkgrel=0
+pkgdesc="Hide useless .desktop icons (vim, htop, Firefox safe mode, ...)"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+source="nodisplay.desktop"
+options="!check"
+replaces="
+	firefox
+	firefox-esr
+	glade
+	gnome-shell
+	gvim
+	htop
+	neovim
+	vim
+"
+
+# Find original .desktop files in /usr/share/applications. Add original
+# providers of the .desktop file to replaces="" above. They can be found here:
+# https://pkgs.alpinelinux.org/contents?file=htop.desktop
+_hidden="
+	htop
+	nvim
+	org.gnome.Extensions
+	org.gnome.Glade
+	org.mozilla.firefox-safe
+	vim
+	"
+
+package() {
+	local dir="$pkgdir/usr/share/applications/"
+	local i
+
+	install -Dm644 "$srcdir/nodisplay.desktop" -t "$dir"
+
+	cd "$dir"
+	for i in $_hidden; do
+		ln -vs "nodisplay.desktop" "$i.desktop"
+	done
+}
+sha512sums="97b7aff6ff8f8451a654ae002500a4a56f289a2318ece759aa7705836e246a7fd33602a21bee48a8b2a1f6f513ac9835c039d75eb6c031cceea9b58dd2aeaea9  nodisplay.desktop"

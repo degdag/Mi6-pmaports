@@ -1,0 +1,64 @@
+# Maintainer: Jakko <jahau@rocketmail.com>
+pkgname=postmarketos-ui-mate
+pkgver=3
+pkgrel=1
+pkgdesc="(X11) MATE Desktop Environment, fork of GNOME2 (stylus recommended)"
+url="http://mate-desktop.org/"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	dbus-x11
+	dnsmasq
+	gtk+2.0
+	lightdm
+	lightdm-openrc
+	mate-desktop-environment
+	mesa-egl
+	networkmanager
+	postmarketos-base-ui
+	postmarketos-artwork-wallpapers
+	xorg-server
+	"
+_pmb_recommends="
+	network-manager-applet
+	onboard
+	"
+install="$pkgname.post-install $pkgname.pre-deinstall $pkgname.post-deinstall $pkgname.post-upgrade"
+source="
+	000-system-background.gschema.override
+	001-screensaver.gschema.override
+	10_mate-terminal_colors.gschema.override
+	10_onboard.gschema.override
+	61-lightdm-autologin.conf
+	onboard-autostart.desktop
+	"
+options="!check"
+
+package() {
+	install -Dm644 "$srcdir"/000-system-background.gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/000-system-background.gschema.override
+
+	install -Dm644 "$srcdir"/001-screensaver.gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/001-screensaver.gschema.override
+
+	install -Dm644 "$srcdir"/10_mate-terminal_colors.gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/10_mate-terminal_colors.gschema.override
+
+	install -Dm644 "$srcdir"/10_onboard.gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/10_onboard.gschema.override
+
+	install -Dm644 "$srcdir"/61-lightdm-autologin.conf \
+		"$pkgdir"/usr/share/lightdm/lightdm.conf.d/61-autologin.conf
+
+	install -Dm644 "$srcdir"/onboard-autostart.desktop \
+		"$pkgdir"/etc/skel/.config/autostart/onboard-autostart.desktop
+}
+
+sha512sums="
+b4eded3d1aba2086d53507d434da6f2d5aae24fa49c7a8619abb1d81f87898d7a6d813be777a285ce988d78db236bea7507e7868c39fe020e5d23c230dd36242  000-system-background.gschema.override
+68c7614bab2f9beadac6a92508c3d63e05938e2746c7314921d4b0c2fc85e7fdca094c1c7c300710ab778a09b76a85158fc806150bc5bf3fce270f51c1d5d65b  001-screensaver.gschema.override
+edef87a2b88a09d023dd51e8b32e2fc1cc9f5bec4a00b88b4f2adfb844ae2dc72747ef8891fc8a08652ae563fb1b914fba214c28a93e77de76b489a5fb50a96c  10_mate-terminal_colors.gschema.override
+ffcc518ff58d37de302bd101e57bf983800e45899645d476045d0a74096704333a0b513f45e6a5485fdbd80ac1caebce14a760cab6fcc6d5dde0d766ade8b58b  10_onboard.gschema.override
+225c4d1bccad4bdacad34958322015147077158b395b8db095b7afd47e18638044780b381124c3b82bf639af66ea565e1763c54ab9599ec13177c289e0d2a000  61-lightdm-autologin.conf
+d598b806bf749e0fedfdaeb51aa035b3877fedf4adc123ce2e50aef20f3cc6727b520a379aa26e88f9a2fe0f1fb96c4682895bb49c6a9cf4b5a5fd963ea93747  onboard-autostart.desktop
+"

@@ -1,0 +1,31 @@
+# Maintainer: Venji10 <bennisteinir@gmail.com>
+# Co-Maintainer: Joel Selvaraj <jo@jsfamily.in>
+
+pkgname=firmware-xiaomi-beryllium
+pkgver=4
+pkgrel=0
+pkgdesc="Firmware for Xiaomi Poco F1"
+url="https://gitlab.com/sdm845-mainline/firmware-xiaomi-beryllium"
+arch="aarch64"
+depends="soc-qcom-sdm845-nonfree-firmware linux-firmware-qcom linux-firmware-qca linux-firmware-ath10k"
+license="proprietary"
+options="!strip !check !archcheck !tracedeps"
+
+_commit="b4937f06a796cd30b8ddecd6cf7ed416eecc06a0"
+
+source="$pkgname.tar.gz::$url/-/archive/$_commit/$pkgname-$_commit.tar.gz
+firmware.files"
+
+package() {
+	cd "$srcdir/$pkgname-$_commit/"
+	while IFS="" read -r _i || [ -n "$_i" ]; do
+		[ ! -d $(dirname $_i) ] && mkdir -p $(dirname $_i)
+		echo $_i
+		install -Dm644 $_i "$pkgdir/$_i"
+	done < "$srcdir/firmware.files"
+}
+
+sha512sums="
+41fdd771fe73e31bdce6088fdeb7686205f61b9888612fa83ac914e4bb524d22bba63894376a671d3acb19e90316a3d2eafdfb5425360ba53e41a38b9fd753ae  firmware-xiaomi-beryllium.tar.gz
+aa320245e6e6827cd23153729d52072a41c91ed12dc2bc5e3648df700561321dfd1ca51cc699945f57a1e36028a1e99adb4007889a2f91b9c0d445c251b2f51c  firmware.files
+"

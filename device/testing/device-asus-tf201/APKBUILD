@@ -1,0 +1,67 @@
+# Maintainer: Svyatoslav Ryhel <clamor95@gmail.com>
+# Co-Maintainer: Ion Agorria
+
+pkgname=device-asus-tf201
+pkgdesc="Asus Transformer Prime TF201"
+pkgver=3
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	alsa-ucm-conf
+	asus-transformer-blobtools
+	libvdpau-tegra
+	linux-postmarketos-grate
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	pointercal
+	rootston.ini
+"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+	$pkgname-phosh
+	$pkgname-x11
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	# osk-sdl touchscreen calibration
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+}
+
+phosh() {
+	install_if="$pkgname=$pkgver-r$pkgrel postmarketos-ui-phosh"
+	install -Dm644 "$srcdir"/rootston.ini \
+		"$subpkgdir"/etc/phosh/rootston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Asus Transformers WiFi & BT firmware"
+	depends="firmware-asus-transformer"
+	mkdir "$subpkgdir"
+}
+
+x11() {
+	install_if="$pkgname=$pkgver-r$pkgrel xorg-server"
+	depends="xf86-video-opentegra"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+5c8652e181c741002aafa2ca714ee169172ad83fe8d8d0156176ed253d40381a90e3868737ae7b2fefc107277ce80d68553dbe8a985ecb4747fa43e0fd63fe6f  deviceinfo
+dcb4e5b6b808205811d9e4f8d5dfa88ff357eb98a8e73ebe46c5cb22f1d2addfc49e552a93bfe678e91467907032676cf7602d418463a20da245b2dbdb494b78  pointercal
+6ec993e278d2a73c72fb96f001716ded63543d99183847d22d172cd81ac410791c79370ecf391d0c24822c975d91b84dc1db296e1b28dbf66d5c227bff8d4011  rootston.ini
+"

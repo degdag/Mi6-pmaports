@@ -1,0 +1,53 @@
+# Forked from Alpine to fix pmbootstrap#2007
+# Upstreaming here (further upstreaming to google requires google acc with
+# phone number, no thanks): https://github.com/nmeum/android-tools/pull/27
+
+pkgname=android-tools
+pkgver=9999
+_pkgver=31.0.0p1
+pkgrel=2
+pkgdesc="[$_pkgver] Android platform tools"
+url="https://sites.google.com/a/android.com/tools/"
+arch="!x86 x86_64 aarch64 armv7 armhf"
+license="Apache-2.0 MIT"
+options="net !check" # upstream doesn't have a test suite
+makedepends="pcre2-dev linux-headers libusb-dev gtest-dev go perl cmake
+	protobuf-dev brotli-dev zstd-dev lz4-dev"
+subpackages="$pkgname-completion:comp:noarch
+	$pkgname-zsh-completion:zshcomp:noarch
+	$pkgname-bash-completion:bashcomp:noarch"
+source="https://github.com/nmeum/$pkgname/releases/download/$_pkgver/$pkgname-$_pkgver.tar.xz
+	0001-fastboot-don-t-die-if-can-t-parse-boot-part-size.patch"
+builddir="$srcdir/$pkgname-$_pkgver"
+
+build() {
+	cmake -B build \
+		-DCMAKE_INSTALL_PREFIX=/usr \
+		-DCMAKE_INSTALL_LIBDIR=lib \
+		-DCMAKE_BUILD_TYPE=None
+	cmake --build build
+}
+
+package() {
+	DESTDIR="$pkgdir" cmake --install build
+}
+
+comp() {
+	depends=""
+	pkgdesc="Common completion files for $pkgname"
+
+	amove usr/share/android-tools/completions
+}
+
+bashcomp() {
+	default_bashcomp
+	depends="$pkgname-completion"
+}
+
+zshcomp() {
+	default_zshcomp
+	depends="$pkgname-completion"
+}
+
+sha512sums="40bded59614a6d0543e5011038b7f1c6abcb64f0daa71a13175ecb75fe42cb9985ed3a6301d73ee8d4ea20e2c98e3ed8130824ee74dcebe75bc0d7f3052c9d3b  android-tools-31.0.0p1.tar.xz
+71fdc774cf1b1de0eefd23a6c5ad6f09b6a06ad61fc2370f452a7d16dc3a3d605270f3bdb531588095ad07e45706ca7fb67c92b5a217c0f9238f5103382bcd35  0001-fastboot-don-t-die-if-can-t-parse-boot-part-size.patch"

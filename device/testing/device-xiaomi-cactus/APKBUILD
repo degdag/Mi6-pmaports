@@ -1,0 +1,26 @@
+# Maintainer: Fedorov Bohdan <misterjdr@yandex.ru>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-xiaomi-cactus
+pkgdesc="Xiaomi Redmi 6A"
+pkgver=0.1
+pkgrel=2
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-xiaomi-cactus mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+1cb856f6aa4dea56962e9fde932f5cbb3cd4ad555e5f82330378f274df11a5d2a9016ac6ec3159af046d5e51656571ac6be8fc3ef5960a5a33d5f84e1caa1566  deviceinfo
+"

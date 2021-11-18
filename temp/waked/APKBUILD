@@ -1,0 +1,30 @@
+pkgname=waked
+pkgver=0.1.0
+pkgrel=0
+license="GPL-2.0-or-later"
+pkgdesc="Waked is a daemon which lets Apps wake the system from suspend at requested times"
+arch="all"
+url="https://gitlab.com/seath1/waked"
+makedepends="cmake sdbus-cpp-dev"
+install="$pkgname-openrc.post-install $pkgname-openrc.post-upgrade"
+source="https://gitlab.com/seath1/waked/-/archive/v$pkgver/waked-v$pkgver.tar.bz2
+	waked.initd"
+subpackages="$pkgname-openrc"
+options="!check" # No test suite
+builddir="$srcdir/$pkgname-v$pkgver"
+
+build() {
+	cd src/
+	cmake .
+	make
+}
+
+package() {
+	install -Dm755 src/waked "$pkgdir"/usr/bin/waked
+	install -Dm644 de.seath.Waked.conf "$pkgdir"/etc/dbus-1/system.d/de.seath.Waked.conf
+	install -Dm755 "$srcdir"/waked.initd "$pkgdir"/etc/init.d/waked
+}
+sha512sums="
+ecac9fe8aa407e055b20271a679292821bc998f14501ad24f9f732607c76c0c456f1dd6a0acb850eb4c315a13e08903e39e8b0b2c93faef450273be43f2f1c45  waked-v0.1.0.tar.bz2
+c7b2331fd545ac7a38499e3159a026155e93173ec8c4336e878170ebd355212f362565805e3409d635875f3fb769a6e62d83ccd61d317c3434ebcee04864c0b6  waked.initd
+"

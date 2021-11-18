@@ -1,0 +1,49 @@
+pkgname=linux-postmarketos-grate
+pkgver=5.15.0_rc4
+pkgrel=0
+arch="armv7"
+pkgdesc="Linux kernel with experimental patches for Tegra"
+url="https://postmarketos.org"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev
+	     devicepkg-dev bison flex openssl-dev xz findutils"
+options="!strip !check !tracedeps pmb:cross-native
+	pmb:kconfigcheck-nftables pmb:kconfigcheck-zram
+	pmb:kconfigcheck-containers pmb:kconfigcheck-anbox"
+license="GPL-2.0-only"
+
+# Source
+_flavor=postmarketos-grate
+_commit="64b369377d2b502b79a12b6c3c1b6b27d0320015"
+_carch="arm"
+_config="config-$_flavor.$arch"
+source="$pkgname-$pkgver-$_commit.tar.gz::https://github.com/grate-driver/linux/archive/$_commit.tar.gz
+	$_config"
+builddir="$srcdir/linux-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+
+	make modules_install dtbs_install \
+		O="$_outdir" ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+sha512sums="
+bc73f00ea4bc8f1e204e969e9d778646ee6f7a4414d42d352b46b44b41e4cbf2083ef7990c5225d870abbd16cb2871980799f01de010cd76e90335c92c3d0789  linux-postmarketos-grate-5.15.0_rc4-64b369377d2b502b79a12b6c3c1b6b27d0320015.tar.gz
+fcb67ac00de88824080f85acc552c6fb55d5076b39ac5db320529fa13335c418e5ef0745bb8fab474639e28947211b085c28a5376ee4bf954f9d0a003db04712  config-postmarketos-grate.armv7
+"

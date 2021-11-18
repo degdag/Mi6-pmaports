@@ -1,0 +1,23 @@
+pkgname=postmarketos-theme
+pkgver=0.6.0
+pkgrel=0
+pkgdesc="GTK themes adjusted for postmarketOS"
+url="https://gitlab.com/postmarketOS/postmarketos-theme"
+arch="all"
+license="GPL-2.0-only"
+makedepends="meson sassc"
+source="https://gitlab.com/postmarketOS/postmarketos-theme/-/archive/$pkgver/postmarketos-theme-$pkgver.tar.gz"
+options="!check" # There's no testsuite
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+
+sha512sums="
+bd2032cb97d5f8462aa7bd98ffabd9cc6ec4e19bc7729026f3da43b7b89705f8fdc0eadb3984d3bb125782daa27a1f4b3ddd8badad9b746b951f25161fdb625f  postmarketos-theme-0.6.0.tar.gz
+"

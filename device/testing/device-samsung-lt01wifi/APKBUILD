@@ -1,0 +1,35 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-lt01wifi
+pkgdesc="Samsung Galaxy Tab 3 8.0"
+pkgver=0.1
+pkgrel=8
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-lt01wifi mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo
+	modules-load.conf
+	modprobe.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-lt01wifi"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+579807e4997b3d5a57a32a9bf9408c08950830c7578da9eae19d3f7454277fdb01ce33df21cc658c36838671b4dd3594e3c4369e0e6fc7cf1573a29de4b9dc9e  deviceinfo
+af036fe35011db078379dbb2e8c16c86546f0a4fcb3d1bcee3502bb1ea5b38f3ec5a9fa8cd1ca8ed8b89592a7f572d6072781289845303e0bf85fc2de4ead9fb  modules-load.conf
+594d6059ba1b06bce65538d26ce80cf2ce840786605b86e993ffaef858837507c033c0f95b7bcd9914ae7ea3cd2a9e43e32ec879db7c908219ad62d38b4e426a  modprobe.conf
+"

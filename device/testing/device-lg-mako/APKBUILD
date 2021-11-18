@@ -1,0 +1,52 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-mako
+pkgver=2
+pkgrel=30
+pkgdesc="Google Nexus 4"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base linux-lg-mako mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-weston"
+source="deviceinfo 90-android-touch-dev.rules profile.sh pointercal fb.modes weston.ini wcnss-wlan"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+	install -Dm644 "$srcdir"/profile.sh \
+		"$pkgdir"/etc/profile.d/00-$pkgname.sh
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+	install -Dm644 "$srcdir"/fb.modes \
+		"$pkgdir"/etc/fb.modes
+	install -Dm644 "$srcdir"/wcnss-wlan \
+		"$pkgdir"/etc/conf.d/wcnss-wlan
+
+
+	# Disable v4l (video4linux), because without the camera firmware
+	# blobs this makes dev hang with the kernel this device uses (#1033)
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+sha512sums="
+5f479cf07ed0c353cc7e41cfc5502ee6911b3816bcad24ba872d1232c0eaef3eced25722c2d1b9416c70fc6c1a786696172482911a90d58af39ca22263c1f208  deviceinfo
+ee25f3d0377f027d108593eb7953b8db49d7f05a5c36a0c8ca7e7849d15e3c217bc1ac97d77a66e28d2db4b81c0f50b905639911276da40321d2b6cca7f797df  90-android-touch-dev.rules
+d04013c17caf77a87ebea167dbe48f7efa9c9d3123c5743d359f3ea8ccc6b268fa021535a4bf8291eb4a352f0c92f6eb527da0db340421f53bc1cc439a453306  profile.sh
+52b1465c75c51e2dc2e351a0609220af04b939b9edf7fca844cc00bb9eeb4e71f53e34817ba094e477fc43bf15101fcfd07963c791a36be5c52f199bba6a6d9d  pointercal
+217bdf692ade75d57968299e29e9379ffcfc97addf735663b3e1e7dfce049f9d13b26347b4405ac724ae5fac2946012dcc58014b23b8df357e225b6718dbc0a6  fb.modes
+86a0c08720225e4532f797ad69307dfff66867e4a35de1aacceefc48f19721caf93f9a17a268e58f1f5a7e947f157d6984676837c2b5b835b0caf6ee9821bb5a  weston.ini
+a8cfde9dd3bc96d990038443e8d10a551f13536f017992ae23545d2f1e09b0f729e5cfd1f94f52a2a335335172f082925b91c980695a27f76f636343de795898  wcnss-wlan
+"

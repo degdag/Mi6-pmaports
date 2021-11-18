@@ -1,0 +1,56 @@
+# Kernel config based on: arch/arm/configs/pxa986_lt023g_blackhawk_defconfig
+
+pkgname=linux-samsung-lt023g
+pkgver=3.4.5
+pkgrel=8
+pkgdesc="Samsung Galaxy Tab 3 7.0 kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-lt023g"
+url="https://github.com/kumajaya/android_kernel_samsung_lt02"
+license="GPL2"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev gcc6"
+
+# Compiler: this kernel was only tested with GCC6. Feel free to make a merge
+# request if you find out that it is booting working with newer GCCs as
+# well. See <https://postmarketos.org/vendorkernel> for instructions.
+if [ "${CC:0:5}" != "gcc6-" ]; then
+	CC="gcc6-$CC"
+	HOSTCC="gcc6-gcc"
+	CROSS_COMPILE="gcc6-$CROSS_COMPILE"
+fi
+
+# Source
+_repository="android_kernel_samsung_lt02"
+_commit="c6fb6f677aa195b07348eb7777322ca956f9c44c"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/kumajaya/$_repository/archive/$_commit.tar.gz
+	$_config
+	timeconst.pl-Eliminate-Perl-warning.patch
+	455bd4c430b0c0a361f38e8658a0d6cb469942b5.patch
+	418df63adac56841ef6b0f1fcf435bc64d4ed177.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="41b0dc94d29e1ad75bcb309aebefc58302b5176be30cafd827b7f69b44805b84d44de93dfc363e671a421623ad2b6d264edbc74976106ba52f0c249d268622f1  linux-samsung-lt023g-c6fb6f677aa195b07348eb7777322ca956f9c44c.tar.gz
+d7c95e89f2ec285560b28d726889c628b9eb9662e9aac1094c6be7dc487c520669d85d0f2c384f0081615007c21ce05f1526e6e06aa870da269efa732c7ca612  config-samsung-lt023g.armv7
+1fcfb5f06a2bfdcc55d53054ca80d1b989599a39a5379d057a0724fc405187d74da4309a650e70b9c79d39444e81923cfc5c9199ed8c0a77c83dcd7998446bb7  timeconst.pl-Eliminate-Perl-warning.patch
+efd1641c0892fddb9c5feea3e49e534fed311b01f0576688b5af766e0160850822d0eb8e296b08c5f82b586d5d0336a98e8e86707ba9af7fcf36fc89f0b288eb  455bd4c430b0c0a361f38e8658a0d6cb469942b5.patch
+5c080c27716d124616e4e684fc63bffb2665f00de06e894dfd78f58588feec2fec858fe8234b054061e3db14d28cb90fbac53f4b54c4fac5946d843cf038386c  418df63adac56841ef6b0f1fcf435bc64d4ed177.patch"

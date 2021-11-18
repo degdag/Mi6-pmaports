@@ -1,0 +1,26 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+pkgname=postmarketos-splash
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Splash screen for postmarketOS"
+url="https://gitlab.com/postmarketos"
+arch="noarch"
+license="MIT"
+depends="ttf-dejavu ttf-droid py3-pillow python3"
+source="https://gitlab.com/postmarketos/postmarketos-splash/-/archive/$pkgver/postmarketos-splash-$pkgver.tar.gz
+	config.ini
+	https://gitlab.com/postmarketOS/artwork/raw/master/logo/pmos.ttf"
+options="!check" # No tests
+
+package() {
+	install -D -m755 make-splash.py \
+		"$pkgdir"/usr/bin/pmos-make-splash
+	install -D -m644 "$srcdir"/config.ini \
+		"$pkgdir"/etc/postmarketos/splash.ini
+	install -D -m644 "$srcdir"/pmos.ttf \
+		"$pkgdir"/usr/share/fonts/ttf-pmos/pmos.ttf
+}
+
+sha512sums="20d775f7cfb6e71eaa093ce254086eb64ed720573e94185bd09b9258e5707dd74ad20d593026fc5dd1edd1190e44e726bce74a5093ee991ee5fa5c0c1373817a  postmarketos-splash-1.0.0.tar.gz
+cdde481bf7c68840515b839d974dd1dddfb37551a2939780e13dce11331f7d1964043de48f8902a30372e9fc9f042bd4ee133e2098694739c452a76b70e97111  config.ini
+81e5df350bf7f435ab5480f7028fc3cabf5a947fa0dff1ed219f6d9ac18a1250f5114887a9f5f270cc699af48cd77f23d14a84578ac8d2d0f3a3e90ec3211c45  pmos.ttf"

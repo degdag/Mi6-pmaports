@@ -1,0 +1,28 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-primou
+pkgdesc="HTC One V"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-htc-primou mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	initfs-hook.sh
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+6dd20f002849cff924d256e35621e91a58783b1b9e6c7246ee212b100c97b661dcf8dd3eb823149590bc526670cfb7b56df2033892991b06657eaae429615331  deviceinfo
+c0d433af6f68716d507a7ad29743543e9cc1e450fc777e8de60527386b3c4b868cbcd6ae148357d0901189cfcb141227c7f7c66b0d1b998e4b1ac09ce505f8ee  initfs-hook.sh
+"

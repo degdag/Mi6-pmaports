@@ -1,0 +1,31 @@
+# Maintainer: Jakob Hauser <jahau@rocketmail.com>
+pkgname=swclock-offset
+pkgver=0.2
+pkgrel=0
+pkgdesc="Keep system time at an offset to a non-writable RTC"
+url="https://gitlab.com/postmarketOS/pmaports"
+arch="noarch"
+license="GPL-3.0-or-later"
+install="$pkgname.post-deinstall"
+subpackages="$pkgname-openrc"
+source="$pkgname-boot.initd $pkgname-shutdown.initd $pkgname-boot.sh $pkgname-shutdown.sh"
+options="!check" # No tests
+
+package() {
+	install -Dm755 "$srcdir/$pkgname-boot.initd" "$pkgdir/etc/init.d/$pkgname-boot"
+	install -Dm755 "$srcdir/$pkgname-shutdown.initd" "$pkgdir/etc/init.d/$pkgname-shutdown"
+	install -Dm755 "$srcdir/$pkgname-boot.sh" "$pkgdir/sbin/$pkgname-boot"
+	install -Dm755 "$srcdir/$pkgname-shutdown.sh" "$pkgdir/sbin/$pkgname-shutdown"
+}
+
+openrc() {
+	install="$subpkgname.post-install $subpkgname.pre-deinstall"
+	default_openrc
+}
+
+sha512sums="
+777dff161dcae742d1bfb7acbf413a319c9e623292a315ccd8cf5f3f0df9258d54d3e9891bdff741a6146ab285bc5a27c7921bc93902b4a2006104666a835ecd  swclock-offset-boot.initd
+a834fe9f721a4797f5675361fe07b500f93a2082753ed0a0fd583ccfd49738acfe04fb526e2936f3ce270053d151c7080a6a5356246fb816638e72992c6f77db  swclock-offset-shutdown.initd
+288373bef5d7e5a64d118396491b424fb9cd38bfb3e7c422762c4c1441894617e59140035cd824846880c159fe3b9f6f8ceaddd552014e53b4e0ab05da7931dc  swclock-offset-boot.sh
+49f2ac3b4f41904097d1b5e903b810abd3da005972fffc14bd34d3c25aaa9b92d293a10bfa4348e160060670ed19d50e06ac6c9b8ebe663e56bf30e36c28edf9  swclock-offset-shutdown.sh
+"

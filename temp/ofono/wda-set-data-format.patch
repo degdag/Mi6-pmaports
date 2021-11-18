@@ -1,0 +1,125 @@
+From 326066dcf5ca27ed8c46f9dfba888255ce84b408 Mon Sep 17 00:00:00 2001
+From: Minecrell <minecrell@minecrell.net>
+Date: Fri, 19 Feb 2021 11:48:44 +0100
+Subject: [PATCH] qmimodem: Update WDA data format for network interfaces !=
+ qmi_wwan
+
+The network interface for the qmimodem may be provided by another
+driver, e.g. bam-dmux for the integrated modem in Qualcomm SoCs or IPA.
+Those do not support changing the expected data format, they just support
+using the modem in Raw-IP mode. However, it may be necessary to change
+the WDA data format of the modem to make that work.
+
+To implement that:
+  1. Assume the network interface expects Raw-IP if it is not exposed
+     via USB (and therefore managed by qmi_wwan).
+  2. Fall back to changing the modem data format with "WDA Set Data Format"
+     if changing the expected data format fails.
+---
+ drivers/qmimodem/gprs-context.c | 59 ++++++++++++++++++++++++++-------
+ drivers/qmimodem/qmi.c          |  5 ++-
+ 2 files changed, 51 insertions(+), 13 deletions(-)
+
+diff --git a/drivers/qmimodem/gprs-context.c b/drivers/qmimodem/gprs-context.c
+index f1fd1f12..b5ab8a83 100644
+--- a/drivers/qmimodem/gprs-context.c
++++ b/drivers/qmimodem/gprs-context.c
+@@ -390,12 +390,25 @@ static void create_wds_cb(struct qmi_service *service, void *user_data)
+ 					pkt_status_notify, gc, NULL);
+ }
+ 
++static void set_data_format_cb(struct qmi_result *result, void *user_data)
++{
++	struct ofono_gprs_context *gc = user_data;
++	struct gprs_context_data *data = ofono_gprs_context_get_data(gc);
++	uint16_t error;
++
++	qmi_result_set_error(result, &error);
++	DBG("result %#x\n", error);
++
++	qmi_service_create_shared(data->dev, QMI_SERVICE_WDS, create_wds_cb, gc,
++									NULL);
++}
++
+ static void get_data_format_cb(struct qmi_result *result, void *user_data)
+ {
+ 	struct ofono_gprs_context *gc = user_data;
+ 	struct gprs_context_data *data = ofono_gprs_context_get_data(gc);
+-	uint32_t llproto;
+-	enum qmi_device_expected_data_format expected_llproto;
++	uint32_t llproto, new_llproto = 0;
++	enum qmi_device_expected_data_format expected_llproto, new_expected = 0;
+ 
+ 	DBG("");
+ 
+@@ -410,19 +423,41 @@ static void get_data_format_cb(struct qmi_result *result, void *user_data)
+ 	if ((llproto == QMI_WDA_DATA_LINK_PROTOCOL_802_3) &&
+ 			(expected_llproto ==
+ 				QMI_DEVICE_EXPECTED_DATA_FORMAT_RAW_IP)) {
+-		if (!qmi_device_set_expected_data_format(data->dev,
+-					QMI_DEVICE_EXPECTED_DATA_FORMAT_802_3))
+-			DBG("Fail to set expected data to 802.3");
+-		else
+-			DBG("expected data set to 802.3");
++		new_llproto = QMI_WDA_DATA_LINK_PROTOCOL_RAW_IP;
++		new_expected = QMI_DEVICE_EXPECTED_DATA_FORMAT_802_3;
+ 	} else if ((llproto == QMI_WDA_DATA_LINK_PROTOCOL_RAW_IP) &&
+ 			(expected_llproto ==
+ 				QMI_DEVICE_EXPECTED_DATA_FORMAT_802_3)) {
+-		if (!qmi_device_set_expected_data_format(data->dev,
+-					QMI_DEVICE_EXPECTED_DATA_FORMAT_RAW_IP))
+-			DBG("Fail to set expected data to raw-ip");
+-		else
+-			DBG("expected data set to raw-ip");
++		new_llproto = QMI_WDA_DATA_LINK_PROTOCOL_802_3;
++		new_expected = QMI_DEVICE_EXPECTED_DATA_FORMAT_RAW_IP;
++	}
++
++	/* First, try to change expected data format */
++	if (new_expected) {
++		if (qmi_device_set_expected_data_format(data->dev,
++					QMI_DEVICE_EXPECTED_DATA_FORMAT_RAW_IP)) {
++			DBG("updated expected data format");
++			goto done;
++		}
++
++		DBG("Fail to set expected data format (not qmi_wwan?)");
++	}
++
++	/* Otherwise try to change modem data format */
++	if (new_llproto) {
++		struct qmi_param *param;
++
++		DBG("set WDA data format: %d\n", new_llproto);
++
++		param = qmi_param_new_uint32(QMI_WDA_LL_PROTOCOL, new_llproto);
++		if (!param)
++			goto done;
++
++		if (qmi_service_send(data->wda, QMI_WDA_SET_DATA_FORMAT, param,
++						set_data_format_cb, gc, NULL) > 0)
++			return;
++
++		qmi_param_free(param);
+ 	}
+ 
+ done:
+diff --git a/drivers/qmimodem/qmi.c b/drivers/qmimodem/qmi.c
+index 4cd1530f..d412adb6 100644
+--- a/drivers/qmimodem/qmi.c
++++ b/drivers/qmimodem/qmi.c
+@@ -1543,7 +1543,10 @@ enum qmi_device_expected_data_format qmi_device_get_expected_data_format(
+ 	interface = get_device_interface(device);
+ 
+ 	if (!interface) {
+-		DBG("Error while getting interface name");
++		DBG("Error while getting interface name (not qmi_wwan?)");
++
++		/* Assume that all other network drivers use Raw-IP */
++		expected = QMI_DEVICE_EXPECTED_DATA_FORMAT_RAW_IP;
+ 		goto done;
+ 	}
+ 
+-- 
+2.30.1
+

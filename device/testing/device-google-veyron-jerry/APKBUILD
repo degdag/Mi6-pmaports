@@ -1,0 +1,32 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Timothy Valldeperas <tvall43@gmail.com>
+pkgname=device-google-veyron-jerry
+pkgdesc="Google Veyron Jerry Chromebook"
+pkgver=0.2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-postmarketos-rockchip mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	extlinux.conf
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/extlinux.conf \
+		"$pkgdir"/boot/extlinux/extlinux.conf
+
+}
+
+sha512sums="
+9818a1b69f8babb9b0b2e7bff24bef07a185aeac9a575eea781cb85587d76040637ca21982840b646d9559711d9f8d6795bbd37c0ffc41b0281c282864cb7723  deviceinfo
+9633b95a87d74a6668d2f2c30aaf187149a3a72c8c5734c5fb4094bcbc2fa9a519d35f6b8992a402aa3e003ce94b430b43ad5a8be774bfb2b4a353701c807f28  extlinux.conf
+"

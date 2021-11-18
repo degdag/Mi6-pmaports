@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-pyramid
+pkgdesc="HTC Sensation"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-htc-pyramid
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	mdss-fb-init-hack
+	msm-fb-refresher
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+1819ed9dc0aa105378def778c7dd63ab8c9d3cfdcfcc6f090e804d47d8ff7a10ef73437618311353ddd2d305de43547e7781a8b7389640d0bef445c89f571673  deviceinfo
+"

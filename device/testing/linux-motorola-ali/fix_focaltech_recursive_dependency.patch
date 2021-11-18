@@ -1,0 +1,9 @@
+diff --git a/drivers/input/touchscreen/focaltech_mmi/Kconfig b/drivers/input/touchscreen/focaltech_mmi/Kconfig
+@@ -82,7 +82,6 @@
+ config TOUCHSCREEN_FOCALTECH_UPGRADE_8006S_MMI
+         bool "Add ft8006S IC support for Focaltech Touchscreen"
+         depends on TOUCHSCREEN_FOCALTECH_UPGRADE_8006U_MMI
+-        select TOUCHSCREEN_FOCALTECH_UPGRADE_MMI
+         help
+           Say Y here will
+           -Add FT8006S IC upgrade support.

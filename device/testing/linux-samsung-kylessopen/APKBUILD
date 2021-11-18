@@ -1,0 +1,50 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/franken_defconfig
+
+pkgname=linux-samsung-kylessopen
+pkgver=3.0.101
+pkgrel=9
+pkgdesc="Samsung Galaxy Trend kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-kylessopen"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev devicepkg-dev lzo xz"
+
+# Source: backup of https://github.com/pavlepiramida/FrankenKernel
+_kernel="pavlepiramida-frankenkernel"
+_commit="d0e853abec2d7be79f5d9b319273a0b66046b125"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://gitlab.com/samsung-kylessopen-kernels/$_kernel/-/archive/$_commit/$_kernel-$_commit.tar.gz
+	$_config
+	gcc5.patch
+	0001-fix-video-argb-setting.patch
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+"
+builddir="$srcdir/$_kernel-$_commit"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor"
+}
+
+sha512sums="874957ad6a6c959b5479ece21225d9423f62e67a6a4c1f9a9e56d0c6078b6644a4ff2e490c7e43a8ef5241b148af6085b041f02268586cf8c61b1eacfd3511ad  linux-samsung-kylessopen-d0e853abec2d7be79f5d9b319273a0b66046b125.tar.gz
+89c6bb98a9bafa1942a07cc6de7eae8c66df1afdac9fc78ad391c531357f28791b87da51632df6b05765f7758bb7ffc5f67146cfd7fd401b275d4e7badb7f7ee  config-samsung-kylessopen.armv7
+db5d16e03a93b453c98882dcd08b7a4cd96c126393365d8916d9cf045e8725831f70ea841756526af7bead36a74301024e3c569c438442906e079fea2ac0a022  gcc5.patch
+e3083c260ed9c4fc0d83f43106700b6173876dbfae072f6e6696ac6785a4dc17771fbcb3e21601e04ed29a11bf0f7a2a09ad549375e0c34cea245c7f2e2bcbbd  0001-fix-video-argb-setting.patch
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch"

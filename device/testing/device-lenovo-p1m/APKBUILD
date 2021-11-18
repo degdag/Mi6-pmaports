@@ -1,0 +1,24 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lenovo-p1m
+pkgdesc="Lenovo Vibe P1m"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-lenovo-p1m mkbootimg mesa-dri-gallium"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+30d3187de4ea8ae89457f0b2d2a4edf9ce97e57fc52824fd2d051b2b215e11030f117afdf09981dd92f724bd88b4dd93d39eb71c1cfe77d652a5d0c3e270f99f  deviceinfo
+"

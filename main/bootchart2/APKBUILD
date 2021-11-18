@@ -1,0 +1,36 @@
+# Maintainer: Pops Dylan <popsdylan@protonmail.com>
+pkgname=bootchart2
+pkgver=0.14.8_git20170531
+pkgrel=1
+pkgdesc="Boot Process Performance Visualization"
+url="https://github.com/xrmx/bootchart"
+arch="all"
+license="GPL-2.0-only"
+depends="python3 py3-cairo"
+makedepends="$depends_dev sed linux-headers"
+subpackages="$pkgname-doc"
+_commit="331ada031f1d65f6d934d918f896e1c708c64bf7"
+source="bootchart-$_commit.tar.gz::https://github.com/xrmx/bootchart/archive/$_commit.tar.gz
+10-set-EXIT_PROC.patch 20-python3.8.patch 30-disable-interactive-mode.patch"
+builddir="$srcdir/bootchart-$_commit"
+options="!check"
+
+build() {
+	make PYTHON=python3 all
+}
+
+check() {
+	make check
+}
+
+package() {
+	# install everything but the service
+	for target in "py-install-compile" "install-collector" "install-docs"; do
+		make PYTHON=python3 DESTDIR="$pkgdir" "$target"
+	done
+}
+
+sha512sums="7efd409366679cb50d8fd6b9414f96d115c17f14e01508ac74f845529303bdbdae70ba14adfc89c78e3b11f2da62307c9e1d5e696ea666147c5a89e1222a02d3  bootchart-331ada031f1d65f6d934d918f896e1c708c64bf7.tar.gz
+0ab20745b0eb360ca1795017f3f2e18b39097f7720816f636d69e91fa01eba7d2fc8971e20d5ab73cff17c89174051982ea8d676319848fb8dee3d2cdbccbd79  10-set-EXIT_PROC.patch
+816298ad0d586e3272a0dbca298ef8cc758c6b37bdc3ea01746be9dc32987492118da81ff2ea280c4649d35fadd8c644ef332410ccc7a3d7a91288507a22a1d2  20-python3.8.patch
+2e8abf01a9b5efae93b587c949626d0357db1857da051d5418150df0ac01f62a42606d2af99e4a3934514587748cb30fcf55434cc0940e750b41095897ca5e69  30-disable-interactive-mode.patch"

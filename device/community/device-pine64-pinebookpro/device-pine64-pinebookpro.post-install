@@ -1,0 +1,8 @@
+#!/bin/sh
+
+# We'll update the hwdb so that the meta key gets fixed
+echo "UPDATING HWDB..."
+udevadm hwdb --update
+
+rc-update add nvme-powersave boot
+rc-update add sysfsconf default

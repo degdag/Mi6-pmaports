@@ -1,0 +1,246 @@
+From f9a3d824d401754805bb7102713facf82bcf39b3 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Pablo=20Correa=20G=C3=B3mez?= <ablocorrea@hotmail.com>
+Date: Sun, 3 Oct 2021 18:13:38 +0200
+Subject: [PATCH 8/8] Users: Adapt panel to make it usable in small screens
+
+---
+ panels/common/cc-permission-infobar.ui     |  6 ++++++
+ panels/user-accounts/cc-add-user-dialog.ui | 22 +++++++---------------
+ panels/user-accounts/cc-password-dialog.ui | 15 ++++++++-------
+ 3 files changed, 21 insertions(+), 22 deletions(-)
+
+diff --git a/panels/common/cc-permission-infobar.ui b/panels/common/cc-permission-infobar.ui
+index 770765e08..e77e759b4 100644
+--- a/panels/common/cc-permission-infobar.ui
++++ b/panels/common/cc-permission-infobar.ui
+@@ -44,6 +44,9 @@
+                     <property name="halign">start</property>
+                     <!-- Actual string set in code -->
+                     <property name="label"></property>
++                    <property name="justify">center</property>
++                    <property name="wrap">True</property>
++                    <property name="wrap-mode">word</property>
+                     <attributes>
+                       <attribute name="weight" value="bold"/>
+                     </attributes>
+@@ -54,6 +57,9 @@
+                     <property name="visible">True</property>
+                     <property name="halign">start</property>
+                     <property name="label" translatable="yes">Some settings must be unlocked before they can be changed.</property>
++                    <property name="justify">center</property>
++                    <property name="wrap">True</property>
++                    <property name="wrap-mode">word</property>
+                   </object>
+                 </child>
+               </object>
+diff --git a/panels/user-accounts/cc-add-user-dialog.ui b/panels/user-accounts/cc-add-user-dialog.ui
+index 12a253ac4..2db2031e0 100644
+--- a/panels/user-accounts/cc-add-user-dialog.ui
++++ b/panels/user-accounts/cc-add-user-dialog.ui
+@@ -121,7 +121,7 @@
+                     <property name="yalign">0</property>
+                     <property name="xalign">0</property>
+                     <property name="label"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="height-request">50</property>
+                     <property name="wrap">True</property>
+@@ -146,7 +146,6 @@
+                     <property name="label" translatable="yes">_Username</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">local_username_combo</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -180,7 +179,6 @@
+                     <property name="label" translatable="yes">_Full Name</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">local_name_entry</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -232,7 +230,6 @@
+                     <property name="label" translatable="yes">Account _Type</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">local_account_type_box</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -249,7 +246,6 @@
+                     <property name="label" translatable="yes">Password</property>
+                     <property name="margin_top">12</property>
+                     <property name="halign">start</property>
+-                    <property name="margin_start">20</property>
+                     <attributes>
+                       <attribute name="weight" value="bold"/>
+                     </attributes>
+@@ -263,7 +259,6 @@
+                   <object class="GtkBox">
+                     <property name="visible">True</property>
+                     <property name="orientation">vertical</property>
+-                    <property name="margin_start">20</property>
+                     <child>
+                       <object class="GtkRadioButton" id="local_password_login_radio">
+                         <property name="label" translatable="yes">Allow user to set a password when they next _login</property>
+@@ -310,7 +305,6 @@
+                     <property name="label" translatable="yes">_Password</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">local_password_entry</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -377,7 +371,7 @@
+                     <property name="yalign">0</property>
+                     <property name="xalign">0</property>
+                     <property name="label"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="height-request">50</property>
+                     <property name="wrap">True</property>
+@@ -405,7 +399,6 @@
+                     <property name="label" translatable="yes">_Confirm</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">local_verify_entry</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -445,7 +438,7 @@
+                     <property name="yalign">0</property>
+                     <property name="xalign">0</property>
+                     <property name="label"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="wrap">True</property>
+                     <property name="wrap_mode">word-char</property>
+@@ -507,7 +500,6 @@
+                     <property name="label" translatable="yes">_Domain</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">enterprise_domain_combo</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -527,7 +519,6 @@
+                     <property name="label" translatable="yes">_Username</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">enterprise_login_entry</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -547,7 +538,6 @@
+                     <property name="label" translatable="yes">_Password</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">enterprise_password_entry</property>
+-                    <property name="margin_start">20</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -566,7 +556,7 @@
+                     <property name="yalign">0</property>
+                     <property name="xalign">0</property>
+                     <property name="label"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="height-request">50</property>
+                     <property name="wrap">True</property>
+@@ -616,7 +606,7 @@
+                     <property name="yalign">0</property>
+                     <property name="xalign">0</property>
+                     <property name="label"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="height-request">50</property>
+                     <property name="wrap">True</property>
+@@ -751,6 +741,8 @@
+                     <property name="label" translatable="yes">You must be online in order to add enterprise users.</property>
+                     <property name="yalign">0</property>
+                     <property name="justify">center</property>
++                    <property name="wrap">True</property>
++                    <property name="wrap_mode">word-char</property>
+                     <property name="vexpand">True</property>
+                     <property name="hexpand">True</property>
+                     <attributes>
+diff --git a/panels/user-accounts/cc-password-dialog.ui b/panels/user-accounts/cc-password-dialog.ui
+index bfcc7585b..ed781c8e8 100644
+--- a/panels/user-accounts/cc-password-dialog.ui
++++ b/panels/user-accounts/cc-password-dialog.ui
+@@ -5,7 +5,7 @@
+   <template class="CcPasswordDialog" parent="GtkDialog">
+     <property name="border_width">6</property>
+     <property name="title" translatable="yes">Change Password</property>
+-    <property name="resizable">False</property>
++    <property name="resizable">True</property>
+     <property name="modal">True</property>
+     <property name="window_position">center-on-parent</property>
+     <property name="icon_name">system-users</property>
+@@ -45,6 +45,7 @@
+             <style>
+               <class name="text-button"/>
+               <class name="suggested-action"/>
++              <class name="default"/>
+             </style>
+           </object>
+           <packing>
+@@ -96,7 +97,7 @@
+                     <property name="xalign">0</property>
+                     <property name="yalign">0</property>
+                     <property name="label" translatable="yes"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="height-request">50</property>
+                     <property name="wrap">True</property>
+@@ -121,7 +122,7 @@
+                     <property name="xalign">0</property>
+                     <property name="yalign">0</property>
+                     <property name="label" translatable="yes"></property>
+-                    <property name="width-chars">35</property>
++                    <property name="width-chars">20</property>
+                     <property name="max-width-chars">35</property>
+                     <property name="wrap">True</property>
+                     <property name="hexpand">True</property>
+@@ -142,10 +143,10 @@
+                   <object class="GtkLabel">
+                     <property name="visible">True</property>
+                     <property name="xalign">1</property>
+-                    <property name="label" translatable="yes">_Confirm New Password</property>
++                    <property name="label" translatable="yes">_Confirm</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">verify_entry</property>
+-                    <property name="margin_start">25</property>
++                    <property name="margin_start">12</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -162,7 +163,7 @@
+                     <property name="label" translatable="yes">_New Password</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">password_entry</property>
+-                    <property name="margin_start">25</property>
++                    <property name="margin_start">12</property>
+                     <style>
+                       <class name="dim-label"/>
+                     </style>
+@@ -216,7 +217,7 @@
+                     <property name="label" translatable="yes">Current _Password</property>
+                     <property name="use_underline">True</property>
+                     <property name="mnemonic_widget">old_password_entry</property>
+-                    <property name="margin_start">25</property>
++                    <property name="margin_start">12</property>
+                     <property name="margin_bottom">12</property>
+                     <style>
+                       <class name="dim-label"/>
+-- 
+2.25.1
+

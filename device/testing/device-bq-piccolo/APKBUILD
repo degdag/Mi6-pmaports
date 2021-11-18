@@ -1,0 +1,34 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-bq-piccolo
+pkgdesc="BQ Aquaris M5"
+pkgver=1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg linux-postmarketos-qcom-msm8939 soc-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="
+	$pkgname-nonfree-firmware:nonfree_firmware
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Video(/Modem) firmware"
+	depends="linux-firmware-qcom firmware-qcom-adreno-a420 firmware-bq-piccolo-venus firmware-bq-piccolo-wcnss"
+	mkdir "$subpkgdir"
+}
+
+
+sha512sums="
+96ec92ae64ddb64d241f7695bdabe86eece3b113369680b325170e343bdc8055b1a97aa73b421323f2527f41f6cd7994e8d55da49dc74b3b144046c3077a2cbe  deviceinfo
+"

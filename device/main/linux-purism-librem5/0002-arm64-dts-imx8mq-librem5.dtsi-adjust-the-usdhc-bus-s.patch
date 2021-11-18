@@ -1,0 +1,37 @@
+From 8d4a1c39146442252ac5666889eab7f0160779b0 Mon Sep 17 00:00:00 2001
+From: Angus Ainslie <angus@akkea.ca>
+Date: Sun, 25 Apr 2021 07:49:49 -0700
+Subject: [PATCH] arm64: dts: imx8mq-librem5.dtsi: adjust the usdhc bus speeds
+
+Limit the usdhc2 bus speed
+Match usdhc1 and usdhs2 bus clocks
+
+Signed-off-by: Angus Ainslie <angus@akkea.ca>
+---
+ arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi b/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
+index b2345dd6cc17..8b3d310f976d 100644
+--- a/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
++++ b/arch/arm64/boot/dts/freescale/imx8mq-librem5.dtsi
+@@ -1723,7 +1723,7 @@ mass-storage@1 {
+ 
+ &usdhc1 {
+ 	assigned-clocks = <&clk IMX8MQ_CLK_USDHC1>;
+-	assigned-clock-rates = <400000000>;
++	assigned-clock-rates = <200000000>;
+ 	pinctrl-names = "default", "state_100mhz", "state_200mhz";
+ 	pinctrl-0 = <&pinctrl_usdhc1>;
+ 	pinctrl-1 = <&pinctrl_usdhc1_100mhz>;
+@@ -1750,6 +1750,7 @@ &usdhc2 {
+ 	cap-sdio-irq;
+ 	keep-power-in-suspend;
+ 	wakeup-source;
++	max-frequency = <50000000>;
+ 	status = "okay";
+ };
+ 
+-- 
+2.31.1
+

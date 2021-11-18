@@ -1,0 +1,135 @@
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-plasma-mobile
+pkgver=3.3
+pkgrel=7
+pkgdesc="(Wayland) Mobile variant of KDE Plasma (does not run without hardware acceleration, allows only numeric passwords!)"
+url="https://wiki.postmarketos.org/wiki/Plasma_Mobile"
+arch="noarch !armhf !x86" # armhf: pmaports#75, x86: aports#11807
+license="GPL-3.0-or-later"
+depends="
+	bluedevil
+	breeze
+	dnsmasq
+	elogind
+	hfd-service
+	iio-sensor-proxy
+	iio-sensor-proxy-openrc
+	kscreen
+	kwallet-pam
+	kwayland-integration
+	plasma-phone-components
+	polkit-kde-agent-1
+	postmarketos-base-ui
+	powerdevil
+	pulseaudio
+	xdg-desktop-portal-kde
+	urfkill
+	urfkill-openrc
+	"
+# Required to launch
+depends="$depends
+	tinydm
+	tinydm-openrc
+	xorg-server
+	"
+_pmb_recommends="breeze-gtk
+	discover
+	firefox-esr
+	font-noto
+	font-noto-emoji
+	index
+	kaccounts-providers
+	kclock
+	kde-gtk-config
+	kirigami-gallery
+	koko
+	kpeoplesink
+	kpeoplevcard
+	megapixels
+	mobile-config-firefox
+	neochat
+	plasma-angelfish
+	plasma-dialer
+	plasma-phonebook
+	postmarketos-artwork-wallpapers
+	postmarketos-hidden-desktop-entries
+	qmlkonsole
+	spacebar
+	ttf-droid-nonlatin
+	xdg-user-dirs
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="
+	000-gschema.override
+	gtk-app-wayland.sh
+	kdeglobals
+	kwinrc
+	maliit-plasmamobile.json
+	qtlogging.ini
+	unlock-plasma
+	kdewallet.kwl
+	kdewallet.salt
+	"
+subpackages="$pkgname-extras"
+options="!check pmb:gpu-accel"
+
+package() {
+	install -Dm644 "$srcdir"/kwinrc \
+		-t "$pkgdir"/etc/xdg/
+
+	install -Dm644 "$srcdir"/kdeglobals \
+		-t "$pkgdir"/etc/xdg/
+
+	install -Dm644 "$srcdir"/qtlogging.ini \
+		-t "$pkgdir"/etc/xdg/QtProject/
+
+	install -Dm755 "$srcdir"/unlock-plasma \
+		-t "$pkgdir"/usr/bin/
+
+	install -Dm755 "$srcdir"/gtk-app-wayland.sh \
+		-t "$pkgdir"/etc/profile.d/
+
+	install -Dm644 "$srcdir"/000-gschema.override \
+		"$pkgdir"/usr/share/glib-2.0/schemas/000-postmarketos.gschema.override
+
+	install -Dm644 "$srcdir"/maliit-plasmamobile.json \
+		"$pkgdir"/usr/share/maliit/keyboard2/devices/plasmamobile.json
+
+	# TODO: remove once keyboard input bug is fixed
+	# https://bugs.kde.org/show_bug.cgi?id=435183
+	install -Dm600 -t "$pkgdir"/etc/skel/.local/share/kwalletd \
+		"$srcdir"/kdewallet.kwl \
+		"$srcdir"/kdewallet.salt
+}
+
+extras() {
+	pkgdesc="Meta package for additional Plasma mobile apps"
+	_pmb_recommends="
+		buho
+		calindori
+		elisa
+		kaidan
+		kalk
+		kdeconnect
+		keysmith
+		kongress
+		krecorder
+		ktrip
+		kweather
+		nota
+		okular-mobile
+		vvave
+		"
+
+	mkdir -p "$subpkgdir"
+}
+
+sha512sums="591529f147f161f5e97c979a9ad4b9f3a65e6d3b87a7bdbd020ec928155cfe5fd561cae6582c4b2831b452fe9b0a03168731771b77020fb66e09f81552ba421e  000-gschema.override
+57793bb079c76ba3bdcfca7880aa887de11fe80e7a05557b78435e57feabab70fbaeedc42da3aec6f914c35bba8e8ee9918367516eb45ee247f63f694624f179  gtk-app-wayland.sh
+93d6c3e76b6e8d3c8c5424fcb921595ad3569e1aba1b03255b977230b33146dc73a97327e455e8a539018cb02c3bf1a700dd951622f798b50f36c5d381a1b342  kdeglobals
+4ae28ff92e2ae2f78cc4841249941ad02b1ed0447a5be2e7c6d9080fa47e22471ade584a328deb3a1cb22e1a5d7a81f961b9d92fbc9103a092dfeabf2c1ba45c  kwinrc
+70ee87860842057b557a433a9ae7d54653f076a612b3d9de2d413d598806d23ec19390262eaa398cddf39437f1213d14922402a8d978878e5e98f3767ce0b9eb  maliit-plasmamobile.json
+341f0b866c315f37868ef3e7137cce8b53a0e8e6164e5af71b3e8e2fa68321afbf0652d76124ef84bade1393f701748852ac939aef9daff7e272a0df827780eb  qtlogging.ini
+e5dcc82c0e58288fd7a8f805e60fa777fab71c68355f085a0e4f25b05526491476fdb6decbc7c0495626d6736a53bfc8e8f34a3231210858998e19cd6fbc89a0  unlock-plasma
+923309f71ee0840ae49d610ab5c11260432f462709eee7148ee5a4703872b9926a3267b16b524162c1560e0798c63fe392a161a57be5c6000bbb1e3f0c947e25  kdewallet.kwl
+f3fdaaaf13e985166b86158d5a60098aa45195ea078a4cab7fbf12d3aa428000af3e46ec011dbdc38a4c00faeac5f9a3b5bc2765a6afdd0f1ee58616e31e7429  kdewallet.salt"

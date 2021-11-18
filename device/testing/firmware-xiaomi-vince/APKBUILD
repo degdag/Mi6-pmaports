@@ -1,0 +1,41 @@
+# Maintainer: m0rf30 <morf3089@gmail.com>
+pkgname=firmware-xiaomi-vince
+pkgver=1
+pkgrel=0
+_commit="545e0ce388b40d4e63e61add9b3286205df45f03"
+_commit_vince_fw="432ab3db085d06f17dc866fbe722b11792e58ae1"
+pkgdesc="Firmware files for Xiaomi Redmi 5 Plus"
+url="https://postmarketos.org"
+arch="aarch64"
+license="proprietary"
+depends="wcnss-wlan adsp-audio"
+source="$pkgname-$_commit.tar.gz::https://github.com/Blacksuan19/android_vendor_xiaomi_vince/archive/$_commit.tar.gz
+vince-fw-$_commit_vince_fw.tar.gz::https://github.com/M0Rf30/postmarketos-vendor-xiaomi-vince/archive/$_commit_vince_fw.tar.gz"
+options="!strip !check !archcheck !spdx !tracedeps pmb:cross-native"
+builddir="$srcdir/postmarketos-vendor-xiaomi-vince-$_commit"
+
+_files_adreno="a506_zap.b00 a506_zap.b01 a506_zap.b02 a506_zap.mdt a530_pfp.fw a530_pm4.fw"
+_files_camera="cpp_firmware_v1_10_0.fw cpp_firmware_v1_12_0.fw cpp_firmware_v1_1_1.fw cpp_firmware_v1_1_6.fw cpp_firmware_v1_2_0.fw cpp_firmware_v1_4_0.fw cpp_firmware_v1_5_0.fw cpp_firmware_v1_5_1.fw cpp_firmware_v1_5_2.fw cpp_firmware_v1_6_0.fw cpp_firmware_v1_8_0.fw"
+_files_finger="goodix_firmware.bin"
+_files_touch="novatek_ts_fw.bin"
+_files_audio="tas2557_uCDSP.bin"
+
+package() {
+	cd $srcdir
+	# /lib/firmware/postmarketos
+	for _i in $_files_adreno \
+		$_files_audio \
+		$_files_camera \
+		$_files_touch \
+		$_files_finger; do
+		install -Dm644 android_vendor_xiaomi_vince-"$_commit"/proprietary/vendor/firmware/"$_i" \
+			"$pkgdir"/lib/firmware/postmarketos/"$_i"
+	done
+
+	cd "$srcdir"
+	cp -r postmarketos-vendor-xiaomi-vince-"$_commit_vince_fw"/* \
+		"$pkgdir"/lib/firmware/postmarketos/
+}
+
+sha512sums="fa841014bc0bf3101928d0a44fbddbbc2a112d6d31d134aa8482f5d41bf67a5dcdffe93a83d7ddc96c56865890a197a1d0f92d279090be8f0f797f69e892b43f  firmware-xiaomi-vince-545e0ce388b40d4e63e61add9b3286205df45f03.tar.gz
+fd679b823043d40393555cecd77011973affca596fe5151fad4badc9970444655d552cce864180322203e84b3c5ba415a12c59172cac84b4b683c1714596a676  vince-fw-432ab3db085d06f17dc866fbe722b11792e58ae1.tar.gz"

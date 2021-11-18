@@ -1,0 +1,35 @@
+# Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=rmtfs
+pkgver=0.2_git20210408
+_commit="293ab8babb27ac0f24247bb101fed9420c629c29"
+pkgrel=0
+pkgdesc="Qualcomm Remote Filesystem Service Implementation"
+url="https://github.com/andersson/rmtfs"
+arch="all"
+license="BSD-3-Clause"
+makedepends="eudev-dev qrtr-dev"
+subpackages="$pkgname-doc $pkgname-openrc"
+source="
+	rmtfs-$_commit.tar.gz::https://github.com/andersson/rmtfs/archive/$_commit.tar.gz
+	rmtfs.initd
+	udev.rules
+"
+builddir="$srcdir/rmtfs-$_commit"
+options="!check"
+
+build() {
+	make rmtfs
+}
+
+package() {
+	install -Dm755 rmtfs "$pkgdir"/usr/sbin/rmtfs
+	install -Dm755 "$srcdir/$pkgname.initd" "$pkgdir/etc/init.d/$pkgname"
+	install -Dm644 "$srcdir/udev.rules" "$pkgdir/usr/lib/udev/rules.d/65-$pkgname.rules"
+	install -Dm644 LICENSE "$pkgdir"/usr/share/licenses/$pkgname/COPYING
+}
+
+sha512sums="
+eac13ff0733de1220af55faceae11b4ca63e4a996544c1423c2188dfda34ee2c9870e0611d24b5450f6f2cb3c3b3b23fc9121fdba2b6a3f80e3965204161b173  rmtfs-293ab8babb27ac0f24247bb101fed9420c629c29.tar.gz
+6d90a413a6b1a144969228f0b65bfcb5c605c8afd3d7d2837f854a179a38367c7efbafda72fe9e97dcf38ee0685a89d271833670e04f3e6a0c7dc9017e59bbf8  rmtfs.initd
+cb2435c159d81d3a40d30e1355c82a3d560dc2df7d05fee95085bc80e492ac93a728258f2f1b463c04a964979760990c8c9176b22cb585cbec19ab285cd45440  udev.rules
+"

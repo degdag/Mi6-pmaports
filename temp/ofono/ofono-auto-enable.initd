@@ -1,0 +1,9 @@
+#!/sbin/openrc-run
+
+command="/usr/bin/ofono-auto-enable"
+command_background=true
+pidfile="/run/${RC_SVCNAME}.pid"
+
+depend() {
+   need dbus
+}

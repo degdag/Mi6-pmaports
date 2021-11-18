@@ -1,0 +1,25 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-zte-kis3
+pkgdesc="ZTE Open C / Kis 3"
+pkgver=0.1
+pkgrel=8
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-zte-kis3 mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+
+sha512sums="
+f6ae0e72809ffdfcfeb87b9aded8ad9056c477c278c3c634868c82fb8698bb3459b9ea8ab334104a1c31a2e14376c8ba3447279f3551a6557072299802ba2972  deviceinfo
+"

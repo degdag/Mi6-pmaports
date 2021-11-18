@@ -1,0 +1,29 @@
+From d88ca42d93cc0f8b51dce0887578920eba0cb797 Mon Sep 17 00:00:00 2001
+From: Denny Harijanto <denny@nusantara-cloud.com>
+Date: Mon, 4 Feb 2019 13:13:11 +0700
+Subject: [PATCH 4/5] Added Parameters to Atmel TouchScreen Drivers
+
+Libinput expects both ABS_MT_TOUCH_MAJOR and ABS_MT_WIDTH_MAJOR to have
+proper min and max value. Without them, the input device is rejected.
+---
+ drivers/input/touchscreen/atmel_mxt1386.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/drivers/input/touchscreen/atmel_mxt1386.c b/drivers/input/touchscreen/atmel_mxt1386.c
+index 0ee2949edb5..6769d3a8938 100644
+--- a/drivers/input/touchscreen/atmel_mxt1386.c
++++ b/drivers/input/touchscreen/atmel_mxt1386.c
+@@ -2997,8 +2997,8 @@ static int __devinit mxt_probe(struct i2c_client *client,
+ 	// multi touch
+ 	input_set_abs_params(input, ABS_MT_POSITION_X, 0, mxt->pdata->max_x, 0, 0);
+ 	input_set_abs_params(input, ABS_MT_POSITION_Y, 0, mxt->pdata->max_y, 0, 0);
+-	input_set_abs_params(input, ABS_MT_TOUCH_MAJOR, 0, 0, 0, 0);
+-	input_set_abs_params(input, ABS_MT_WIDTH_MAJOR, 0, 0, 0, 0);
++	input_set_abs_params(input, ABS_MT_TOUCH_MAJOR, 0, 0xff, 0, 0);
++	input_set_abs_params(input, ABS_MT_WIDTH_MAJOR, 0, 0xff, 0, 0);
+ //	input_set_abs_params(input, ABS_MT_TRACKING_ID, 0, MXT_MAX_NUM_TOUCHES, 0, 0);
+ //	input_set_abs_params(input, ABS_MT_PRESSURE, 0, 255, 0, 0); 
+ 
+-- 
+2.19.1
+

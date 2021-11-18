@@ -1,0 +1,28 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+
+name="RMTFS"
+description="Qualcomm remote file system service"
+
+# -P: find and use raw EFS partitions
+# -r: avoid writing to storage
+command="/usr/sbin/rmtfs"
+command_args="-P -r"
+
+# https://github.com/andersson/rmtfs/commit/dfb8f3ed1c8fbde621cd08aaf9e7724a4c55cbd1
+respawn_delay=1
+
+# Downstream hacks: use libqipcrtr4msmipc.so
+if [ -f /usr/lib/preload/libqipcrtr4msmipc.so ]; then
+	export LD_PRELOAD=/usr/lib/preload/libqipcrtr4msmipc.so
+else
+	# -s: enable sync for the mss rproc instance (works only on mainline)
+	# Basically: start/stop modem remoteproc together with rmtfs
+	command_args="$command_args -s"
+fi
+
+depend() {
+	before ofono modemmanager
+	after udev-settle
+	use qrtr-ns
+}

@@ -1,0 +1,9 @@
+# This udev rule is a workaround, udev doesn't care about the headphone jack input events :(
+# We need a better workaround, perhaps a daemon for jack detection?
+
+# Init
+ATTRS{id}=="msm8920sku7sndc", RUN+="/usr/bin/alsaucm -c msm8920-sku7-snd-card set _verb HiFi set _enadev Speaker"
+
+# Jack detection
+SUBSYSTEM=="switch",ATTRS{state}=="[1-4]",RUN+="/usr/bin/alsaucm -c msm8920-sku7-snd-card set _verb HiFi set _enadev Headphones"
+SUBSYSTEM=="switch",ATTRS{state}=="0",RUN+="/usr/bin/alsaucm -c msm8920-sku7-snd-card set _verb HiFi set _enadev Speaker"

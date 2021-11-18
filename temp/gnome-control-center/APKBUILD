@@ -1,0 +1,132 @@
+# Forked from Alpine to apply adaptability patches
+pkgname=gnome-control-center
+pkgver=9999_git20210917
+pkgrel=0
+_pkgver=41.1
+pkgdesc="GNOME control center"
+url="https://gitlab.gnome.org/GNOME/gnome-control-center"
+# s390x, mips64 and riscv64 blocked by polkit
+arch="all !s390x !mips64 !riscv64"
+license="GPL-2.0-or-later"
+depends="cups-pk-helper openrc-settingsd dbus:org.freedesktop.Secrets"
+makedepends="
+	clutter-dev
+	clutter-gtk-dev
+	gnome-desktop-dev
+	gnome-settings-daemon-dev
+	gnome-online-accounts-dev
+	grilo-dev
+	libgtop-dev
+	gnome-bluetooth-dev
+	colord-gtk-dev
+	samba-dev
+	accountsservice-dev
+	libpwquality-dev
+	networkmanager-dev
+	libnma-dev
+	modemmanager-dev
+	krb5-dev
+	itstool
+	libxml2-utils
+	libxslt
+	docbook-xml
+	docbook-xsl
+	pulseaudio-dev
+	udisks2-dev
+	cups-dev
+	meson
+	libsecret-dev
+	gsound-dev
+	libgudev-dev
+	polkit-dev
+	libhandy1-dev
+	cheese-dev
+	ibus-dev"
+options="!check" # needs unpackaged py-dbusmock
+install="$pkgname.pre-install $pkgname.pre-upgrade"
+subpackages="$pkgname-dbg $pkgname-dev $pkgname-lang $pkgname-doc $pkgname-bash-completion"
+
+_assets_location="https://gitlab.com/pabloyoyoista/g-c-c-assets/-/raw/master"
+
+_purism_commit="d2c36cb86195d75a6975bc3ad369ee7a0a8f1352"
+_purism_patches="https://source.puri.sm/pureos/packages/gnome-control-center/-/raw/$_purism_commit/debian/patches"
+
+source="https://download.gnome.org/sources/gnome-control-center/${_pkgver%.*}/gnome-control-center-$_pkgver.tar.xz
+	0001-Hide-and-disable-building-printer-panel.patch
+	0002-shell-Mirror-the-main-leaflet-s-folded-property.patch
+	0003-display-Use-ComboBox-when-folded.patch
+	0004-Wrap-long-labels-on-small-screens.patch
+	0005-WiFi-Reduce-width-of-connection-row-for-mobile.patch
+	0006-Add-new-connection-editor.patch
+	0007-Wifi-Use-Purism-connection-editor.patch
+	0008-Users-Adapt-panel-to-make-it-usable-in-small-screens.patch
+	$_assets_location/multitasking/active-screen-edges.svg
+	$_assets_location/multitasking/hot-corner.svg
+	$_assets_location/multitasking/workspaces-primary-display.svg
+	$_assets_location/multitasking/workspaces-span-displays.svg
+	$_purism_patches/pureos/avatar-chooser-Adapt-to-work-on-librem5.patch
+	$_purism_patches/pureos/datetime-Fix-timezone-selection-map.patch
+	$_purism_patches/pureos/display-Request-a-smaller-size-for-arrangment-widget.patch
+	$_purism_patches/pureos/online-accounts-Make-edit-account-dialog-resizable.patch
+	$_purism_patches/pureos/sound-fix-test-dialog-on-small-screen.patch
+	$_purism_patches/pureos/wifi-Fix-a-crash-when-wifi-device-is-removed.patch
+	README.alpine
+	"
+
+builddir="$srcdir/$pkgname-$_pkgver"
+
+prepare() {
+	default_prepare
+
+	cp "$srcdir"/*.svg "$builddir"/panels/multitasking/assets
+}
+
+build() {
+	abuild-meson \
+		-Dcheese=true \
+		-Dibus=true \
+		. output
+
+	# Bad dep file -> blows up when compiling with multiple build jobs otherwise
+	ninja -C output panels/network/cc-network-resources.c
+	ninja -C output panels/network/cc-network-resources.h
+
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	meson test --no-rebuild -v -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+
+	mkdir -p "$pkgdir"/usr/lib/pkgconfig
+	mv "$pkgdir"/usr/share/pkgconfig/* "$pkgdir"/usr/lib/pkgconfig
+	rmdir "$pkgdir"/usr/share/pkgconfig
+
+	install -Dm0644 "$srcdir"/README.alpine -t "$pkgdir"/usr/share/doc/"$pkgname"
+}
+
+sha512sums="
+432cc9d90896f7d5ffc751cd6904e1694cf825e39807b00f673bf2a6b375ecb3d65de6602df49da0b3147c3a35c83f3177ab22ca68e7f66c530958afeab30bc5  gnome-control-center-41.1.tar.xz
+b0e53a2a436acc7502dbe3c21df73ce7da042b4f1513b3e003d7f14bb23f308e67f32d1a5743e5b60800a3247c5f48e87479d7c1c8eeade25ae35fe43e088e6c  0001-Hide-and-disable-building-printer-panel.patch
+7351f941110f369d3d9c837fcb52f91c8afaeb6e1a372de789584869bd9eb1d26c72ea65ea75fd1b14cecc8dc4baef060ec38b52d0c3bc46080732b38df26290  0002-shell-Mirror-the-main-leaflet-s-folded-property.patch
+832da3134cdfb7a693088fe9b7579d5dc9788636163ec0fa8957803ff07bdc0c2b0a08fe7997fdf57a9d336cabd3cddc944074cca42154ed674bce6f01b5e163  0003-display-Use-ComboBox-when-folded.patch
+a7d912c6e4a2aab0ba20e04240ee8e7a6729bee328249a1b7c123fa9bd2ee51685b29817538b81ec6bd5e1eee1966923893ca0fb9189eaa8dad401927a3746ed  0004-Wrap-long-labels-on-small-screens.patch
+e8c0f1e03013ba95e80e65d790ea3eec3c47860a783bc6b0772a6607e90a37017da52a4308d78ec1755df740c798af744dac896fb74e690abf068a3e560a20d4  0005-WiFi-Reduce-width-of-connection-row-for-mobile.patch
+8ed6b4c90a645e31b24e65a312b63f74d839a9a0f94509c7bf7206b355d326969203b20ddd3d1dc03a30f5294698899eaa42aa7301f166fab451ffc91bb59673  0006-Add-new-connection-editor.patch
+9573434124562643299bcc7a2d2bf1f9b7a6f4efc30aa7605017553503c301efa062399409eefa07e5df4ea5be2d4396b7edfcf69828f2ca188d25fbae0dbcb9  0007-Wifi-Use-Purism-connection-editor.patch
+ca8f9d85043682311c29352f21d4c1270b28d1a13135cb4189bb26d785bb255a37f70ba6a84d857d87febfc7a82344304ebb5e954411406f38126e8b0c1492fa  0008-Users-Adapt-panel-to-make-it-usable-in-small-screens.patch
+a14d99eb128b04d6c1744c5599cb88a78c26c6aaa5a02b00970095c1107dbac9002dd985c9d0ef313bea13db79ed6bd672f247f00d4fb3c31b7dc1e9565627da  active-screen-edges.svg
+4ccc3cbce817381e0780f518ab8e6877f8169ad0ffefb89ae331703be5c4630f5f533ef73a978b093f0f4a0005b488aaf0bd637db11f5efacd5e0fe8c703d863  hot-corner.svg
+6d17793ceb312ec9b3bf32c5ace90c0515aa874ed654ab0a18fa822bfc3c5fdfbfc6e752eb3c6e43f2abfbfd61c1e8ee6eca61fa721e8503a19a061a748c69ae  workspaces-primary-display.svg
+49fd807338e6d47e7f59cc592dd859c8fb93f73b0c035827f6d1c4f877afcca72aa24068adacf025f9f8c13d35ae8090bcc9a0f06a760915c53453cae870f20f  workspaces-span-displays.svg
+d7475a4d021ccaec1b380484cc045fba5ae43e36460bcba8f940fced3690148377f58e78fd57b7de0e3675671246dc4f28dc1611e2f2c1cdaf51495ee8ddb3d5  avatar-chooser-Adapt-to-work-on-librem5.patch
+3c49081f364033d1d84a4b7594c39940da6f33d0eff2000ec04aea7f590876cf1a586dad4de9cb34f1bbb2e778a137bc5e38ecb9fa9c6121e1fa1ce21f74298f  datetime-Fix-timezone-selection-map.patch
+b07796c5d5424fe26f3c773750bd248b60a30d9ccccd7976fbf2626732216eb2a5813497c90f8c7a29074531cf5378cddb7cec4809df221ec9214f3191214b0a  display-Request-a-smaller-size-for-arrangment-widget.patch
+a4f34dfb11d676503991d5feb79f0f0551d5c067ce669091b195ac44518a09349db0178d3e7c13dfd5080acdfb24e2515f86c50c3d67fd15015ce20951ff9889  online-accounts-Make-edit-account-dialog-resizable.patch
+24cc550021ba7fe7103d031411a2cc50f6d8b9522d37d19a84133a3da0a032a2c7b5a711f730bbd77c50a7ea7ff67fabb12ffecd15622094af39de802e576c86  sound-fix-test-dialog-on-small-screen.patch
+6cce02774a0e755c9cd55af5a3baf4cc16f5e8c125cd6d83980dcfd9e7eabe0e884fa2a797d43f9741eb795e71fed7169b93e02bdd315aa96c0bedb5b42f0a50  wifi-Fix-a-crash-when-wifi-device-is-removed.patch
+350aa443149c71851ad4de0976c7fc5cb626ba0c57a8d41e6ef80da1c65ed84a4dfa2483ae92630a3b611c4bfa9360ded82b55e8cd0e3907294c025e4f6b1671  README.alpine
+"

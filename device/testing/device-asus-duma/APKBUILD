@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-asus-duma
+pkgdesc="ASUS MeMO Pad FHD 10 (ME302KL)"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-asus-duma mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-asus-duma"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+035841c2e5b0b8fb2dae939d01257e3fc2672ca1198abade926258501fd0860b0278c20221a04a5205a45cdd53cc3b3bdf839b9ad917c280ff31ddf57afc106b  deviceinfo
+"

@@ -1,0 +1,68 @@
+# Maintainer: Minecrell <minecrell@minecrell.net>
+# Kernel config based on: https://github.com/me176c-dev/archlinux-me176c/blob/master/linux-me176c/config
+
+_flavor="asus-me176c"
+pkgname=linux-$_flavor
+pkgver=5.4.107
+_kernver=${pkgver%.*}
+_me176cver=5.4.17
+pkgrel=2
+pkgdesc="Mainline kernel fork for ASUS MeMO Pad 7 (ME176C(X))"
+arch="x86_64"
+_carch="x86_64"
+url="https://github.com/me176c-dev/linux-me176c"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-anbox
+		 pmb:kconfigcheck-nftables"
+makedepends="
+	bison
+	diffutils
+	elfutils-dev
+	flex
+	gmp-dev
+	linux-headers
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+	xz
+"
+
+# Source
+source="
+	https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$_kernver.tar.xz
+	linux-$pkgver.patch.xz::https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/patch-$pkgver.xz
+	https://github.com/me176c-dev/linux-me176c/releases/download/$_me176cver/linux-me176c-$_me176cver.patch.xz
+	config-$_flavor.$arch
+"
+builddir="$srcdir/linux-$_kernver"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$arch" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make install modules_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="9f60f77e8ab972b9438ac648bed17551c8491d6585a5e85f694b2eaa4c623fbc61eb18419b2656b6795eac5deec0edaa04547fc6723fbda52256bd7f3486898f  linux-5.4.tar.xz
+f470aef89892a79da7d87a3637859ba3b67ca3103f4be5e439fa5fa06a3aef2fe9a9b6d152556da92d2ae595ee8623bcd68b57bc65c4ec45c5500ae2c530dba0  linux-5.4.107.patch.xz
+aa462bfcbba87469a617e2ffd4058cd41137b74f836aae47ac89bc70de2836b8f3ddce94f597e61bb287eb009bb71f4e831c487b0073011673d5db4a8d8ae080  linux-me176c-5.4.17.patch.xz
+a919b5243bce4ce1d4a8c4117137b8cf1c5c3787332a8afa7e3b0b3079e6f7718c356d0a03e288ad4e7b11f763915a8a941fe7e1522aaa71ef5977e0e297f04c  config-asus-me176c.x86_64"

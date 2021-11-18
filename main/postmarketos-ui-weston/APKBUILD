@@ -1,0 +1,43 @@
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-weston
+pkgver=5
+pkgrel=4
+pkgdesc="(Wayland) Reference compositor (demo, not a phone interface)"
+url="https://postmarketos.org"
+arch="noarch"
+license="GPL-3.0-or-later"
+depends="
+	dnsmasq
+	elogind
+	networkmanager
+	postmarketos-base-ui
+	tinydm
+	tinydm-openrc
+	weston-clients
+	weston
+	weston-shell-desktop
+	weston-backend-fbdev
+	weston-backend-drm
+	xorg-server
+	"
+_pmb_recommends="htop
+	postmarketos-artwork-wallpapers
+	postmarketos-demos
+	weston-clients
+	weston-terminal
+	weston-xwayland
+	xwayland
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="start_weston.sh weston.ini.default"
+options="!check" # Meta package, no test suite
+
+package() {
+	install -Dm755 "$srcdir"/start_weston.sh \
+		"$pkgdir"/usr/bin/start_weston.sh
+
+	install -Dm644 "$srcdir"/weston.ini.default \
+		"$pkgdir"/etc/xdg/weston/weston.ini.default
+}
+sha512sums="33fbf6a3b5558a6d7c3a5993e890e4cee10e868ebc70e8f602d5e07513a77a0bebf7fd343c90a2a72c4f4b30777d3cd7b48c66efb4112032f4421d2806ef3b9b  start_weston.sh
+b712c9d4c846437656781656ec15e9b7e238a9244e0b77bf84b67f6661d44f68718330706f69ccb8b4d7f6182b8f17f273018ca461c0c40e49b9185f6eec168d  weston.ini.default"

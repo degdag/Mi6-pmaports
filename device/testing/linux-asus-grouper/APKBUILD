@@ -1,0 +1,47 @@
+# Maintainer: David Heidelberg <david@ixit.cz>
+pkgname=linux-asus-grouper
+pkgver=5.14.0_rc3
+pkgrel=1
+arch="armv7"
+pkgdesc="Linux kernel with experimental patches for Tegra (optimized for size constrained boot.img of Nexus 7 grouper/tilapia (2012))"
+url="https://postmarketos.org"
+makedepends="perl sed installkernel bash gmp-dev bc linux-headers elfutils-dev
+	     devicepkg-dev bison flex openssl-dev xz findutils"
+options="!strip !check !tracedeps pmb:cross-native"
+license="GPL-2.0-only"
+
+# Source
+_flavor=asus-grouper
+_commit="6ab7e328e14f2693ca800ac742f2f5cb3e5e450e"
+_carch="arm"
+_config="config-$_flavor.armv7"
+source="$pkgname-$pkgver-$_commit.tar.gz::https://github.com/grate-driver/linux/archive/$_commit.tar.gz
+	$_config"
+builddir="$srcdir/linux-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+
+	REPLACE_GCCH=0 \
+		. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-$_flavor"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+
+	make modules_install dtbs_install \
+		O="$_outdir" ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+}
+
+sha512sums="05b76312634a425297fe70b14ce6a5e502227fd9f9c490abc3f20aeb5b330111290fe280cfeeacb53de659beef0c6b3312655fde8263af7f954ce1954560dd20  linux-asus-grouper-5.14.0_rc3-6ab7e328e14f2693ca800ac742f2f5cb3e5e450e.tar.gz
+af9db52e246783ce61a3b0254f0a7de8258bfdcbfb4551e78c3e3b71e63663b999187ac8534a93baa9ccf730ebc51942559e283a4ea2efc07d689547113d81f3  config-asus-grouper.armv7"

@@ -1,0 +1,38 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-k2ul
+pkgdesc="HTC One SV"
+pkgver=0.1
+pkgrel=8
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-htc-k2ul mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo initfs-hook.sh 90-android-touch-dev.rules"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -D -m644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+		# Remove v4l rules due to crashes and hangs
+		ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-htc-k2ul"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+8bba6b30fbea35b1150048969320b874890412cb12eac2911b3be45fafef944abd2f9c252762f09259b67373e36c9cc56930be1333971642b05c11ff87a72e6c  deviceinfo
+e1fa365c75602eb3144ef36f0b1f1c622fea092c758064355c277daf58848655e51ed9db6cbef57a6fe605378a97f778a0b5e3ffca80797257369dc3064419de  initfs-hook.sh
+f0f69ab3b5b3fed11ec5049f37c71c4e9dcf87dc1f238199a3917dd61957d46783a8798d63d400cc5d3983987e750e3fec6d7117561ad5005f28131ae4821d66  90-android-touch-dev.rules
+"

@@ -1,0 +1,87 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/exynos8895-dreamlte_defconfig
+
+pkgname=linux-samsung-dream
+pkgver=4.4.111
+pkgrel=3
+pkgdesc="Meta package for Samsung Galaxy S8/S8+ kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="samsung-dream"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl dtbtool-exynos"
+subpackages="
+	${pkgname}lte:kernel_dreamlte
+	${pkgname}2lte:kernel_dream2lte
+"
+
+# Source
+_repository="android_kernel_samsung_universal8895"
+_commit="abd876b3b5fc80dc302183cd372067bab40efab5"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/exynos8895/$_repository/archive/$_commit.tar.gz
+	$_config
+	01-disable-ext4-debug.patch
+	02-fix-decon_reg.patch
+	03-change-dtb-config-var.patch
+	04-firmware-path.patch
+	05-BGR-to-RGB-colors.patch
+	linux4.2-gcc10-extern_YYLOC_global_declaration.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+
+	# Master DTB dreamlte (deviceinfo_bootimg_qcdt)
+	dtbTool-exynos --pagesize 2048 \
+		--platform 0x50a6 \
+		--subtype  0x217584da \
+		-o "$_outdir/arch/$_carch/boot/dt_dreamlte.img" \
+		$(find "$_outdir/arch/$_carch/boot/dts/" -name *dreamlte*.dtb)
+
+	# Master DTB dream2lte (deviceinfo_bootimg_qcdt)
+	dtbTool-exynos --pagesize 2048 \
+		--platform 0x50a6 \
+		--subtype  0x217584da \
+		-o "$_outdir/arch/$_carch/boot/dt_dream2lte.img" \
+		$(find "$_outdir/arch/$_carch/boot/dts/" -name *dream2lte*.dtb)
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+kernel_dreamlte() {
+	pkgdesc="Kernel for the Samsung Galaxy S8"
+	depends="$pkgname"
+	install -Dm644 "$builddir/$_outdir/arch/$_carch/boot/dt_dreamlte.img" \
+		"$subpkgdir"/boot/dt.img
+}
+
+kernel_dream2lte() {
+	pkgdesc="Kernel for the Samsung Galaxy S8+"
+	depends="$pkgname"
+	install -Dm644 "$builddir/$_outdir/arch/$_carch/boot/dt_dream2lte.img" \
+		"$subpkgdir"/boot/dt.img
+}
+
+sha512sums="a7c6d55d12ec5ef2bb388fae4106c63eb89ea0d4f8a682f45a0e15899484b633883cd40138eb2d36ef040b49301e48e3fdb44be92ecbfa20a7bbcda35f326a9c  linux-samsung-dream-abd876b3b5fc80dc302183cd372067bab40efab5.tar.gz
+14aa04acd6f265fb5bfa482743ba523b0f9df6d325fdca0d12041955b370dd70425610457c066d05e437481a60b7686eaeebf21a60d5c4b535346779c3852bc4  config-samsung-dream.aarch64
+1779761fd276e3edc083d5d823c254da0606824157c353a52c35a81ca95b3ce5741fc42cd5cf9b5846ca9f2c823e207c97fc2c970254ee8d9c83c0e240b2ba6b  01-disable-ext4-debug.patch
+939b2f5b569c3c9d8e088762e394edc6f4eae4a0f08e8c428f687e4e559bb278cefdd377023271487b6c937a6c5421050d7821cefa34c10d44e7cd904fd12b9a  02-fix-decon_reg.patch
+6ad12c90f66b10e6b58e161e44841cbbb73e0aef22e4a32fa390ac664451287c253501c9cf84b87aeac41c13fa29b1d8330df3dd58f890567d8a8543a2432505  03-change-dtb-config-var.patch
+18082be5bcb4eec18b4916a116a40653826e45ccc52b6cc364790c37ba9056f383c82ae2027a613b9f1973463ea9dfc09ea2d3e19c0cccb16e65507b42931ec9  04-firmware-path.patch
+3b76da1513001f7b926e90d46f1435a86d99884ef8f6fe6d2b49d9b6b152a9a0939b4d9e0933b4b7d34a69ad13ae2782e65ee1e29832598eb5ed9aab4bc12ed1  05-BGR-to-RGB-colors.patch
+eaf2e61fcb508cdd239b8fed209d2a09ecac77287f6b46d003918fdf1c6fa2ee63f7390f3ff7c49029b8ed6cbcdd81c7e9a4b1ece9f5060b6fc84e322bd47f41  linux4.2-gcc10-extern_YYLOC_global_declaration.patch"

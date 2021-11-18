@@ -1,0 +1,83 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Clayton Craft <clayton@craftyguy.net>
+pkgname=device-pine64-pinebookpro
+pkgdesc="PINE64 Pinebook Pro"
+pkgver=9
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	alsa-ucm-conf
+	linux-postmarketos-rockchip>=5.14
+	mesa-dri-gallium
+	nvme-cli
+	postmarketos-base
+	u-boot-pinebookpro
+	iw
+	"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="
+	deviceinfo
+	extlinux.conf
+	10-pinebookpro.hwdb
+	70-edp-backlight.rules
+	mem_sleep.conf
+	nvme-powersave.initd
+	ucm/rockchip,es8316-codec.conf
+	ucm/HiFi
+	wlan-powersave-off.start
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/extlinux.conf \
+		"$pkgdir"/boot/extlinux/extlinux.conf
+
+	# Keyboard mapping
+	install -D -m644 "$srcdir"/10-pinebookpro.hwdb \
+		"$pkgdir"/etc/udev/hwdb.d/10-pinebookpro.hwdb
+
+	# Sleep workaround
+	install -D -m644 "$srcdir"/mem_sleep.conf \
+		"$pkgdir"/etc/sysfs.d/mem_sleep.conf
+
+	# Alsa usecase manager config
+	install -D -m644 "$srcdir"/rockchip,es8316-codec.conf \
+		"$pkgdir"/usr/share/alsa/ucm2/simple-card/rockchip,es8316-codec.conf
+	install -D -m644 "$srcdir"/HiFi \
+		"$pkgdir"/usr/share/alsa/ucm2/rockchip_es8316/HiFi
+
+	install -D -m755 "$srcdir"/nvme-powersave.initd \
+		"$pkgdir"/etc/init.d/nvme-powersave
+
+	install -D -m755 "$srcdir"/wlan-powersave-off.start \
+		"$pkgdir"/etc/local.d/wlan-powersave-off.start
+
+	install -D -m644 "$srcdir"/70-edp-backlight.rules \
+		"$pkgdir"/usr/lib/udev/rules.d/70-edp-backlight.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi, Bluetooth and video-out firmware"
+	depends="firmware-pine64-pinebookpro"
+	mkdir "$subpkgdir"
+}
+sha512sums="
+d748d300043b5f3d87af5ac4a7bb916b5af15186d30830273c2bb921cd67937b7bc4019505931c7152216d88d4043f89880c91a497713c510ba92c64ddc7830a  deviceinfo
+a24af007d87ec1b9108b4ca0fafa661a0c1298c8de97abeaeacb70283a1e797e8cd0caa41918e5f38e8e41c6195a1964b569f54cb4deca63d403b685455f118c  extlinux.conf
+d3988fe83c54228d743f4a8c190e9530404a436a7fbc0b004bf20d3986b502d864717d8cc9c76812e599266bf84cb08f9a86e1bfd220875799c5a022aea588ec  10-pinebookpro.hwdb
+6e9e9ef54ee9aa9491be6dc30451fdcd9038b0efeb959509f48626d97a1696ee81711a46510049557b73269ff48acc85fad6496c65451e2e24908241b7655444  70-edp-backlight.rules
+bcae155e24a151d3c098833680b83b6004a329962f115480d560ebe19257eab87286b8a4c194e456c067ca54fb53e59a5a16b022cea13c11135b0855145db563  mem_sleep.conf
+2abfa31fa56028339efc6d2b6cb838f310990d7110ac4dd996bc4cfcf90f0a8770e70f28f77f7b6929d110e494bc33731302f16b9717729f991c2732be0731d5  nvme-powersave.initd
+71a3ea790eedd02df2bcf2ba24cc41b376ad0a8a7d72b1ee2dd7a0f9d618243d214157046649583f790b388d8faef5a03fcd4306ff4a3319e418bb895be831bc  rockchip,es8316-codec.conf
+558f08b56425e0ceeea8d4815eeb862a2b801ba1b26b4dc28f4d0ec991ed9dfef14113172a224191eb2de5d0b57a741e4c48f1307bda2a69595944bd58731be1  HiFi
+0fd7580e197e409978c219726af627cabe347404ee826e32892b61f3da1775b0fd81f8ed5e9a0f0bfaad87faa434d7a73ddaebf475ed0ad8fdcef6690cd692d3  wlan-powersave-off.start
+"

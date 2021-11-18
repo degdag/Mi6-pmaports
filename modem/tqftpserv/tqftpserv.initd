@@ -1,0 +1,9 @@
+#!/sbin/openrc-run
+supervisor=supervise-daemon
+name="tqftpserv"
+description="QRTR TFTP service"
+command="/usr/bin/tqftpserv"
+
+depend() {
+	want qrtr-ns
+}

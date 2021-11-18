@@ -1,0 +1,18 @@
+#!/sbin/openrc-run
+
+description="Initialize PowerVR SGX server"
+
+depend() {
+	need dev localmount
+	after hwdrivers modules dev-mount
+}
+
+start() {
+	for i in {0..5} ; do
+		if /bin/pvrsrvinit ; then
+			return 0
+		fi
+		sleep 5
+	done
+}
+

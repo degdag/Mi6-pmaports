@@ -1,0 +1,21 @@
+# Configure the touch including calibration for wayland and x11
+# Add the touch to a group so the pen can be added to the same group
+# and then whenever the pen is recognized, regular touch is deactivated.
+SUBSYSTEM=="input", ENV{DEVNAME}=="/dev/input/event2", \
+ENV{WL_CALIBRATION}="0 1 0 -1 0 800", \
+ENV{LIBINPUT_CALIBRATION_MATRIX}="0 1 0 -1 0 1", \
+ENV{LIBINPUT_DEVICE_GROUP}="touchpen", \
+ENV{ID_INPUT}="1", ENV{ID_INPUT_TOUCHSCREEN}="1"
+
+# Configure the pen including calibration (for x11).
+# Further, the resolution needs to be set.
+# This could be in hwdb and calls the builtin "keyboard" from (e)udev
+# that sets the internal "ABS" property.
+# This "resolution" is units/mm.
+SUBSYSTEM=="input", ENV{DEVNAME}=="/dev/input/event10", \
+ENV{ID_INPUT_TABLET}="1", \
+ENV{LIBINPUT_DEVICE_GROUP}="touchpen", \
+ENV{LIBINPUT_CALIBRATION_MATRIX}="0 1 0 -1 0 1", \
+ENV{EVDEV_ABS_00}="::100", \
+ENV{EVDEV_ABS_01}="::100", \
+RUN{builtin}+="keyboard"

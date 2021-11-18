@@ -1,0 +1,36 @@
+# Automatically generated aport, do not edit!
+# Generator: pmbootstrap aportgen busybox-static-armv7
+
+# Stub for apkbuild-lint
+if [ -z "$(type -t arch_to_hostspec)" ]; then
+	arch_to_hostspec() { :; }
+fi
+
+pkgname=busybox-static-armv7
+pkgver=1.34.1
+pkgrel=2
+
+_arch="armv7"
+_mirror="http://uk.alpinelinux.org/alpine/"
+
+url="http://busybox.net"
+license="GPL2"
+arch="x86_64"
+options="!check !strip"
+pkgdesc="Statically linked Busybox for $_arch"
+_target="$(arch_to_hostspec $_arch)"
+
+source="
+	busybox-static-$pkgver-r$pkgrel-$_arch-edge.apk::$_mirror/edge/main/$_arch/busybox-static-$pkgver-r$pkgrel.apk
+"
+
+package() {
+	mkdir -p "$pkgdir/usr/$_target"
+	cd "$pkgdir/usr/$_target"
+	tar -xf $srcdir/busybox-static-$pkgver-r$pkgrel-$_arch-edge.apk
+	rm .PKGINFO .SIGN.*
+}
+
+sha512sums="
+b4d2db485f9c4eded6109cce97d8a4592ad2591eb7f95e60d77fa9c07278a3e0b1dd40bd7a41a4016091a4db4be1503de7289258ac966def5fc079c4d163f88b  busybox-static-1.34.1-r2-armv7-edge.apk
+"

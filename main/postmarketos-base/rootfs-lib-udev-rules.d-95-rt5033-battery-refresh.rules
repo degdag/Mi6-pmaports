@@ -1,0 +1,5 @@
+# refresh rt5033-battery information in UPower 5 secs after initialization
+ACTION=="add", KERNEL=="rt5033-battery", RUN+="/bin/sh -c 'sleep 5 && \
+dbus-send --print-reply --system --dest=org.freedesktop.UPower \
+/org/freedesktop/UPower/devices/battery_rt5033_battery \
+org.freedesktop.UPower.Device.Refresh > /dev/null 2>&1'"

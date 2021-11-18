@@ -1,0 +1,25 @@
+# Maintainer: Martijn Braam <martijn@brixit.nl>
+pkgname=crust
+pkgver=0.4
+pkgrel=0
+pkgdesc="SCP firmware for sunxi SoCs"
+arch="aarch64"
+url="https://github.com/crust-firmware/crust"
+license="BSD-1-Clause AND BSD-3-Clause AND GPL-2.0-only and MIT"
+makedepends="gcc-or1k-elf binutils-or1k-elf dtc bison flex"
+source="https://github.com/crust-firmware/crust/archive/v$pkgver/crust-v$pkgver.tar.gz
+	0289a01c9ee211195728e14b4f26dd2e5226561a.patch"
+options="!check !archcheck !tracedeps pmb:cross-native" # No tests
+
+build() {
+	make CROSS_COMPILE=or1k-elf- pinephone_defconfig
+	make CROSS_COMPILE=or1k-elf- build/scp/scp.bin
+}
+
+package() {
+	install -D -m644 build/scp/scp.bin "$pkgdir"/usr/share/crust/pinephone/scp.bin
+}
+sha512sums="
+c6cd3b001ed3573c1737d07e68871740ae5df152d3dcb33358378f8e91ef599f6141bc4fc8aa66d2bc6d9be510da927cfab389e36e9f7f25bdad02f778acac03  crust-v0.4.tar.gz
+3e9271a9c2850f2c8864502b2db19b9c42c8c336ee8b4e31077fdb11c7ccdabcc8353f13b2d58330a01c2aa574c08e315ec75685ba39689ec51900f9c001862f  0289a01c9ee211195728e14b4f26dd2e5226561a.patch
+"

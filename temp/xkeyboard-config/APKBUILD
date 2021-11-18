@@ -1,0 +1,54 @@
+# Forked from Alpine, so we can extend the keyboard layouts
+pkgname=xkeyboard-config
+pkgver=9999
+_pkgver=2.33
+pkgrel=3
+pkgdesc="X keyboard configuration files"
+url="http://www.freedesktop.org/wiki/Software/XKeyboardConfig"
+arch="noarch"
+license="MIT"
+subpackages="$pkgname-doc"
+makedepends="meson perl libxslt"
+source="https://www.x.org/archive/individual/data/xkeyboard-config/xkeyboard-config-$_pkgver.tar.bz2
+	0001-RX-51-Symbols-Bind-Escape-to-third-level-Backspace.patch
+	0002-RX-51-Symbols-Bind-function-keys-to-fourth-level-top.patch
+	0003-RX-51-Symbols-Bind-PgUp-PgDown-Home-End-to-third-lev.patch
+	0004-RX-51-Symbols-Bind-less-and-greater-to-fourth-level-.patch
+	0005-RX-51-Symbols-Bind-volume-keys-as-XF86-raise-and-low.patch
+	0006-RX-51-Symbols-Bind-bar-to-fourth-level-L.patch
+	0007-RX-51-Symbols-Bind-tilde-to-fourth-level-C-and-F.patch
+	0008-RX-51-Symbols-Bind-percent-to-fourth-level-D.patch
+	0009-RX-51-Symbols-Bind-Tab-to-third-level-Return.patch
+	0010-RX-51-Symbols-Bind-braces-to-fourth-level-N-and-M.patch
+	0011-RX-51-Symbols-Extend-Swiss-layout.patch
+	0012-RX-51-Symbols-Bind-square-brackets.patch
+	"
+builddir="$srcdir/$pkgname-$_pkgver"
+
+build() {
+	abuild-meson . output
+	meson compile ${JOBS:+-j ${JOBS}} -C output
+}
+
+check() {
+	meson test --no-rebuild -v -C output
+}
+
+package() {
+	DESTDIR="$pkgdir" meson install --no-rebuild -C output
+}
+sha512sums="
+084f79350d5dc7f9ebd5b5333d386459b0ab587f6cec27ee2d8d5c3a56b08993f9fafb9d893307f4d43cfeaf2e225c5295ad6297ae8287c68efc48a82638feb1  xkeyboard-config-2.33.tar.bz2
+6a761968c0101251a256e4a0b9545c953ba82ecf5f20af35a2c487c01dfdb8804caf32eff0b9534854b7adaab5693a937fbb245c2a1001253735a48d90f80824  0001-RX-51-Symbols-Bind-Escape-to-third-level-Backspace.patch
+13950fc4064f55a69adf2f0dc3d9e2f8ec31ad686202486f772745ed9c7a8b502aed6073c5d629eac30a274194f5d29402f64c2f286b4a46807f3bcfab6753ff  0002-RX-51-Symbols-Bind-function-keys-to-fourth-level-top.patch
+db3c4a1f30c2efc3bf5bba7541d6956414f0d09f089d0ad5e35d340fc2c0faf8bdd6eb8c3708db307ad2c9e7ac841de8c4d11ead076d9c65dd5458b292efae19  0003-RX-51-Symbols-Bind-PgUp-PgDown-Home-End-to-third-lev.patch
+4169251cafbea573316319c6a06b9df892995f42f3a1100ed3062171a57003d2f821d45b2a193c54e270703a73883ac9b612caa094b10136e14e691776d0f1c7  0004-RX-51-Symbols-Bind-less-and-greater-to-fourth-level-.patch
+fb34ea9a5465575f1b21ade7c8ae4f65bf491b707d9f5c5aa7d0492d2b6c53a800feef078830610fe011ba177083eb2f58af98ce1c699a4aa45b53e5b3c37cb3  0005-RX-51-Symbols-Bind-volume-keys-as-XF86-raise-and-low.patch
+d81a992697e69ed460598c0c61fc754d7bfc83e43d56abb8cd1c8075156e41c2ee9fb7ba836a2398fb56b565223fbc40587a8bfd6d36afcc49495129f2ec693f  0006-RX-51-Symbols-Bind-bar-to-fourth-level-L.patch
+9a9586925b8ee350f57dd1b7621e70ad65f1c7f54361b188de665af5623b2008a51e57837191610d5805882085ac0ea479182acf69048d997f6b8b6dde0d3e69  0007-RX-51-Symbols-Bind-tilde-to-fourth-level-C-and-F.patch
+21ce49429d03689ac5f50ea432e640fb4a09e051941dd7fcad82c7a3e1fa323fc363e059daee5910b9ad7c696e7ebb2d76fefcf31608903ac54cf99b4ced021e  0008-RX-51-Symbols-Bind-percent-to-fourth-level-D.patch
+fe44b3535ec586a58901e63cb47413b574e19e889d1a2d32fd4c53dc6e374d78caa081f4679d374ccee2028c922b2ae547eb22a91f68f70d2faff029ee3b5099  0009-RX-51-Symbols-Bind-Tab-to-third-level-Return.patch
+6241cc409bc4cbe4149d8703ae413c11fc2066c14374cf9fe126066759b4c9a1592ff183d3d14b5ee168be6678a2844cee622a1226ac1ddbc7d9b058143c591b  0010-RX-51-Symbols-Bind-braces-to-fourth-level-N-and-M.patch
+65f92b510db6cb38d3761d4f38368875680b4ded1243c1f54b573d3a44820866892e25dfa3a4e729fe82575144b0d464f11150638b812a0884509fc9c9d5f5d0  0011-RX-51-Symbols-Extend-Swiss-layout.patch
+8dd15fc2877b86265885648b733e12b68be6a7c14aa0ce79cf4649c12ab1445ff3111039651fc4243439ab46352b80a6d1be81c62978c8a22aa4300b8f1b5edd  0012-RX-51-Symbols-Bind-square-brackets.patch
+"

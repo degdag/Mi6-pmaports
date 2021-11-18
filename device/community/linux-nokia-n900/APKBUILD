@@ -1,0 +1,64 @@
+# Maintainer: Daniele Debernardi <drebrez@gmail.com>
+
+pkgname=linux-nokia-n900
+pkgver=5.7.19
+pkgrel=1
+pkgdesc="Mainline kernel fork for Nokia N900"
+arch="armv7"
+url="https://kernel.org/"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native pmb:kconfigcheck-nftables"
+makedepends="bison findutils flex openssl-dev perl postmarketos-installkernel"
+
+_carch="arm"
+_flavor=nokia-n900
+_config="config-$_flavor.armv7"
+case $pkgver in
+	*.*.*)	_kernver=${pkgver%.*};;
+	*.*) _kernver=$pkgver;;
+esac
+source="
+	https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/linux-$_kernver.tar.xz
+	$_config
+	0001-ARM-dts-n900-increase-charge-current-limit-to-950mA.patch
+	0002-ARM-dts-n900-remove-rx51-battery.patch
+	0003-power-supply-bq27xxx_battery-ignore-inaccurate-flag.patch
+"
+if [ "${pkgver%.0}" = "$pkgver" ]; then
+	source="$source
+	linux-$pkgver.patch.xz::https://cdn.kernel.org/pub/linux/kernel/v${pkgver%%.*}.x/patch-$pkgver.xz"
+fi
+builddir="$srcdir/linux-$_kernver"
+
+prepare() {
+	default_prepare
+	cp -v "$srcdir"/$_config .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir/usr/share/dtb"
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir/usr/share/kernel/$_flavor/kernel.release"
+}
+
+sha512sums="
+45bde01593f6147c8c169b9e46b4b56eee998142552ae0ff82f1dd21b1fd54f3b32f6283f6bd77ea717d374672167849e468c157f235d2f12f7d7816e4623bf6  linux-5.7.tar.xz
+734e59bdfc7071e41194db7581104dbe64f8aa32e85489f5896f82fb4e91f2a73f1aaac29e9b4e2866e57e835795ec964db1ab2d48f6e6f6ff66d9ad87bda8ea  config-nokia-n900.armv7
+04a39253afd25a7de03dc45ff322161672005406543c44b97d2dc293f202de7de446aee9707a690a290641c55c7bed6e78bbe096ca323dd7d88d3207427c8d31  0001-ARM-dts-n900-increase-charge-current-limit-to-950mA.patch
+c1055c7a4d2e39ce13db3871d948022b62eb7ebeb898777d197169b3e7c04d705ce7f52f28214754e3cefe99d1dd66f339a1a5770bae1ee970d5926067032061  0002-ARM-dts-n900-remove-rx51-battery.patch
+93e82f7041e347b63fc32ce54176ee3fe7e8260cc793810bcf0146a3699567b63a0cb7ce8c531b0484390907a25c51bfbeb15b32dddb2220c2481ec1f86e5eb5  0003-power-supply-bq27xxx_battery-ignore-inaccurate-flag.patch
+0f908677886be528213655d3f307bbf6dde53d475f59e6731ba9729b3ea653af5b3da070cedef7f80ed15f7576ea6506c54333d17e427448ac005c243d5beb9a  linux-5.7.19.patch.xz
+"

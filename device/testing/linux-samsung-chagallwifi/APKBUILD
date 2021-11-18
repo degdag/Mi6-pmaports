@@ -1,0 +1,55 @@
+# Maintainer: David Davies-Jones <david@exultantmonkey.co.uk>
+# Co-Maintainer: Henrik Grimler <henrik@grimler.se>
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/lineageos_chagallwifi_defconfig
+
+pkgname=linux-samsung-chagallwifi
+pkgver=3.4.113
+pkgrel=4
+pkgdesc="Samsung Galaxy Tab S 10.5 kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-chagallwifi"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl xz"
+
+# Source
+_repository="android_kernel_samsung_exynos5420"
+_commit="fed1690ca92e33cc6a5febe2e45dd909b9090d37"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/exynos5420/$_repository/archive/$_commit.tar.gz
+	$_config
+	01-fix-FIMC-IS-disabling.patch
+	02-netfilter-symbols.patch
+	03-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="c10c0b457a37ca89172203d83b0c5efd3b4fd4a9e4ff5b64328737275cfc4b19d4a316eab61aa5561943f29f70bb2bebac0efba54854e01553b90b8dd639d4bd  linux-samsung-chagallwifi-fed1690ca92e33cc6a5febe2e45dd909b9090d37.tar.gz
+ab5a6ff22793a548d7fe9da163c764cf7898c2a1ee6825cd436eca4f1916dd37b8029a08b3e579dfe83fc691c16d765f605ba26e5cc434c18f57d368f718efa4  config-samsung-chagallwifi.armv7
+00c86b897193340ce4e8184e622d830d16efe9a5c10c12357e5f6ab98193a28f69c0006bdfe0d3429f1136a9820b8f8ff262d07b0314e40f4c7b664013e0b8a6  01-fix-FIMC-IS-disabling.patch
+5214a850d496bed9e17575bd0b52e9e4415bcbd5a89863f924c5bfed848f684c0a95e8d10c9ef93c0e00149f034cf5e897d1b268be35676a600b3ee6e1917501  02-netfilter-symbols.patch
+5fad0940e90da71277b70b6e72fbb75fcc5e12625e65f827ae896d448628b252b3312539f9c184b26ffe5ca3b343a56b388ea6addb7fe446c7d1ae2aefb4b51e  03-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch"

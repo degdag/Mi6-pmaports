@@ -1,0 +1,479 @@
+From 14bdd49c5f21ff642d60b119c082c2d48a561b30 Mon Sep 17 00:00:00 2001
+From: Pierre Parent <pierre.parent@pparent.fr>
+Date: Sun, 23 Sep 2018 18:29:53 +0200
+Subject: [PATCH 1/1] Patch for usability on postmarketOS
+
+---
+ src/appengine.cpp         | 37 +++++++++++++++++++++++++
+ src/appengine.h           |  2 ++
+ src/main.cpp              | 41 +++++++++++++++-------------
+ src/qml/BrowserWindow.qml | 15 +++++++++--
+ src/qml/NavigationBar.qml | 69 ++++++++++++++++++++++-------------------------
+ src/qml/PageView.qml      | 42 +++++++++++++----------------
+ 6 files changed, 125 insertions(+), 81 deletions(-)
+
+diff --git a/src/appengine.cpp b/src/appengine.cpp
+index f48325d..b32078a 100644
+--- a/src/appengine.cpp
++++ b/src/appengine.cpp
+@@ -33,6 +33,7 @@
+ #include <QtCore/QStandardPaths>
+ #include <QStringBuilder>
+ #include <QCoreApplication>
++#include <QTextStream>
+ 
+ AppEngine::AppEngine(QObject *parent)
+     : QObject(parent)
+@@ -105,3 +106,39 @@ void AppEngine::saveSetting(const QString &name, const QString &value)
+     m_settings.setValue(name, value);
+ }
+ 
++
++bool AppEngine::writeFile(const QString& source, const QString& data)
++    {
++        if (source.isEmpty())
++            return false;
++
++        QFile file(source);
++        if (!file.open(QFile::WriteOnly | QFile::Truncate))
++            return false;
++
++        QTextStream out(&file);
++        out << data;
++        file.close();
++         
++        return true;
++    }
++    
++QString AppEngine::readFile(const QString& source)
++    {
++        if (source.isEmpty())
++            return "";
++
++        QFile file(source);
++        if(!file.open(QIODevice::ReadOnly)) {
++            return "";
++        }
++
++        QTextStream in(&file);
++
++        if (!in.atEnd()) {
++        QString line = in.readLine();    
++        return line;
++        }
++        else
++        return "";
++    }    
+diff --git a/src/appengine.h b/src/appengine.h
+index c5ad20e..c7a374e 100644
+--- a/src/appengine.h
++++ b/src/appengine.h
+@@ -83,6 +83,8 @@ public:
+     Q_INVOKABLE QString fallbackColor();
+     Q_INVOKABLE QString restoreSetting(const QString &name, const QString &defaultValue = QString());
+     Q_INVOKABLE void saveSetting(const QString &name, const QString &value);
++    Q_INVOKABLE bool writeFile(const QString& source, const QString& data);
++    Q_INVOKABLE QString readFile(const QString& source);
+ 
+ private:
+     QSettings m_settings;
+diff --git a/src/main.cpp b/src/main.cpp
+index 2181f15..e462b9b 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -31,15 +31,17 @@
+ #include "navigationhistoryproxymodel.h"
+ #include "touchtracker.h"
+ 
+-#if defined(DESKTOP_BUILD)
+-#include "touchmockingapplication.h"
+-#endif
+-
+ #include <QGuiApplication>
+ #include <QQmlContext>
+ #include <QQmlEngine>
+ #include <QQuickView>
+ #include <QtWebEngine/qtwebengineglobal.h>
++#include <QtWebEngine>
++#include <csignal>
++#include <iostream>
++
++using namespace std;
++
+ 
+ static QObject *engine_factory(QQmlEngine *engine, QJSEngine *scriptEngine)
+ {
+@@ -50,7 +52,15 @@ static QObject *engine_factory(QQmlEngine *engine, QJSEngine *scriptEngine)
+ }
+ 
+ int main(int argc, char **argv)
+-{
++{   
++    //Handle the signals
++    signal(SIGINT,   SIG_IGN);
++    signal(SIGSEGV,  SIG_IGN); 
++    signal(SIGABRT,  SIG_IGN);  
++    signal(SIGIOT,   SIG_IGN);  
++    signal(SIGILL,   SIG_IGN);  
++    signal(SIGBUS,   SIG_IGN);
++   
+     qputenv("QT_IM_MODULE", QByteArray("qtvirtualkeyboard"));
+ 
+     //do not use any plugins installed on the device
+@@ -71,24 +81,23 @@ int main(int argc, char **argv)
+ 
+     int qAppArgCount = qargv.size();
+ 
+-#if defined(DESKTOP_BUILD)
+-    TouchMockingApplication app(qAppArgCount, qargv.data());
+-#else
++        
+     QGuiApplication app(qAppArgCount, qargv.data());
+-#endif
++        
++    QtWebEngine::initialize();
+ 
++  
+     qmlRegisterType<NavigationHistoryProxyModel>("WebBrowser", 1, 0, "SearchProxyModel");
+     qmlRegisterType<TouchTracker>("WebBrowser", 1, 0, "TouchTracker");
+     qmlRegisterSingletonType<AppEngine>("WebBrowser", 1, 0, "AppEngine", engine_factory);
+ 
+-    QtWebEngine::initialize();
+-
++  
+     app.setOrganizationName("The Qt Company");
+     app.setOrganizationDomain("qt.io");
+     app.setApplicationName("qtwebbrowser");
+ 
+     QQuickView view;
+-    view.setTitle("Yet Another Browser");
++    view.setTitle("Qt WebBrowser");
+     view.setFlags(Qt::Window | Qt::WindowTitleHint);
+     view.setResizeMode(QQuickView::SizeRootObjectToView);
+     view.setColor(Qt::black);
+@@ -96,13 +105,7 @@ int main(int argc, char **argv)
+ 
+     QObject::connect(view.engine(), SIGNAL(quit()), &app, SLOT(quit()));
+ 
+-#if defined(DESKTOP_BUILD)
+-    view.show();
+-    if (view.size().isEmpty())
+-        view.setGeometry(0, 0, 800, 600);
+-#else
+-    view.showFullScreen();
+-#endif
+ 
++    view.showMaximized();
+     app.exec();
+ }
+diff --git a/src/qml/BrowserWindow.qml b/src/qml/BrowserWindow.qml
+index 05ddcff..d1d0c73 100644
+--- a/src/qml/BrowserWindow.qml
++++ b/src/qml/BrowserWindow.qml
+@@ -189,7 +189,7 @@ Item {
+                 return false
+             return true
+         }
+-
++        
+         anchors {
+             top: navigation.bottom
+             left: parent.left
+@@ -205,9 +205,20 @@ Item {
+                 return
+ 
+             navigation.webView = tab.webView
+-            var url = AppEngine.initialUrl
++            var url = AppEngine.readFile("/tmp/qt-WebBrowser-last-url.txt")
++            
++            tabView.page_view_url=url;
+ 
+             navigation.load();
++            
++            if ( url == "" )
++            {
++            homeScreen.messageBox.state = "disabled"
++            homeScreen.state = "enabled"
++            homeScreen.forceActiveFocus()
++            }
++    
++       
+         }
+         onCurrentIndexChanged: {
+             if (!tabView.get(tabView.currentIndex))
+diff --git a/src/qml/NavigationBar.qml b/src/qml/NavigationBar.qml
+index 742ca47..0ee6388 100644
+--- a/src/qml/NavigationBar.qml
++++ b/src/qml/NavigationBar.qml
+@@ -40,6 +40,7 @@ ToolBar {
+ 
+     property alias addressBar: urlBar
+     property Item webView: null
++    property bool moreButtons: false
+ 
+     onWebViewChanged: {
+ 
+@@ -159,10 +160,7 @@ ToolBar {
+         }
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
+         UIButton {
+@@ -175,19 +173,13 @@ ToolBar {
+         }
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
+         Rectangle {
+             Layout.fillWidth: true
+             implicitWidth: 10
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiColor
+         }
+         TextField {
+@@ -286,10 +278,7 @@ ToolBar {
+             visible: !cancelButton.visible
+             Layout.fillWidth: true
+             implicitWidth: 10
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiColor
+         }
+ 
+@@ -313,18 +302,18 @@ ToolBar {
+         }
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
+-        UIButton {
++        
++            UIButton {
+             id: homeButton
+             source: "icons/Btn_Home.png"
++            visible:moreButtons
+             color: uiColor
+             highlightColor: buttonPressedColor
+             onClicked: {
++               moreButtons = false 
+                 if (homeScreen.state == "disabled" || homeScreen.state == "edit") {
+                     homeScreen.messageBox.state = "disabled"
+                     homeScreen.state = "enabled"
+@@ -336,18 +325,17 @@ ToolBar {
+         }
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
+         UIButton {
+             id: pageViewButton
++            visible:moreButtons            
+             source: "icons/Btn_Tabs.png"
+             color: uiColor
+             highlightColor: buttonPressedColor
+-            onClicked: {
++            onClicked: {     
++               moreButtons = false 
+                 if (tabView.viewState == "list") {
+                     tabView.viewState = "page"
+                 } else {
+@@ -371,23 +359,22 @@ ToolBar {
+         }
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
+         UIButton {
+             id: bookmarksButton
+             color: uiColor
+             highlightColor: buttonPressedColor
+-            enabled: urlBar.text != "" && !settingsView.privateBrowsingEnabled
++            enabled: true
++            visible:moreButtons            
+             property bool bookmarked: false
+             source: bookmarked ? "icons/Btn_Bookmark_Checked.png" : "icons/Btn_Bookmarks.png"
+             onClicked: {
+-                if (!webView)
+-                    return
++                  moreButtons = false
+                 var icon = webView.loading ? "" : webView.icon
++                icon=icon.toString().replace("image://favicon/", "");              
++                bookmarked = true                  
+                 var idx = homeScreen.contains(webView.url.toString())
+                 if (idx !== -1) {
+                     homeScreen.remove("", idx)
+@@ -400,21 +387,29 @@ ToolBar {
+             }
+             Component.onCompleted: refresh()
+         }
++        
+         Rectangle {
+             width: 1
+-            anchors {
+-                top: parent.top
+-                bottom: parent.bottom
+-            }
++            height: parent.height
+             color: uiSeparatorColor
+         }
++        
+         UIButton {
+             id: settingsButton
+             source: "icons/Btn_Settings.png"
+             color: uiColor
+             highlightColor: buttonPressedColor
+             onClicked: {
++                if ( ! moreButtons )
++                {
++                 moreButtons = true 
++                 return
++                }
++                else
++                {
+                 settingsView.state = "enabled"
++                moreButtons = false 
++                }
+             }
+         }
+     }
+diff --git a/src/qml/PageView.qml b/src/qml/PageView.qml
+index f7e0448..d31bc69 100644
+--- a/src/qml/PageView.qml
++++ b/src/qml/PageView.qml
+@@ -49,6 +49,7 @@ Rectangle {
+     property alias count: pathView.count
+ 
+     property string viewState: "page"
++    property string page_view_url: ""
+ 
+     onViewStateChanged: {
+         if (viewState == "page" || viewState == "fullscreen")
+@@ -107,13 +108,19 @@ Rectangle {
+ 
+             WebEngineView {
+                 id: webEngineView
+-
++                url: parent.parent.page_view_url
++                
++                profile: WebEngineProfile{
++                     httpUserAgent: "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 5 Build/LMY48B; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/43.0.2357.65 Safari/537.361"
++                     persistentCookiesPolicy : WebEngineProfile.ForcePersistentCookies
++                     persistentStoragePath : "~/.qtwebbrowser/"
++                 }
++                 
+                 anchors {
+                     fill: parent
+                     top: permBar.bottom
+                 }
+ 
+-                profile: settingsView.privateBrowsingEnabled ? otrProfile : defaultProfile
+                 enabled: root.interactive
+ 
+                 function takeSnapshot() {
+@@ -134,7 +141,11 @@ Rectangle {
+                 }
+ 
+                 // Trigger a refresh to check if the new url is bookmarked.
+-                onUrlChanged: navigation.refresh()
++                onUrlChanged: 
++                {
++                    AppEngine.writeFile("/tmp/qt-WebBrowser-last-url.txt",webEngineView.url)
++                    navigation.refresh()
++                }
+ 
+ 
+                 settings.autoLoadImages: settingsView.autoLoadImages
+@@ -295,10 +306,7 @@ Rectangle {
+                     anchors.fill: parent
+                     Rectangle {
+                         width: 5
+-                        anchors {
+-                            top: parent.top
+-                            bottom: parent.bottom
+-                        }
++                        height: parent.height
+                         color: uiColor
+                     }
+                     TextField {
+@@ -324,18 +332,12 @@ Rectangle {
+                     }
+                     Rectangle {
+                         width: 5
+-                        anchors {
+-                            top: parent.top
+-                            bottom: parent.bottom
+-                        }
++                        height: parent.height
+                         color: uiColor
+                     }
+                     Rectangle {
+                         width: 1
+-                        anchors {
+-                            top: parent.top
+-                            bottom: parent.bottom
+-                        }
++                        height: parent.height
+                         color: uiSeparatorColor
+                     }
+                     UIButton {
+@@ -346,10 +348,7 @@ Rectangle {
+                     }
+                     Rectangle {
+                         width: 1
+-                        anchors {
+-                            top: parent.top
+-                            bottom: parent.bottom
+-                        }
++                        height: parent.height
+                         color: uiSeparatorColor
+                     }
+                     UIButton {
+@@ -360,10 +359,7 @@ Rectangle {
+                     }
+                     Rectangle {
+                         width: 1
+-                        anchors {
+-                            top: parent.top
+-                            bottom: parent.bottom
+-                        }
++                        height: parent.height
+                         color: uiSeparatorColor
+                     }
+                     UIButton {
+-- 
+2.11.0
+

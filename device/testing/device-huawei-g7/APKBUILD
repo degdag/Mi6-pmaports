@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+# Maintainer: Minecrell <minecrell@minecrell.net>
+pkgname=device-huawei-g7
+pkgdesc="Huawei Ascend G7"
+pkgver=2
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base mkbootimg soc-qcom-msm8916 linux-postmarketos-qcom-msm8916"
+makedepends="devicepkg-dev"
+source="deviceinfo pointercal"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -D -m644 "$srcdir"/pointercal "$pkgdir"/etc/pointercal
+}
+
+nonfree_firmware() {
+	pkgdesc="GPU/WiFi/BT/Video firmware"
+	# msm-firmware-loader not needed because modem is not supported yet
+	depends="firmware-qcom-adreno-a300
+		 firmware-qcom-msm8916-wcnss firmware-huawei-g7-wcnss-nv
+		 firmware-qcom-msm8916-venus"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+097d7aaad9b78cbaa5773153a8934a0e8090640454a57282980db37de1ae725e48926c7b4705aba0954aceaf40c6a120cf48772f9ce8f4757159ac768c6b4d9c  deviceinfo
+b47b3eee3f330408ea28f89b0a70752466f1ab854fc7c4677157fd2dcf5a546d1056b1fbfac587ece827b7ae864e969f0fef6981e4e9802b159f88d03fe9b487  pointercal
+"

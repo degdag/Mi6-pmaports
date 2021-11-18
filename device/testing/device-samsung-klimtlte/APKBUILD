@@ -1,0 +1,36 @@
+# Maintainer: Henrik Grimler <henrik@grimler.se>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-klimtlte
+pkgdesc="Samsung Galaxy Tab S 8.4 LTE"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-samsung-klimtlte
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+	msm-fb-refresher
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Non-free firmware for the Samsung Galaxy Tab S"
+	depends="firmware-samsung-klimt"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="b3ccb88021887be5f76183e339642e9c3863f17b9c50f068f906a644edd444346ed12f2b539d1ac9ef32d40340ae74b935030173f932018f7a180c96d00966f4  deviceinfo"

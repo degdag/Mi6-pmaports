@@ -1,0 +1,60 @@
+# Forked from Alpine Linux
+pkgname=dino
+pkgver=9999_git20210616
+pkgrel=2
+# feature/handy branch
+_commit="202d85779241e2088533d88a542bc5d0acfbe9ec"
+pkgdesc="Modern Jabber/XMPP client"
+url="https://dino.im"
+arch="all"
+license="GPL-3.0-only"
+makedepends="
+	glib-dev
+	glib-networking
+	gtk+3.0-dev
+	gpgme-dev
+	gspell-dev
+	gstreamer-dev
+	gst-plugins-base-dev
+	libgee-dev
+	libsignal-protocol-c-dev
+	libgcrypt-dev
+	libhandy1-dev
+	libnice-dev
+	libsoup-dev
+	libsrtp-dev
+	sqlite-dev
+	libqrencode-dev
+	cmake
+	vala
+"
+subpackages="$pkgname-lang"
+source="
+	https://github.com/mimi89999/dino/archive/$_commit.tar.gz
+	bump-signal-version.patch
+	"
+builddir="$srcdir/$pkgname-$_commit"
+build() {
+	./configure \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var \
+		--with-tests
+	make
+}
+
+check() {
+	build/xmpp-vala-test
+	build/signal-protocol-vala-test
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+sha512sums="
+1ce2b6c98a38be3736c3832396d12ef7b378b124e6bd8a3a1f12a64f80ba6142cca0c7086449cb3746c39eee0f3875c22eaff167d53842baf0dbf6fffea22db4  202d85779241e2088533d88a542bc5d0acfbe9ec.tar.gz
+838ccba8d97db8bc43de26afd259e4bdaf3afea786bf40a7ed9ae63f4fb7c2190e8bf6de7b41880602113df87831d01467547f8bfd1f88b50d35287822cb5f4c  bump-signal-version.patch
+"

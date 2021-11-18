@@ -1,0 +1,49 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-titan
+pkgver=1
+pkgrel=37
+pkgdesc="Motorola Moto G 2014"
+url="https://postmarketos.org"
+arch="armv7"
+license="MIT"
+depends="postmarketos-base linux-motorola-titan mkbootimg msm-fb-refresher mesa-dri-swrast"
+makedepends="devicepkg-dev"
+install="$pkgname.post-install"
+subpackages="$pkgname-weston $pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo 90-android-touch-dev.rules profile.sh weston.ini"
+options="!check !archcheck"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/90-android-touch-dev.rules \
+		"$pkgdir"/etc/udev/rules.d/90-android-touch-dev.rules
+	install -Dm644 "$srcdir"/profile.sh \
+		"$pkgdir"/etc/profile.d/00-$pkgname.sh
+
+	# Disable v4l (video4linux), because without the camera firmware
+	# blobs this makes dev hang with the kernel this device uses (#1033)
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+weston() {
+	install_if="$pkgname weston"
+	install -Dm644 "$srcdir"/weston.ini \
+		"$subpkgdir"/etc/xdg/weston/weston.ini
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-motorola-titan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+4698a4cb0f5f9bc083798f18ff1c85c9952868817a085cb2e00c8f64fc44649538a18d6e896aa6b03f2b55bbada097590848be34927f9c1dc9c5acaefece77d1  deviceinfo
+8406968cd554393ea1e350967c80810d059de2b1d33ea1302e265780c1f0110d64cf15a68c2f374981a88906d0317315e0a71995c85fd5eaf93bb47ed427529c  90-android-touch-dev.rules
+d04013c17caf77a87ebea167dbe48f7efa9c9d3123c5743d359f3ea8ccc6b268fa021535a4bf8291eb4a352f0c92f6eb527da0db340421f53bc1cc439a453306  profile.sh
+86a0c08720225e4532f797ad69307dfff66867e4a35de1aacceefc48f19721caf93f9a17a268e58f1f5a7e947f157d6984676837c2b5b835b0caf6ee9821bb5a  weston.ini
+"

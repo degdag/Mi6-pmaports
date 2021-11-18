@@ -1,0 +1,28 @@
+# Maintainer: Bart Ribbers <bribbers@disroot.org>
+pkgname=postmarketos-ui-kodi
+pkgver=1
+pkgrel=7
+pkgdesc="(Wayland) 10-foot UI useful on TV's"
+url="https://kodi.tv"
+arch="x86 x86_64 aarch64" # flatbuffers missing on armhf and armv7
+license="GPL-3.0-or-later"
+depends="
+	cage
+	elogind
+	kodi
+	kodi-wayland
+	postmarketos-base-ui
+	pulseaudio
+	tinydm
+	tinydm-openrc
+	upower
+	"
+install="$pkgname.post-install $pkgname.post-upgrade"
+source="kodi.desktop"
+options="!check pmb:gpu-accel"
+
+package() {
+	install -Dm644 "$srcdir"/kodi.desktop \
+		"$pkgdir"/usr/share/wayland-sessions/kodi-wayland.desktop
+}
+sha512sums="fc7d545310a77845af88638e95a72f8774be4fb91231554ac91a2dfcd65d11aed5e6cea550548df5e12c49963968a17a89429fc0fb3ebf4a6843d95dccad7eee  kodi.desktop"

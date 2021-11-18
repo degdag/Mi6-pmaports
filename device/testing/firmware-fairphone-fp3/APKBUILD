@@ -1,0 +1,30 @@
+pkgname=firmware-fairphone-fp3
+pkgver=20210420.0
+pkgrel=0
+pkgdesc="Firmware for Fairphone 3"
+url="https://gitlab.com/knfr/firmware-fairphone-fp3"
+arch="aarch64"
+license="proprietary"
+subpackages="$pkgname-wcnss"
+options="!check !strip !archcheck !tracedeps pmb:cross-native"
+
+source="$pkgname-$pkgver.tar.gz::$url/-/archive/$pkgver/$pkgname-$pkgver.tar.gz"
+_fwdir="/lib/firmware/postmarketos"
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+wcnss() {
+	pkgdesc="Fairphone 3 firmware for the Qualcomm Wireless Connectivity Subsystem (WCNSS)"
+	depends="wcnss-wlan"
+
+	install -Dm644 "$builddir"/wcnss.* -t \
+		"$subpkgdir/$_fwdir"
+	install -Dm644 "$builddir"/prima/* -t \
+		"$subpkgdir/$_fwdir"/wlan/prima
+}
+
+sha512sums="
+bf2aea11343a4c0cd0f7a6d7ac7304674f2eb565ebe78dc1020e7756d9ee13c8fc45ff03e5c4d8f532528c2d613834603dbf01f68944ec8faeb08b3bc7d86470  firmware-fairphone-fp3-20210420.0.tar.gz
+"

@@ -1,0 +1,42 @@
+# Maintainer: Degdag Mohamed <degdagmohamed@gmail.com>
+pkgname=firmware-xiaomi-sagit
+pkgver=9.0.1
+pkgrel=0
+_commit="6dd776c42642c444eafffadb248fd119b777b514"
+pkgdesc="Firmware for Xisomi Mi 6"
+url="https://github.com/degdag/firmware-mainline-xiaomi-mi6"
+# Conflicts with ath10k/WCN3990/hw1.0/firmware-5.bin, qca/cr{btfw21.tlv,nv21.bin} & qcom/a530_p{fp,m4}.fw
+replaces="linux-firmware-ath10k linux-firmware-qca linux-firmware-qcom"
+arch="aarch64"
+depends="soc-qcom-sdm845-nonfree-firmware qcom-diag"
+install="$pkgname.post-install"
+license="proprietary"
+options="!check !archcheck !strip !tracedeps"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/degdag/firmware-mainline-xiaomi-mi6/archive/$_commit.tar.gz
+	30-gpu-firmware.files
+	firmware.files
+"
+subpackages="$pkgname-initramfs:firmware_initramfs"
+builddir="$srcdir/firmware-mainline-xiaomi-mi6-$_commit"
+
+package() {
+	while IFS="" read -r fw; do
+		install -Dm644 "$fw" "$pkgdir/lib/firmware/$fw"
+	done < "$srcdir"/firmware.files
+}
+
+firmware_initramfs() {
+	pkgdesc="Files to be included in the initramfs to support osk-sdl"
+	depends="$pkgname mesa-egl mesa-gbm"
+	install_if="$pkgname"
+
+	install -Dm644 "$srcdir"/30-gpu-firmware.files \
+		"$subpkgdir"/etc/postmarketos-mkinitfs/files/30-gpu-firmware.files
+}
+
+sha512sums="
+36e36ab33fc0f1150a361829af86559eeec6f1e8e3b036ed9cbb37040110b772e9758007c2ce090d88b0dd5e1e79b4e3f86d4994f42742208bb9ed23c11499bb  firmware-xiaomi-sagit-6dd776c42642c444eafffadb248fd119b777b514.tar.gz
+974b7bcef52b4ae6d6fa11212ede1ddc9a9944dc3d6b066b0813072d8a9586929db8052670d98277db15cc1e2aa2d731c97c9c3d443f26bd3afab7e885230cba  30-gpu-firmware.files
+7afbe7c43b5d30e0922694e70435419d2c37eff1571c60f33f64f4b693ca3d83a1b81452b8567287ea4f2d5e57a0c97870d8d81e591614d8fa1b3e745d573b06  firmware.files
+"

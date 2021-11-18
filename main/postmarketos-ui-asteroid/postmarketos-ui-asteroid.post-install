@@ -1,0 +1,9 @@
+#!/bin/sh
+
+rc-update add tinydm default
+rc-update add bluetooth default
+rc-update add mce default
+rc-update add usb-moded default
+rc-update add connman default
+rc-update add dsme default
+tinydm-set-session -s /usr/share/wayland-sessions/asteroid.desktop

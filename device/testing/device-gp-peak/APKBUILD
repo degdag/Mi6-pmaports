@@ -1,0 +1,33 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-gp-peak
+pkgdesc="Geeksphone Peak"
+pkgver=0.1
+pkgrel=12
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base linux-gp-peak mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	device-gp-peak.start
+	fb.modes
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm755 "$srcdir"/$pkgname.start "$pkgdir"/etc/local.d/$pkgname.start
+	install -Dm644 "$srcdir"/fb.modes "$pkgdir"/etc/fb.modes
+}
+
+sha512sums="
+450fa9a0207fd85d8d241d70fbaf0497e5fd19730e07d269cd800c083493db3200310067b88655139a482d757478ebd0776297253773a8fdab8f2f4be5142a91  deviceinfo
+b77fc5191c07bf2b6a5bf5e702351f8de024a6f15d3726c88da1ab2e3d8185cbb468acbea533d07bf595855d53ab8bcd3a48fd9f35d55b78981f1ae23d44bbd8  device-gp-peak.start
+3a2c1c53ec67d40639920ace68ebf13ecff5966a8f94a603f625e01e5f403178c511c21c6de841837e256b714045e7c90cc0cb62537a9f0a536ad4b390f9c3c3  fb.modes
+"

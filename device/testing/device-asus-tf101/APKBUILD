@@ -1,0 +1,37 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-asus-tf101
+pkgdesc="Asus Eee Pad Transformer"
+pkgver=0.2
+pkgrel=12
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-asus-tf101 mkbootimg asus-transformer-blobtools"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo nvram_4329.txt modules-load.conf"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+nonfree_firmware() {
+       pkgdesc="Wifi firmware"
+       depends="firmware-aosp-broadcom-wlan"
+       mkdir "$subpkgdir"
+       install -D -m644 "$srcdir"/nvram_4329.txt \
+           "$subpkgdir"/lib/firmware/postmarketos/bcmdhd/bcm4329/nvram_4329.txt
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/modules-load.conf \
+		"$pkgdir"/etc/modules-load.d/00-$pkgname.conf
+}
+
+sha512sums="
+aaa7a983068bed820861fd52ef0bd737fd32f56bae88e04377ec93dc87b8f27d669d7f96aa41e7d32bd6ed25a5d7d88b4dc91acd43ccbc21df20369f5917278d  deviceinfo
+d2da77986b419abd225349b5dea197b427de15e530021bf8f81e00a8c519d1a66cf92643b75aa396dccda78496ddd070a73ef91243af8bf78f839d21e6792546  nvram_4329.txt
+49645401e265f49cb942ef899f6ad80eb52c5b94c9eca5c311dcc3d64e0da49fa905674f3e5dc228fd2c4f3162f0c76b2a6fbab9a531031c2b21b27c57ce3ba2  modules-load.conf
+"

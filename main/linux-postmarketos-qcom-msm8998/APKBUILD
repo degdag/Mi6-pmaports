@@ -1,0 +1,64 @@
+# Maintainer: Jami Kettunen <jami.kettunen@protonmail.com>
+# Stable Linux kernel with patches for MSM8998 devices
+# Kernel config based on: allnoconfig, msm8998.config and oneplus5.config
+
+_flavor="postmarketos-qcom-msm8998"
+pkgname=linux-$_flavor
+pkgver=5.15.0_rc4
+pkgrel=0
+_commit="20b6767747b6c6ee74e85542628f6c63d5b74163"
+pkgdesc="Mainline Kernel fork for MSM8998 devices"
+arch="aarch64"
+_carch="arm64"
+_config="config-$_flavor.$arch"
+url="https://gitlab.com/msm8998-mainline/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-nftables
+	pmb:kconfigcheck-zram
+	pmb:kconfigcheck-containers
+"
+# (anbox kconfigcheck excluded to use ANDROID_BINDERFS with Waydroid)
+makedepends="bison findutils flex installkernel perl openssl-dev linux-headers xz"
+
+# Source
+source="
+	https://gitlab.com/msm8998-mainline/linux/-/archive/$_commit/linux-$_commit.tar.gz
+	$_config
+"
+builddir="$srcdir/linux-$_commit"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$arch" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1))-$_flavor"
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+
+	install -Dm644 "$builddir/arch/$_carch/boot/Image.gz" \
+		"$pkgdir/boot/vmlinuz"
+
+	make modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_MOD_STRIP=1 \
+		INSTALL_DTBS_PATH="$pkgdir"/usr/share/dtb
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+bb3e02d0bd013f4cf4a38394367b64ad16f3aef6cf7cb6991176b7998b82a59b98ae6b07613143dc720440bb43e4ae7230253135520da7a6272e4285dde12962  linux-20b6767747b6c6ee74e85542628f6c63d5b74163.tar.gz
+9a77270198fe0a240450b05e52b00b66c8dbfa18c9d63e5ae09f12b5ac0c23b54e92dac17931fd978a350577b512e8429f2cf264db9a6b8eead6f415f57a900b  config-postmarketos-qcom-msm8998.aarch64
+"

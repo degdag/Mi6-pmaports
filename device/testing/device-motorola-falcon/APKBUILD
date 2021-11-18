@@ -1,0 +1,31 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-motorola-falcon
+pkgdesc="Moto G (2013)"
+pkgver=0.1
+pkgrel=13
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-motorola-falcon mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-motorola-falcon"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+a6a0628a87cd0ef6b23dc9ab0fd239ef34102a8b3a780b6bb3240172b8739fd5f65fb7e36de98fcf00f2849bf3e68f34ba84d37b64790fc12fea62181ab63d06  deviceinfo
+"

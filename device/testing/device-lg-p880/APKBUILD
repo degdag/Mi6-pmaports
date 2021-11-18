@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-lg-p880
+pkgdesc="LG Optimus 4X HD"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="
+	linux-lg-p880
+	mesa-dri-gallium
+	mkbootimg
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+89b233829a86b3e0282cfb15a260d15da3d0e159000e2af33fd21fb16d48c329cb4f603fbf091891f748122e53bb2875b3cdbe96ac12e9b65cb914eca80eb6a2  deviceinfo
+"

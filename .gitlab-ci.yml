@@ -1,0 +1,162 @@
+---
+
+# global settings
+image: alpine:latest
+after_script:
+  - .ci/move_logs.sh $CI_PROJECT_DIR
+stages:
+  - lint
+  - build
+
+# defaults for "only"
+# We need to run the CI jobs in a "merge request specific context", if CI is
+# running in a merge request. Otherwise the environment variable that holds the
+# merge request ID is not available. This means, we must set the "only"
+# variable accordingly - and if we only do it for one job, all other jobs will
+# not get executed. So have the defaults here, and use them in all jobs that
+# should run on both the master branch, and in merge requests.
+# https://docs.gitlab.com/ee/ci/merge_request_pipelines/index.html#excluding-certain-jobs
+.only-default: &only-default
+  only:
+    - master
+    - merge_requests
+    - tags
+
+# device documentation
+wiki:
+  stage: lint
+  <<: *only-default
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - device/*/device-*/*
+  before_script:
+    - apk -q add python3
+  script:
+    - .ci/check_devices_in_wiki.py --booting
+
+# testcases linting
+testcases-linting:
+  stage: lint
+  <<: *only-default
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .ci/*
+      - .ci/*/*
+  before_script:
+    - apk -q add py-flake8
+  script:
+    - flake8 --ignore E501,F401,E722,W504,W605
+
+# shellcheck
+shellcheck:
+  stage: lint
+  <<: *only-default
+  image: alpine:edge
+  before_script:
+    - apk -q add shellcheck
+  script:
+    - .ci/shellcheck.sh
+
+# aports checks (generic)
+aports-static:
+  stage: lint
+  <<: *only-default
+  before_script:
+    - wget "https://gitlab.com/postmarketOS/ci-common/-/raw/master/install_pmbootstrap.sh"
+    - sh ./install_pmbootstrap.sh pytest
+  script:
+    - su pmos -c ".ci/run_testcases.sh"
+    - su pmos -c ".ci/check_changed_aports_versions.py"
+  artifacts:
+    when: on_failure
+    paths:
+      - log.txt
+      - log_testsuite_pmaports.txt
+      - pmbootstrap.cfg
+    expire_in: 1 week
+
+distfile-check:
+  stage: lint
+  <<: *only-default
+  before_script:
+    - apk -q add make findutils
+    - wget "https://gitlab.com/postmarketOS/ci-common/-/archive/master/ci-common-master.tar.bz2"
+    - tar -xf ci-common-master.tar.bz2
+    - mv ci-common-master/distfile-check/*.sh ci-common-master/distfile-check/Makefile .
+    - rm -r ci-common-master ci-common-master.tar.bz2
+  script:
+    - make -j999
+
+# APKBUILD linting
+aport-lint:
+  stage: lint
+  before_script:
+    - wget "https://gitlab.com/postmarketOS/ci-common/-/raw/master/install_pmbootstrap.sh"
+    - sh ./install_pmbootstrap.sh
+  script:
+    - su pmos -c ".ci/apkbuild-linting.py"
+  only:
+    - merge_requests
+  allow_failure: true
+
+# kernel kconfig check
+kernel-kconfig:
+  stage: lint
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - device/*/linux-*/config-*
+      - main/linux-*/config-*
+  before_script:
+    - wget "https://gitlab.com/postmarketOS/ci-common/-/raw/master/install_pmbootstrap.sh"
+    - sh ./install_pmbootstrap.sh pytest
+  script:
+    - su pmos -c "pmbootstrap kconfig check"
+
+# MR settings
+# (Checks for "Allow commits from members who can merge to the target branch")
+mr-settings:
+  stage: lint
+  only:
+    - merge_requests
+  before_script:
+    - apk -q add python3
+  script:
+    - wget -q "https://gitlab.com/postmarketOS/ci-common/-/raw/master/check_mr_settings.py"
+    - python3 ./check_mr_settings.py
+
+# build changed aports
+.build:
+  stage: build
+  <<: *only-default
+  before_script:
+    - wget "https://gitlab.com/postmarketOS/ci-common/-/raw/master/install_pmbootstrap.sh"
+    - sh ./install_pmbootstrap.sh
+  script:
+    - .ci/build.sh
+    - cp -r /home/pmos/.local/var/pmbootstrap/packages/ packages/ || true
+  artifacts:
+    expire_in: 1 week
+    paths:
+      - packages/
+
+build-x86_64:
+  extends: .build
+
+build-x86:
+  extends: .build
+
+build-aarch64:
+  extends: .build
+
+build-armv7:
+  extends: .build
+
+build-armhf:
+  extends: .build

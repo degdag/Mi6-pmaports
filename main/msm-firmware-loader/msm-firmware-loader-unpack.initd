@@ -1,0 +1,16 @@
+#!/sbin/openrc-run
+
+name="Firmware Unpacker"
+description="Unpack dynamically loaded firmware"
+
+depend() {
+	before rmtfs
+}
+
+start() {
+	ebegin "Starting msm-firmware-loader (Unpacking the firmware)"
+	# This script must be executed before rmtfs, block other services until it's done.
+	/usr/sbin/msm-firmware-loader-unpack.sh
+	eend $?
+}
+

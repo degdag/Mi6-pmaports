@@ -1,0 +1,29 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-flounder
+pkgdesc="Google Nexus 9"
+pkgver=0.1
+pkgrel=9
+url="https://postmarketos.org"
+license="gpl-v3"
+arch="aarch64"
+options="!check !archcheck"
+depends="postmarketos-base linux-htc-flounder mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+package() {
+	devicepkg_package $startdir $pkgname
+
+}
+nonfree_firmware() {
+	pkgdesc="Firmware"
+	depends="linux-firmware-brcm linux-firmware-cypress firmware-htc-flounder"
+	mkdir "$subpkgdir"
+}
+sha512sums="
+00d3f4e52e8d0ba2ab3c5770a0e04824455a0a22ecb3623baf5353fe8b15ae2664ff16e48e96dfdc4d2a23e88b52ccd462895d24099aff8907919f8e958a2dc9  deviceinfo
+"

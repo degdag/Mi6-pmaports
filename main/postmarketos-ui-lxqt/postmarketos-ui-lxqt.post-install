@@ -1,0 +1,6 @@
+#!/bin/sh
+
+rc-update add tinydm default
+rc-update add networkmanager default
+
+tinydm-set-session -s /usr/share/xsessions/lxqt.desktop

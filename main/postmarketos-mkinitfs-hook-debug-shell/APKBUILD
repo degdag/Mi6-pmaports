@@ -1,0 +1,21 @@
+pkgname=postmarketos-mkinitfs-hook-debug-shell
+pkgver=0.1.1
+pkgrel=5
+pkgdesc="Root shell in the initramfs (security hole, for debugging only)"
+url="https://postmarketos.org"
+depends="postmarketos-mkinitfs fbdebug evtest linuxconsoletools reboot-mode"
+source="20-debug-shell.sh 20-debug-shell.files"
+arch="noarch"
+license="GPL2"
+options="!check"
+
+package() {
+	mkdir -p "$pkgdir"/etc/postmarketos-mkinitfs/hooks/
+	install -Dm644 "$srcdir"/20-debug-shell.sh \
+		"$pkgdir"/etc/postmarketos-mkinitfs/hooks/20-debug-shell.sh
+	install -Dm644 "$srcdir"/20-debug-shell.files \
+		"$pkgdir"/etc/postmarketos-mkinitfs/files/20-debug-shell.files
+}
+
+sha512sums="8de9bd415adc9ac09763e34bef1ac869105cf42377a233c2fad021b64b3a0a68883feddd056491ef3ce4a1cc892344337aea0898af3834c1396302aed128f782  20-debug-shell.sh
+3274b01850dabe927bc3749f2b4b86eab02adc6954504352401e596e29e044aec512ccead68b471a8009aa8658fe698ffdc67e03c3ca55b7dd54d35c72ac620f  20-debug-shell.files"

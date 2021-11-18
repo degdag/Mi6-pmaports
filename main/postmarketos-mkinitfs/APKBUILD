@@ -1,0 +1,73 @@
+# Maintainer: Oliver Smith <ollieparanoid@postmarketos.org>
+# Co-Maintainer: Clayton Craft <clayton@craftyguy.net>
+pkgname=postmarketos-mkinitfs
+pkgver=1.1.2
+pkgrel=1
+pkgdesc="Tool to generate initramfs images for postmarketOS"
+url="https://postmarketos.org"
+depends="
+	boot-deploy
+	busybox-extras
+	bzip2
+	cryptsetup
+	device-mapper
+	e2fsprogs
+	e2fsprogs-extra
+	f2fs-tools
+	lz4
+	multipath-tools
+	parted
+	postmarketos-fde-unlocker
+	xz
+	"
+makedepends="go"
+replaces="mkinitfs"
+triggers="$pkgname.trigger=/etc/postmarketos-mkinitfs/hooks:/usr/share/kernel/*:/usr/share/postmarketos-mkinitfs-triggers"
+source="
+	https://gitlab.com/postmarketOS/postmarketos-mkinitfs/-/archive/$pkgver/postmarketos-mkinitfs-$pkgver.tar.gz
+	00-default.modules
+	init.sh
+	init_functions.sh
+	"
+install="$pkgname.post-upgrade"
+arch="all"
+license="GPL-2.0-or-later"
+provides="mkinitfs=0.0.1"
+
+export GOPATH="$srcdir"
+export CGO_ENABLED=0
+
+build() {
+	# "-s -w" build a stripped binary
+	go build -v -ldflags="-s -w"
+}
+
+package() {
+	install -Dm644 "$srcdir/init_functions.sh" \
+		"$pkgdir/usr/share/postmarketos-mkinitfs/init_functions.sh"
+
+	install -Dm755 "$srcdir/init.sh" \
+		"$pkgdir/usr/share/postmarketos-mkinitfs/init.sh"
+
+	install -Dm644 "$srcdir/00-default.modules" \
+		"$pkgdir/etc/postmarketos-mkinitfs/modules/00-default.modules"
+
+	install -Dm755 postmarketos-mkinitfs \
+		"$pkgdir/sbin/postmarketos-mkinitfs"
+
+	ln -s /sbin/postmarketos-mkinitfs \
+		"$pkgdir/sbin/mkinitfs"
+
+	mkdir -p "$pkgdir/etc/postmarketos-mkinitfs/hooks/"
+}
+
+check() {
+	go test ./...
+}
+
+sha512sums="
+67341444c21fc884751ee12fec4069132184d6346fe6dee3f90989ed1417322336c3f135a5099dce5cecce64ad1f2a5e7ce254e5fdc772e20a150facb09f3763  postmarketos-mkinitfs-1.1.2.tar.gz
+950ac042f19055979cb53b39be93866c88aba0acd5a49cd768522505991e2bd2851735677e777caa6c8973e006318582ddd975214eccc5c35c2c1d649af6d71e  00-default.modules
+40033b421e79999c85bd72e1353fe6745a87fcbf9f6a5b8180e832c7f340da7d4e33d056f557ae95a9924f5d186a6e728f3ed53c0922cdac4c39513fdc3e3a82  init.sh
+8c411d808a0830344d447f2c8afdcd98b40b493ae982638e66e7e095a9d3fd1024d4034762631d9f7c0667d1553e5a40f9847b8cbb48c2a09e6a6d49c3ad6d7d  init_functions.sh
+"

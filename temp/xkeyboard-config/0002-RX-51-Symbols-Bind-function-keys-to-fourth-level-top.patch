@@ -1,0 +1,55 @@
+From 4659852c4d94384a1af5239d248de6ebb16e4c05 Mon Sep 17 00:00:00 2001
+From: Joni Lapilainen <joni.lapilainen@gmail.com>
+Date: Sun, 24 Feb 2013 18:08:04 +0200
+Subject: [PATCH 02/10] RX-51: Symbols: Bind function keys to fourth level top
+ row
+
+---
+ symbols/nokia_vndr/rx-51 | 24 ++++++++++++------------
+ 1 file changed, 12 insertions(+), 12 deletions(-)
+
+diff --git a/symbols/nokia_vndr/rx-51 b/symbols/nokia_vndr/rx-51
+index ebd077e..a0dc3f5 100644
+--- a/symbols/nokia_vndr/rx-51
++++ b/symbols/nokia_vndr/rx-51
+@@ -3,7 +3,7 @@ xkb_symbols "common" {
+     include "nokia_vndr/rx-51(common_keys)"
+     include "nokia_vndr/rx-51(modifiers)"
+ 
+-	key <BKSP>	{ [	BackSpace,	Delete,		Escape, 	Delete		] };
++	key <BKSP>	{ [	BackSpace,	Delete,		Escape, 	F12	] };
+ 	
+     // This section should not be included by any other section.
+     // It's referenced only once by rule file to allow multiple layout configurations.
+@@ -382,17 +382,17 @@ partial hidden alphanumeric_keys
+ xkb_symbols "english_base" {
+ 
+     // 1. row
+-    key <AD01>	{ [	q,		Q,		1,		1		] };
+-    key <AD02>	{ [	w,		W,		2,		2		] };
+-    key <AD03>	{ [	e,		E,		3,		3		] };
+-    key <AD04>	{ [	r,		R,		4,		4		] };
+-    key <AD05>	{ [	t,		T,		5,		5		] };
+-    key <AD06>	{ [	y,		Y,		6,		6		] };
+-    key <AD07>	{ [	u,		U,		7,		7		] };
+-    key <AD08>	{ [	i,		I,		8,		8		] };
+-    key <AD09>	{ [	o,		O,		9,		9		] };
+-    key <AD10>	{ [	p,		P,		0,		0		] };
+-    key <AB08>	{ [	comma,		semicolon,	equal,		equal		] };
++    key <AD01>	{ [	q,		Q,		1,		F1		] };
++    key <AD02>	{ [	w,		W,		2,		F2		] };
++    key <AD03>	{ [	e,		E,		3,		F3		] };
++    key <AD04>	{ [	r,		R,		4,		F4		] };
++    key <AD05>	{ [	t,		T,		5,		F5		] };
++    key <AD06>	{ [	y,		Y,		6,		F6		] };
++    key <AD07>	{ [	u,		U,		7,		F7		] };
++    key <AD08>	{ [	i,		I,		8,		F8		] };
++    key <AD09>	{ [	o,		O,		9,		F9		] };
++    key <AD10>	{ [	p,		P,		0,		F10		] };
++    key <AB08>	{ [	comma,		semicolon,	equal,		F11		] };
+ 
+     // 2. row
+     key <AC01>	{ [	a,		A,		asterisk,	asterisk	] };
+-- 
+1.8.1.4
+

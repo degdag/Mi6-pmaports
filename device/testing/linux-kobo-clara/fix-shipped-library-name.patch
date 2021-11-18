@@ -1,0 +1,21 @@
+External object files should end with _shipped so that kbuild handles
+them correctly. Link drivers/video/fbdev/mxc/lib.a_shipped-imx6sl-noaa
+to lib-imx6sl-noaa.a_shipped and fix the Makefile.
+
+diff --git a/drivers/video/fbdev/mxc/Makefile b/drivers/video/fbdev/mxc/Makefile
+index cb81820c..9e59b92a 100644
+--- a/drivers/video/fbdev/mxc/Makefile
++++ b/drivers/video/fbdev/mxc/Makefile
+@@ -9,7 +9,7 @@ obj-$(CONFIG_FB_MXC_EDID)			+= mxc_edid.o
+ obj-$(CONFIG_FB_MXC_SYNC_PANEL) += mxc_dispdrv.o mxc_lcdif.o mxc_ipuv3_fb.o
+ obj-$(CONFIG_FB_MXC_EINK_PANEL)			+= mxc_epdc_fb.o
+ obj-$(CONFIG_FB_MXC_EINK_V2_PANEL)		+= mxc_epdc_v2_fb.o mxc_epdc_eink.o fake_s1d13522.o epdfb_dc.o
+-mxc_epdc_eink-objs				:= mxc_epdc_eink_module.o lib.a_shipped-imx6sl-noaa
++mxc_epdc_eink-objs				:= mxc_epdc_eink_module.o lib-imx6sl-noaa.a
+ obj-$(CONFIG_FB_MXS_SII902X) += mxsfb_sii902x.o
+ obj-$(CONFIG_FB_MXC_DCIC) += mxc_dcic.o
+ obj-$(CONFIG_HANNSTAR_CABC) += hannstar_cabc.o
+diff --git a/drivers/video/fbdev/mxc/lib.a_shipped-imx6sl-noaa b/drivers/video/fbdev/mxc/lib-imx6sl-noaa.a_shipped
+similarity index 100%
+rename from drivers/video/fbdev/mxc/lib.a_shipped-imx6sl-noaa
+rename to drivers/video/fbdev/mxc/lib-imx6sl-noaa.a_shipped

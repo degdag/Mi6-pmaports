@@ -1,0 +1,43 @@
+pkgname=firmware-samsung-klimt
+pkgver=1
+pkgrel=0
+pkgdesc="Firmware for Samsung klimtwifi and klimtlte"
+url="https://github.com/exynos5420/android_vendor_samsung_klimt-common"
+arch="armv7"
+license="proprietary"
+options="!check !strip !archcheck !spdx !tracedeps pmb:cross-native"
+
+# Source
+_klimt_commit="cedd082ae12290218c2c33ffd31bbecc713b7cd9"
+_klimt_url="https://github.com/exynos5420/android_vendor_samsung_klimt-common/raw/$_klimt_commit"
+
+_klimt_wifi_files="
+	bcmdhd_apsta.bin
+	bcmdhd_ibss.bin
+	bcmdhd_mfg.bin
+	bcmdhd_sta.bin
+	cred.conf
+	nvram_mfg.txt
+	nvram_net.txt
+"
+
+for _i in $_klimt_wifi_files; do
+	source="$source $pkgname-$_klimt_commit-$_i::$_klimt_url/proprietary/etc/wifi/$_i";
+done
+
+package() {
+	# Wifi
+	local file
+	for file in $_klimt_wifi_files; do
+		 install -Dm644 "$srcdir/$pkgname-$_klimt_commit-$file" \
+			"$pkgdir/lib/firmware/postmarketos/$file"
+	done
+}
+
+sha512sums="4449d14eafe81afe2b3a8f81b00af1fd36e493cfde8892d83a9853b9ee9fc8551970b363f7e73d4a98640a043856e1374deabea5ec06dc46e86312d6e3687d35  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-bcmdhd_apsta.bin
+755810fc6a72860a21a3392c6fa1070382877e6c1bccea353dd808e5ed2c1741d5c67481465252857b1f86bb1928cf4d9014e6e88063d156afeb7d278149c202  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-bcmdhd_ibss.bin
+712d9fa7b823383fcd586419dbd54eb824bf23cab17d352a39032d304ff0768cc29f47d2fcd0a9c819e18c55f688b32984f9514e775358f6299caacefa5e668f  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-bcmdhd_mfg.bin
+e382700c6af5f592ebb10c4eca038289ae09a3de36a3f330b81c2c6322b75a85d1bbe1e3061f4c2d889bf32e9cf92f17e3474c324e166aa89847bd401aa902df  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-bcmdhd_sta.bin
+16ee43800bf7c05f550a14036ef1d648999568996854c72c1ef3965a8fd18eabfda284266fa2e2a0fee8c5fec01fd9a7e22b11b6723797742b5a6260e0b44096  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-cred.conf
+1a6cdc436f467fb2727532c9a997be80cb1505faec4ca1c57681dc353a10a0696430ce48b578bd1411e0d14e2a9748072a584b901ae14b9470a6b28d2f351351  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-nvram_mfg.txt
+54f5aa17d79fd352bab2bc036937a72c63f37fa49e8a182a061dfd2bdaab621ed91429b6de8a9e255d1c64d15f846f9dc41ba6bb8421b36947beac3bdfd5fd95  firmware-samsung-klimt-cedd082ae12290218c2c33ffd31bbecc713b7cd9-nvram_net.txt"

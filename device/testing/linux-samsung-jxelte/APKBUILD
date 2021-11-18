@@ -1,0 +1,64 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm64/configs/device_j7xelte_xx
+
+pkgname=linux-samsung-jxelte
+pkgver=3.18.14
+pkgrel=3
+pkgdesc="Samsung Galaxy J7(2016) kernel fork"
+arch="aarch64"
+_carch="arm64"
+_flavor="samsung-jxelte"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="bash bc bison devicepkg-dev flex openssl-dev perl dtbtool-exynos"
+
+# Source
+_repository="android_kernel_samsung_exynos7870"
+_commit="6a08243a47caf497bf07d34baacbf7e822344b24"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/jcadduono/$_repository/archive/$_commit.tar.gz
+	$_config
+	gcc10-extern_YYLOC_global_declaration.patch
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+	01-fix-dtb.patch
+	02-fix-video-argb-setting.patch
+"
+
+
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+
+	# Master DTB (deviceinfo_bootimg_qcdt)
+	dtbTool-exynos -o "$_outdir/arch/$_carch/boot"/dt.img \
+		$(find "$_outdir/arch/$_carch/boot/dts/" -name *j7xelte*.dtb)
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+	install -Dm644 "$_outdir/arch/$_carch/boot"/dt.img \
+		"$pkgdir"/boot/dt.img
+}
+
+sha512sums="e6602a988b66a632114b431743a170fca15f069f3eb5f743d2859bf9d0de020faaeabbf3a9b574a2f3b1167efb04a42c7d818ecff2e730d268d24966e73b16c4  linux-samsung-jxelte-6a08243a47caf497bf07d34baacbf7e822344b24.tar.gz
+637c2db7abaa76c14c75efcc99b5846d522321e7ff67e326eddb237970e6dac45ffbd68bcf87d9523d30caf9f0ed7f314c589a0bff816589dd26a67cb9647877  config-samsung-jxelte.aarch64
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+1ea1501b7b7f1ab3ef4c54a74c01183c96b0403b0a57e3f7c37f299c5c338b86ef5e281a7273b97e87dae5a8d49ffa8a7a3e55d433e34fb53d97fbffdc631d55  01-fix-dtb.patch
+3156b7badd136700ba6332a6d20844ed00452d0a89eda81c32a7d008f61bec1a694d6afbddc35e1f5ffbd400d1119e176361b7e9647ea7edd4310f2cf4ba5caa  02-fix-video-argb-setting.patch"

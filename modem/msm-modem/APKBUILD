@@ -1,0 +1,43 @@
+pkgname=msm-modem
+pkgver=5
+pkgrel=1
+pkgdesc="Common support for Qualcomm MSM modems"
+url="https://postmarketos.org/"
+arch="armhf armv7 aarch64"
+license="GPL-3.0-or-later"
+depends="rmtfs rmtfs-openrc"
+install="$pkgname.post-install"
+subpackages="$pkgname-downstream $pkgname-uim-selection:uim_selection"
+source="
+	msm-modem-downstream.initd
+	msm-modem-uim-selection.initd
+	udev-downstream.rules
+"
+options="!check"
+
+package() {
+	mkdir -p "$pkgdir"
+}
+
+uim_selection() {
+	pkgdesc="$pkgdesc (UIM selection)"
+	depends="$pkgname libqmi"
+	install="$subpkgname.post-install"
+
+	install -Dm755 "$srcdir/$subpkgname.initd" "$subpkgdir/etc/init.d/$subpkgname"
+}
+
+downstream() {
+	pkgdesc="$pkgdesc (downstream)"
+	depends="$pkgname libqipcrtr4msmipc libsmdpkt_wrapper keepfileopen"
+	install="$subpkgname.post-install"
+
+	install -Dm755 "$srcdir/$subpkgname.initd" "$subpkgdir/etc/init.d/$subpkgname"
+	install -Dm644 "$srcdir/udev-downstream.rules" "$subpkgdir/usr/lib/udev/rules.d/55-$pkgname.rules"
+}
+
+sha512sums="
+3172f8c409f552f13d1da29f14ab6c79072cd6da4acab151a1a0ea1858a416974456852609f14fe29cf97a6a45e60b99d0a57ddcde751da243ee5ac6fa8b672c  msm-modem-downstream.initd
+9ce373d668a4324ef4d2f465b2524e45b46dc2b93a718ec6bd0c681a99a6506c707083dc9295f30a704526f7b2c508af8bef873fd2ef7ee4638f573677ac79e4  msm-modem-uim-selection.initd
+2a511c2e249d0ec5a52f04ffe1ef3d29cf3c4813143b103e54879ff89176ea45b1a5ffe21cb7dc2f1cdd84c3102ba45ef9926ed37e00b1ae12a36d01de35ea5a  udev-downstream.rules
+"

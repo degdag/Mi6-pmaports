@@ -1,0 +1,11 @@
+#!/bin/sh
+
+if [ ! -f  "/usr/bin/libEGL.so" ]; then  
+        ln -s /usr/lib/libEGL.so  /usr/bin/libEGL.so                                         
+fi
+
+if [ ! -f  "/usr/bin/libGLESv2.so" ]; then  
+        ln -s /usr/lib/libGLESv2.so  /usr/bin/libGLESv2.so                                       
+fi
+
+exit 0;

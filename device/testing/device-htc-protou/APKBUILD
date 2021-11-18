@@ -1,0 +1,40 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-htc-protou
+pkgdesc="HTC Desire X"
+pkgver=0.1
+pkgrel=5
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-htc-protou mkbootimg mesa-dri-swrast msm-fb-refresher"
+makedepends="devicepkg-dev"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+source="deviceinfo initfs-hook.sh pointercal"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+
+	# Disable v4l (video4linux), because without the camera firmware
+	# blobs this makes udev hang with the kernel this device uses (#1033)
+	ln -s /dev/null "$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-aosp-broadcom-wlan"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+7afbcb20a7cf0fa87de438b852b06fa86e223c2ac98cc7f5dedba2bed45d56315a86a23cee18c990bb6dd139606098beda1325186519d175725d3a23749e1313  deviceinfo
+b49562b112ac966896d152ba30548f5b863cc94359fb02a8b75ec43a2c1229a852a218d50201628c0cbee3b88b68136163716e78dcc4ec71401ff9dc8340e016  initfs-hook.sh
+e76d0a2e1a9b611e811f6c0c90201f019ef435132ea4e7119e6179ffc99ba72c5fb6c3bdd1041ff06186d75a163bf3443d0c073c7fe1b55c10b58af53ada163a  pointercal
+"

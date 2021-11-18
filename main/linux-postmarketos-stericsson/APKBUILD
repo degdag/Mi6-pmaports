@@ -1,0 +1,72 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Maintainer: Newbyte <newbyte@disroot.org>
+# Kernel config based on: arch/arm/configs/u8500_defconfig
+
+_flavor="postmarketos-stericsson"
+_config="config-$_flavor.armv7"
+pkgname=linux-$_flavor
+pkgver=5.15_rc1
+pkgrel=1
+_tag="5.15-rc1"
+pkgdesc="Mainline kernel fork for ST-Ericsson NovaThor devices"
+arch="armv7"
+_carch="arm"
+url="https://github.com/stericsson-mainline/linux"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps
+	pmb:cross-native
+	pmb:kconfigcheck-anbox
+	pmb:kconfigcheck-containers
+	pmb:kconfigcheck-zram
+	pmb:kconfigcheck-nftables
+	"
+makedepends="
+	bison
+	findutils
+	gmp-dev
+	flex
+	mpc1-dev
+	mpfr-dev
+	openssl-dev
+	perl
+	postmarketos-installkernel
+"
+
+source="
+	$pkgname-$_tag.tar.gz::https://git.kernel.org/torvalds/t/linux-$_tag.tar.gz
+	config-$_flavor.armv7
+	emmc.patch
+	regulators.patch
+"
+builddir="$srcdir/linux-${_tag#v}"
+
+prepare() {
+	default_prepare
+	cp "$srcdir/config-$_flavor.$CARCH" .config
+}
+
+build() {
+	unset LDFLAGS
+	make ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION=$((pkgrel + 1 ))
+}
+
+package() {
+	mkdir -p "$pkgdir"/boot
+	make zinstall modules_install dtbs_install \
+		ARCH="$_carch" \
+		INSTALL_PATH="$pkgdir"/boot \
+		INSTALL_MOD_PATH="$pkgdir" \
+		INSTALL_DTBS_PATH="$pkgdir"/usr/share/dtb
+	rm -f "$pkgdir"/lib/modules/*/build "$pkgdir"/lib/modules/*/source
+
+	install -D "$builddir"/include/config/kernel.release \
+		"$pkgdir"/usr/share/kernel/$_flavor/kernel.release
+}
+
+sha512sums="
+3f7303ed8387b9f0298d32c28ae17a48ccbab2232fb278868c76dbd3d8f2911cb25b725a4e79c77f1c0f7939bd6fde946ddf68ee5ace3cd9d1076470e6238109  linux-postmarketos-stericsson-5.15-rc1.tar.gz
+30028e5287f4d4df5355a385343daa388bf738f9b1f394c090601d89d10901b90dc46296d622b264882c943422cd9b8bd035e2b796a9879b89b7ca855cb7c8ac  config-postmarketos-stericsson.armv7
+d1bd4c1f04e67ab33f03285f8baf1187d4dde29b9c49711c56f31d4708296172295ea1ad153504f2a4e944ad3d80ddc12a7218dc0d79161089ed527fc4404632  emmc.patch
+8206d74c52328827502a32644f70fd149a72a78aaf936cd44f474b9153e8caccf73206df76e24004329edebab90e1a4a0e965630f4817aa5dd642d9ee2729295  regulators.patch
+"

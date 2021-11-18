@@ -1,0 +1,73 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-raspberry-pi
+pkgdesc="Raspberry Pi"
+pkgver=0.1
+pkgrel=16
+url="https://postmarketos.org"
+license="MIT"
+arch="armhf"
+options="!check !archcheck"
+depends="postmarketos-base raspberrypi-bootloader"
+makedepends="devicepkg-dev"
+subpackages="
+	$pkgname-kernel-rpi:kernel_rpi
+	$pkgname-kernel-rpi2:kernel_rpi2
+	$pkgname-sway
+	$pkgname-phosh
+"
+source="deviceinfo
+	config.txt
+	usercfg.txt
+	cmdline.txt
+	95-vchiq-permissions.rules
+	start-even-without-input.sh"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/config.txt "$pkgdir"/boot/config.txt
+	install -Dm644 "$srcdir"/usercfg.txt "$pkgdir"/boot/usercfg.txt
+	install -Dm644 "$srcdir"/cmdline.txt "$pkgdir"/boot/cmdline.txt
+	install -Dm644 "$srcdir"/95-vchiq-permissions.rules \
+		"$pkgdir"/etc/udev/rules.d/95-vchiq-permissions.rules
+}
+
+kernel_rpi() {
+	pkgdesc="Kernel for the Raspberry Pi 1 (from Alpine, depends on non free firmware!)"
+	depends="$pkgname linux-rpi"
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	mkdir "$subpkgdir"
+}
+
+kernel_rpi2() {
+	pkgdesc="Kernel for the Raspberry Pi 2 (from Alpine, depends on non free firmware!)"
+	depends="$pkgname linux-rpi2"
+	install="$subpkgname.post-install $subpkgname.post-upgrade"
+	mkdir "$subpkgdir"
+}
+
+sway() {
+	install_if="$pkgname postmarketos-ui-sway"
+	depends="$pkgname mesa-dri-vc4"
+	install -Dm644 "$srcdir"/start-even-without-input.sh "$pkgdir"/etc/profile.d/start-even-without-input.sh
+	mkdir "$subpkgdir"
+}
+
+phosh() {
+	install_if="$pkgname postmarketos-ui-phosh"
+	depends="$pkgname mesa-dri-vc4"
+	install -Dm644 "$srcdir"/start-even-without-input.sh "$pkgdir"/etc/profile.d/start-even-without-input.sh
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+f1ee1275f72805f6b04a9b7a111d0111b96c3df37dbff565add99b0007a6e4fecc781a4599b439f2c8308ec5db9db66ae2e6f0db66d9db3327b3013b347474f0  deviceinfo
+501b085650a7c1e39628b64c6bf05e967f08470c9c70c648ce45b5cdf05e831b994f91e91ba83ad076797deb7ee405ff4912bcd71779d66b7056d1786d366a3c  config.txt
+e94c810f973eb6b6d0fb3687ea1d70612ba00e9c5d6b3608390a161e077c5591fd9d232c37b42443c05ed28bb639ca1754422ff35899c5e33d7fc266e0e1ad05  usercfg.txt
+ae3de0b8fec07d3a283dc3c06bf8678eec1e65c9faf0b7f4fdc9fb92751e324d1f8e2fb224dbbf561b7e5a6fb34769bfa1657858375f74b101a130d78e0737e2  cmdline.txt
+7e5505cb07d5b4a81bd28443d508336b5c547356538f1c06f91ed93ad0d7d456d4f74f1d24df5a2e08c17e74f0a66607352ac4874e967e9a91dfec9522d2d58d  95-vchiq-permissions.rules
+5e91a9efbaa0c734492472b0d1bb1798ec75587f3cf0ccbc31489b2e1ee6c6713e78397e67cdce3616af967bb3cbf57b49a137879106a3eec4a4a4e3d74f0610  start-even-without-input.sh
+"

@@ -1,0 +1,33 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-s3ve3g
+pkgdesc="Samsung Galaxy S III Neo"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-s3ve3g mkbootimg msm-fb-refresher mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="
+	deviceinfo
+	initfs-hook.sh
+	udev/60-persistent-v4l.rules
+"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+
+	install -Dm644 "$srcdir"/60-persistent-v4l.rules \
+		"$pkgdir"/etc/udev/rules.d/60-persistent-v4l.rules
+}
+
+sha512sums="
+10504324fdd87541a1a9ce8f960575673fcae95cceee91d6f86e0682b895527efb27f9e93da3b560600972ea2493bea8a80ca5aec2380952b7adc2adf99be3f8  deviceinfo
+b6102448a5c04cc0f8527295f312d38affb250c6c248018f9dbe543d51824f0f32d3ee334d1caee1e630a07b49bda3d81dee50ea3cb04397100f369d308400f7  initfs-hook.sh
+b8bf2e3ec166af6acbbfaaa2b57b053473c0b12df007090eecf7a885aee2e3cd5d982819e2ee73e2817e5266b9875dc9240389bca409d5523f3cfa8037fa7870  60-persistent-v4l.rules
+"

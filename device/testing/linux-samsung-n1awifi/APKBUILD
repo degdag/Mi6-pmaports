@@ -1,0 +1,66 @@
+# Reference: <https://postmarketos.org/vendorkernel>
+# Kernel config based on: arch/arm/configs/lineageos_n1awifi_defconfig
+
+pkgname=linux-samsung-n1awifi
+pkgver=3.4.113
+pkgrel=2
+pkgdesc="Samsung Galaxy Note 10.1 (2014 Edition) kernel fork"
+arch="armv7"
+_carch="arm"
+_flavor="samsung-n1awifi"
+url="https://kernel.org"
+license="GPL-2.0-only"
+options="!strip !check !tracedeps pmb:cross-native"
+makedepends="
+	bash
+	bc
+	bison
+	devicepkg-dev
+	flex
+	openssl-dev
+	perl
+	xz
+"
+
+# Source
+_repository="android_kernel_samsung_exynos5420"
+_commit="c1a203cee565eb20a9b5bc2daf1c1b650a420fe5"
+_config="config-$_flavor.$arch"
+source="
+	$pkgname-$_commit.tar.gz::https://github.com/exynos5420/$_repository/archive/$_commit.tar.gz
+	$_config
+	gcc7-give-up-on-ilog2-const-optimizations.patch
+	gcc8-fix-put-user.patch
+	gcc10-extern_YYLOC_global_declaration.patch
+	01-fix-FIMC-IS-disabling.patch
+	02-revert-hrtimer-crash.patch
+	03-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+"
+builddir="$srcdir/$_repository-$_commit"
+_outdir="out"
+
+prepare() {
+	default_prepare
+	. downstreamkernel_prepare
+}
+
+build() {
+	unset LDFLAGS
+	make O="$_outdir" ARCH="$_carch" CC="${CC:-gcc}" \
+		KBUILD_BUILD_VERSION="$((pkgrel + 1 ))-postmarketOS"
+}
+
+package() {
+	downstreamkernel_package "$builddir" "$pkgdir" "$_carch" "$_flavor" "$_outdir"
+}
+
+sha512sums="
+38bb1af78097f32ec594d3c7dd393c1fe449c4c892b567b1558a999143049e1bc2fa7375ecd54477be97066534e0dd875c01453e4658b4ae3f91e346e0b3b6ea  linux-samsung-n1awifi-c1a203cee565eb20a9b5bc2daf1c1b650a420fe5.tar.gz
+295f7a408873650f74f40f334add5454ca5b19b8f6d198e9206375d41c798a97c60245d539ac85c46dd4cbb25abddfd11858864f70d172fcdbbcd6f0f40362d0  config-samsung-n1awifi.armv7
+77eba606a71eafb36c32e9c5fe5e77f5e4746caac292440d9fb720763d766074a964db1c12bc76fe583c5d1a5c864219c59941f5e53adad182dbc70bf2bc14a7  gcc7-give-up-on-ilog2-const-optimizations.patch
+197d40a214ada87fcb2dfc0ae4911704b9a93354b75179cd6b4aadbb627a37ec262cf516921c84a8b1806809b70a7b440cdc8310a4a55fca5d2c0baa988e3967  gcc8-fix-put-user.patch
+2b48f1bf0e3f70703d2cdafc47d5e615cc7c56c70bec56b2e3297d3fa4a7a1321d649a8679614553dde8fe52ff1051dae38d5990e3744c9ca986d92187dcdbeb  gcc10-extern_YYLOC_global_declaration.patch
+00c86b897193340ce4e8184e622d830d16efe9a5c10c12357e5f6ab98193a28f69c0006bdfe0d3429f1136a9820b8f8ff262d07b0314e40f4c7b664013e0b8a6  01-fix-FIMC-IS-disabling.patch
+14e9341140e6fcc899c435c7572cacfbbef3c5a9b455106cfc648985211daf64ff5955ea9b9b7706b459401d9b60c6bb5857396e913adc07c01b3557c49a98d8  02-revert-hrtimer-crash.patch
+5fad0940e90da71277b70b6e72fbb75fcc5e12625e65f827ae896d448628b252b3312539f9c184b26ffe5ca3b343a56b388ea6addb7fe446c7d1ae2aefb4b51e  03-usb_gadget-set-random-rndis-host-MAC-address-to-prev.patch
+"

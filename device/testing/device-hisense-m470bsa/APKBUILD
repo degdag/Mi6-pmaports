@@ -1,0 +1,36 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-hisense-m470bsa
+pkgdesc="Hisense Sero 7 Pro"
+pkgver=0.1
+pkgrel=6
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-hisense-m470bsa mkbootimg mesa-dri-swrast"
+makedepends="devicepkg-dev"
+source="deviceinfo modules-load.conf pointercal"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+	install -Dm644 "$srcdir"/pointercal \
+		"$pkgdir"/etc/pointercal
+}
+
+nonfree_firmware() {
+	pkgdesc="WiFi Firmware"
+	depends="firmware-hisense-m470bsa"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+c876dc3a98fb8d837237e6a171679a8c6925ec612bb92bd682a61505a2860a75c7efc051221724349dee4f906d14a7dd6ce64f0ad3a81bc1c68b5f9c22c6a37c  deviceinfo
+6a53747e22b530dcd52ca523017edf422b36bcd6616d7b0df0ba23f50de0f91dff63913ec6aab5051eebc131879c235cfb724aacefc90a10b94a1790985144ec  modules-load.conf
+8fcb7330a660995bb1aabf3fd2f3a3536fed79e9369bda115874151e84651839c59d134ac3ca0919eff0770ac51c934b252e7d544a26c076614f7f1d10bfd016  pointercal
+"

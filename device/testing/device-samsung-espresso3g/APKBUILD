@@ -1,0 +1,33 @@
+# Maintainer: Mighty17 <mightymb17@gmail.com>
+# Co-Maintainer: Antoni Aloy <aaloytorrens@gmail.com>
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-samsung-espresso3g
+pkgdesc="Samsung Galaxy Tab 2 3g (7.0 inch)"
+pkgver=0.1
+pkgrel=1
+url="https://postmarketos.org"
+license="MIT"
+arch="armv7"
+options="!check !archcheck"
+depends="postmarketos-base linux-samsung-espresso3g mkbootimg"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+subpackages="$pkgname-nonfree-firmware:nonfree_firmware"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+nonfree_firmware() {
+	pkgdesc="Wifi firmware"
+	depends="firmware-samsung-espresso3g"
+	mkdir "$subpkgdir"
+}
+
+sha512sums="
+9fa446ae99b5d22bb211cb455ef78d0567463650e0a85beb9125f4bc56531b74d1690304770afa7886f26852b81f668d36add71fa3f7b840d0650e8b5483257a  deviceinfo
+"

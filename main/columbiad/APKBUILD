@@ -1,0 +1,30 @@
+# Maintainer: Kacper Grobelny <kacper12455@gmail.com>
+pkgname=columbiad
+pkgver=0_git20171127
+_commit="9e561ab041452d369d2a5ef51bc17a81b1f67851"
+pkgrel=1
+pkgdesc="Full-screen launcher"
+url="https://github.com/ikeydoherty/columbiad"
+arch="all"
+license="GPL-2.0-or-later"
+makedepends="gtk+3.0-dev automake autoconf linux-headers util-linux-dev"
+source="columbiad-$_commit.tar.gz::https://github.com/ikeydoherty/columbiad/archive/$_commit.tar.gz"
+builddir="$srcdir/columbiad-$_commit"
+
+build() {
+	./autogen.sh \
+		--build=$CBUILD \
+		--host=$CHOST \
+		--prefix=/usr \
+		--sysconfdir=/etc \
+		--mandir=/usr/share/man \
+		--localstatedir=/var
+	make
+}
+
+package() {
+	make DESTDIR="$pkgdir" install
+}
+
+
+sha512sums="1a4db59160776f2ff0ff68435fb714df3a422eb1dcf4fabb19d069af1d3e4d77f6b47ebccde9def5344513225c0f18e074380db4c02d1875f25b6cf028bbd35b  columbiad-9e561ab041452d369d2a5ef51bc17a81b1f67851.tar.gz"

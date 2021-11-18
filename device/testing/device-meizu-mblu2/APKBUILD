@@ -1,0 +1,30 @@
+# Reference: <https://postmarketos.org/devicepkg>
+pkgname=device-meizu-mblu2
+pkgdesc="Meizu M2"
+pkgver=0.1
+pkgrel=0
+url="https://postmarketos.org"
+license="MIT"
+arch="aarch64"
+options="!check !archcheck"
+depends="
+	linux-meizu-mblu2
+	mesa-dri-gallium
+	mkbootimg
+	msm-fb-refresher
+	postmarketos-base
+"
+makedepends="devicepkg-dev"
+source="deviceinfo"
+
+build() {
+	devicepkg_build $startdir $pkgname
+}
+
+package() {
+	devicepkg_package $startdir $pkgname
+}
+
+sha512sums="
+f0c1f051fc71ddfb0078aef23585a2cbfd4410ab150e381e092bbefca1eeeff47833d5e7a04ff95443b6193a2660a5afdd564b098a4545d084694ba39633da68  deviceinfo
+"

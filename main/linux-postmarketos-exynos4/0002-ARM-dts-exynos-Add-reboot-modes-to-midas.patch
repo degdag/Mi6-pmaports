@@ -1,0 +1,61 @@
+From 3163b4525121fd36e44490db1df33121e1ab48d6 Mon Sep 17 00:00:00 2001
+From: Denis 'GNUtoo' Carikli <GNUtoo@cyberdimension.org>
+Date: Wed, 4 Nov 2020 00:06:26 +0100
+Subject: [PATCH 02/10] ARM: dts: exynos: Add reboot modes to midas
+
+The values have been taken from the sec-reboot.c driver in
+the 3.0.101 smdk4412 kernel used in LineageOS which is based
+on Samsung source code releases for various devices.
+
+Only the strict minimum modes have been added: the S-Boot 4.0
+bootloader is nonfree, so exporting less well known modes could
+potentially have unwanted consequences.
+
+TODO:
+- After reboot to download, heimdall doesn't work while it works
+  with the SMDK4412 kernel.
+- Fix reboot without arguments (Test: Try "Reboot system now"
+  in a recovery after rebooting to the recovery)
+
+Signed-off-by: Denis 'GNUtoo' Carikli <GNUtoo@cyberdimension.org>
+---
+ arch/arm/boot/dts/exynos4412-midas.dtsi | 23 +++++++++++++++++++++++
+ 1 file changed, 23 insertions(+)
+
+diff --git a/arch/arm/boot/dts/exynos4412-midas.dtsi b/arch/arm/boot/dts/exynos4412-midas.dtsi
+index 968c7943653e..159fd1e21339 100644
+--- a/arch/arm/boot/dts/exynos4412-midas.dtsi
++++ b/arch/arm/boot/dts/exynos4412-midas.dtsi
+@@ -981,6 +981,29 @@ &mshc_0 {
+ &pmu_system_controller {
+ 	assigned-clocks = <&pmu_system_controller 0>;
+ 	assigned-clock-parents =  <&clock CLK_XUSBXTI>;
++
++	/* S-Boot 4.0 */
++	#define S5P_INFORM2		0xF008
++	#define S5P_INFORM3		0x080C
++	#define BOOT_MODE_PREFIX	0x12345670
++	#define BOOT_NORMAL		(BOOT_MODE_PREFIX | 0)
++	#define BOOT_DOWNLOAD		(BOOT_MODE_PREFIX | 1)
++	#define BOOT_RECOVERY		(BOOT_MODE_PREFIX | 4)
++
++	no-lpm-mode {
++		compatible = "syscon-reboot";
++		offset = <S5P_INFORM2>;
++		value = <0x12345678>;
++	};
++
++	reboot-mode {
++		compatible = "syscon-reboot-mode";
++		offset = <S5P_INFORM3>;
++		mode-normal = <BOOT_NORMAL>;
++		mode-recovery = <BOOT_RECOVERY>;
++		mode-bootloader = <BOOT_DOWNLOAD>;
++		mode-download = <BOOT_DOWNLOAD>;
++	};
+ };
+ 
+ &pinctrl_0 {
+-- 
+2.33.0
+

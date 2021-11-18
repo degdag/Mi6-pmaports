@@ -1,0 +1,34 @@
+pkgname=qtwebbrowser
+pkgver=1.0
+pkgrel=1
+pkgdesc="Qt web browser"
+url="http://doc.qt.io/QtWebBrowser/"
+arch="all !armhf !armv7" # armhf: pmaports#75, armv7: build.postmarketos.org#72
+license="GPLv3"
+depends="qt5-qtbase qt5-qtwebengine qt5-qtvirtualkeyboard qt5-qtquickcontrols qt5-qtgraphicaleffects mesa-dev"
+makedepends="qt5-qtbase-dev qt5-qtwebengine-dev busybox"
+install="qtwebbrowser.post-install"
+source="$pkgname-$pkgver.tar.gz::https://github.com/qtproject/qt-apps-qtwebbrowser/archive/v$pkgver.tar.gz qtwebbrowser.svg startup-qtwebbrowser.sh qtwebbrowser.desktop 0001-Patch-for-usability-on-postmarketOS.patch"
+builddir="$srcdir/qt-apps-qtwebbrowser-$pkgver/"
+
+build() {
+	cd "$builddir/src/"
+	/usr/lib/qt5/bin/qmake src.pro
+	make
+}
+
+package() {
+	cd "$builddir/src/"
+	mkdir -p $pkgdir/usr/bin/
+	install -D -m755 qtwebbrowser $pkgdir/usr/bin/qtwebbrowser-bin
+	install -D -m755 "$srcdir"/startup-qtwebbrowser.sh "$pkgdir"/usr/bin/qtwebbrowser
+	install -D -m644 "$srcdir"/qtwebbrowser.svg "$pkgdir"/usr/share/icons/hicolor/scalable/apps/qtwebbrowser.svg
+	install -D -m644 "$srcdir"/qtwebbrowser.desktop "$pkgdir"/usr/share/applications/qtwebbrowser.desktop
+}
+
+
+sha512sums="a385ef2c6459733606945bc3a6857bfbc725fa04224ee4309196220c3a9be177d52bbaf0bab57fac7a15b38920b8d19852db04451bdbdadb4f03a7f5803319ab  qtwebbrowser-1.0.tar.gz
+5e14de5c4c8aec79f3ab25947e1f4091fdbf9a38a894229d1f636dbbb17480970e3c9d7dfdf7cc57e42246a55058025ee3e200145115cfea507f0611aaa3dd77  qtwebbrowser.svg
+a0a09a8d7942ae7ce5f5bd3be96fb96448babf05191d46582366db1a1c2db97d724b5767f34959cabe18bbce36b64b2c2dfdefae4e23391d9cdddb83afb22ae5  startup-qtwebbrowser.sh
+681a1275f7d09991cdffe9a0f86aa9af22103807d02fd24e806a46e79c8eacb4eea907ef1a677d5eacc379e0666934b346662c99e76026e3dc7820df162a9fe6  qtwebbrowser.desktop
+6802f908973d29dc73f87df831cc4303dfc2eaf11a082341d1ff4618bbbcb712e858cab20bf67ed6cc2ef5eacfb44f80ec04d3765890b49ce510040d01986880  0001-Patch-for-usability-on-postmarketOS.patch"
